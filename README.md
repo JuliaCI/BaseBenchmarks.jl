@@ -1,3 +1,3 @@
-# BaseBenchmarks
+# BaseBenchmarks.jl
 
-[![Build Status](https://travis-ci.org/jrevels/BaseBenchmarks.jl.svg?branch=master)](https://travis-ci.org/jrevels/BaseBenchmarks.jl)
+This package is a collection of Julia benchmarks available for CI tracking from the JuliaLang/julia repository.
