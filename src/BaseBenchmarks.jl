@@ -4,10 +4,8 @@ using BenchmarkTrackers
 
 @tracker TRACKER
 
-include("array/benchmarks.jl")
+include("arrays/benchmarks.jl")
 
 execute(istagged) = run(TRACKER, istagged)
-
-export execute
 
 end # module
