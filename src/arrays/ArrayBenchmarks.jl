@@ -11,8 +11,8 @@ include("indexing.jl")
 
 const SMALL_SIZE = (3,5)
 const LARGE_SIZE = (300,500)
-const SMALL_N = 10^5
-const LARGE_N = 100
+const LARGE_N = 10^5
+const SMALL_N = 100
 
 # using small Int arrays...
 @track BaseBenchmarks.TRACKER begin
