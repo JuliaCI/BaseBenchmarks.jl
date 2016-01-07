@@ -1,8 +1,13 @@
 module ArrayBenchmarks
 
-using BaseBenchmarks, BenchmarkTrackers
+import BaseBenchmarks
+using BenchmarkTrackers
 
-include("definitions.jl")
+############
+# indexing #
+############
+
+include("indexing.jl")
 
 const SMALL_SIZE = (3,5)
 const LARGE_SIZE = (300,500)
@@ -22,7 +27,7 @@ const LARGE_N = 100
         [(:sumlogical, string(typeof(A)), SMALL_N) => sumlogical(A, SMALL_N) for A in arrays]
         [(:sumvector, string(typeof(A)), SMALL_N) => sumvector(A, SMALL_N) for A in arrays]
     end
-    @tags "small" "arrays" "Int" "sums" "indexing"
+    @tags "arrays" "int" "sums" "indexing" "fast"
 end
 
 # using large Int arrays...
@@ -38,7 +43,7 @@ end
         [(:sumlogical, string(typeof(A)), LARGE_N) => sumlogical(A, LARGE_N) for A in arrays]
         [(:sumvector, string(typeof(A)), LARGE_N) => sumvector(A, LARGE_N) for A in arrays]
     end
-    @tags "large" "arrays" "Int" "sums" "indexing"
+    @tags "arrays" "int" "sums" "indexing" "slow"
 end
 
 # using small Float32 arrays...
@@ -54,7 +59,7 @@ end
         [(:sumlogical, string(typeof(A)), SMALL_N) => sumlogical(A, SMALL_N) for A in arrays]
         [(:sumvector, string(typeof(A)), SMALL_N) => sumvector(A, SMALL_N) for A in arrays]
     end
-    @tags "small" "arrays" "Float" "sums" "indexing"
+    @tags "arrays" "float" "sums" "indexing" "fast"
 end
 
 # using large Float32 arrays...
@@ -70,7 +75,26 @@ end
         [(:sumlogical, string(typeof(A)), LARGE_N) => sumlogical(A, LARGE_N) for A in arrays]
         [(:sumvector, string(typeof(A)), LARGE_N) => sumvector(A, LARGE_N) for A in arrays]
     end
-    @tags "large" "arrays" "Float" "sums" "indexing"
+    @tags "arrays" "float" "sums" "indexing" "slow"
+end
+
+####################
+# Views vs. Copies #
+####################
+
+include("lucompletepiv.jl")
+
+# LU factorization with complete pivoting. These functions deliberately allocate
+# a lot of temprorary arrays by working on vectors instead of looping through
+# the elements of the matrix. Both a view (SubArray) version and a copy version
+# are provided.
+@track BaseBenchmarks.TRACKER begin
+    @setup sizes = (100, 250, 500, 1000)
+    @benchmarks begin
+        [(:lucompletepivCopy!, n) => lucompletepivCopy!(rand(n,n)) for n in sizes]
+        [(:lucompletepivSub!, n) => lucompletepivSub!(rand(n,n)) for n in sizes]
+    end
+    @tags "lucompletepiv" "arrays" "float" "linalg" "alloc" "copies" "subarrays" "views"
 end
 
 end # module

@@ -4,7 +4,7 @@ using BenchmarkTrackers
 
 @tracker TRACKER
 
-include("arrays/benchmarks.jl")
+include("arrays/ArrayBenchmarks.jl")
 
 execute(istagged) = run(TRACKER, istagged)
 
