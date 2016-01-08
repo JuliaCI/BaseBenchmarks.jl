@@ -1,4 +1,3 @@
-# This file is a part of Julia. License is MIT: http://julialang.org/license
 
 function sumelt(A, n)
     s = zero(eltype(A)) + zero(eltype(A))
