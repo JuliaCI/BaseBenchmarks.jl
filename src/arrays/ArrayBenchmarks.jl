@@ -95,7 +95,7 @@ include("lucompletepiv.jl")
         [(:lucompletepivCopy!, n) => lucompletepivCopy!(rand(n,n)) for n in sizes]
         [(:lucompletepivSub!, n) => lucompletepivSub!(rand(n,n)) for n in sizes]
     end
-    @tags "lucompletepiv" "arrays" "float" "linalg" "alloc" "copies" "subarrays" "views"
+    @tags "lucompletepiv" "arrays" "float" "linalg" "copy" "subarrays" "factorization"
 end
 
 end # module
