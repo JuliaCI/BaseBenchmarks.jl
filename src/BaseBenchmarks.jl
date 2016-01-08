@@ -6,6 +6,7 @@ using BenchmarkTrackers
 
 include("arrays/ArrayBenchmarks.jl")
 include("blas/BLASBenchmarks.jl")
+include("lapack/LAPACKBenchmarks.jl")
 
 execute(istagged) = run(TRACKER, istagged)
 
