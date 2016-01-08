@@ -25,7 +25,7 @@ include("indexing.jl")
         [(:sumlogical, string(typeof(A)), size(A)) => sumlogical(A) for A in arrays]
         [(:sumvector, string(typeof(A)), size(A)) => sumvector(A) for A in arrays]
     end
-    @tags "arrays" "sums" "indexing" "simd"
+    @tags "array" "sum" "indexing" "simd"
 end
 
 ####################
@@ -44,7 +44,7 @@ include("lucompletepiv.jl")
         [(:lucompletepivCopy!, n) => lucompletepivCopy!(rand(n,n)) for n in sizes]
         [(:lucompletepivSub!, n) => lucompletepivSub!(rand(n,n)) for n in sizes]
     end
-    @tags "lucompletepiv" "arrays" "linalg" "copy" "subarrays" "factorization"
+    @tags "lucompletepiv" "array" "linalg" "copy" "subarray" "factorization"
 end
 
 end # module
