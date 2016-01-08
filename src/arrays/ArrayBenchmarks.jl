@@ -80,7 +80,7 @@ end
 end
 
 ####################
-# Views vs. Copies #
+# views vs. copies #
 ####################
 
 include("lucompletepiv.jl")
