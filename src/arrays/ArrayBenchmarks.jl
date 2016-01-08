@@ -9,74 +9,23 @@ using BenchmarkTrackers
 
 include("indexing.jl")
 
-const SMALL_SIZE = (3,5)
-const SMALL_SIZE_ITERS = 10^5
-
-const LARGE_SIZE = (300,500)
-const LARGE_SIZE_ITERS = 100
-
-# using small Int arrays...
 @track BaseBenchmarks.TRACKER begin
-    @setup arrays = makearrays(Int, SMALL_SIZE)
-    @benchmarks begin
-        [(:sumelt, string(typeof(A)), SMALL_SIZE_ITERS) => sumelt(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumeach, string(typeof(A)), SMALL_SIZE_ITERS) => sumeach(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumlinear, string(typeof(A)), SMALL_SIZE_ITERS) => sumlinear(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumcartesian, string(typeof(A)), SMALL_SIZE_ITERS) => sumcartesian(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumcolon, string(typeof(A)), SMALL_SIZE_ITERS) => sumcolon(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumrange, string(typeof(A)), SMALL_SIZE_ITERS) => sumrange(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumlogical, string(typeof(A)), SMALL_SIZE_ITERS) => sumlogical(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumvector, string(typeof(A)), SMALL_SIZE_ITERS) => sumvector(A, SMALL_SIZE_ITERS) for A in arrays]
+    @setup begin
+        int_arrs = (makearrays(Int32, 3, 5)..., makearrays(Int32, 300, 500)...)
+        float_arrs = (makearrays(Float32, 3, 5)..., makearrays(Float32, 300, 500)...)
+        arrays = (int_arrs..., float_arrs...)
     end
-    @tags "arrays" "int" "sums" "indexing" "fast"
-end
-
-# using large Int arrays...
-@track BaseBenchmarks.TRACKER begin
-    @setup arrays = makearrays(Int, LARGE_SIZE)
     @benchmarks begin
-        [(:sumelt, string(typeof(A)), LARGE_SIZE_ITERS) => sumelt(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumeach, string(typeof(A)), LARGE_SIZE_ITERS) => sumeach(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumlinear, string(typeof(A)), LARGE_SIZE_ITERS) => sumlinear(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumcartesian, string(typeof(A)), LARGE_SIZE_ITERS) => sumcartesian(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumcolon, string(typeof(A)), LARGE_SIZE_ITERS) => sumcolon(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumrange, string(typeof(A)), LARGE_SIZE_ITERS) => sumrange(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumlogical, string(typeof(A)), LARGE_SIZE_ITERS) => sumlogical(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumvector, string(typeof(A)), LARGE_SIZE_ITERS) => sumvector(A, LARGE_SIZE_ITERS) for A in arrays]
+        [(:sumelt, string(typeof(A)), size(A)) => sumelt(A) for A in arrays]
+        [(:sumeach, string(typeof(A)), size(A)) => sumeach(A) for A in arrays]
+        [(:sumlinear, string(typeof(A)), size(A)) => sumlinear(A) for A in arrays]
+        [(:sumcartesian, string(typeof(A)), size(A)) => sumcartesian(A) for A in arrays]
+        [(:sumcolon, string(typeof(A)), size(A)) => sumcolon(A) for A in arrays]
+        [(:sumrange, string(typeof(A)), size(A)) => sumrange(A) for A in arrays]
+        [(:sumlogical, string(typeof(A)), size(A)) => sumlogical(A) for A in arrays]
+        [(:sumvector, string(typeof(A)), size(A)) => sumvector(A) for A in arrays]
     end
-    @tags "arrays" "int" "sums" "indexing" "slow"
-end
-
-# using small Float32 arrays...
-@track BaseBenchmarks.TRACKER begin
-    @setup arrays = makearrays(Float32, SMALL_SIZE)
-    @benchmarks begin
-        [(:sumelt, string(typeof(A)), SMALL_SIZE_ITERS) => sumelt(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumeach, string(typeof(A)), SMALL_SIZE_ITERS) => sumeach(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumlinear, string(typeof(A)), SMALL_SIZE_ITERS) => sumlinear(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumcartesian, string(typeof(A)), SMALL_SIZE_ITERS) => sumcartesian(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumcolon, string(typeof(A)), SMALL_SIZE_ITERS) => sumcolon(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumrange, string(typeof(A)), SMALL_SIZE_ITERS) => sumrange(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumlogical, string(typeof(A)), SMALL_SIZE_ITERS) => sumlogical(A, SMALL_SIZE_ITERS) for A in arrays]
-        [(:sumvector, string(typeof(A)), SMALL_SIZE_ITERS) => sumvector(A, SMALL_SIZE_ITERS) for A in arrays]
-    end
-    @tags "arrays" "float" "sums" "indexing" "fast"
-end
-
-# using large Float32 arrays...
-@track BaseBenchmarks.TRACKER begin
-    @setup arrays = makearrays(Float32, LARGE_SIZE)
-    @benchmarks begin
-        [(:sumelt, string(typeof(A)), LARGE_SIZE_ITERS) => sumelt(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumeach, string(typeof(A)), LARGE_SIZE_ITERS) => sumeach(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumlinear, string(typeof(A)), LARGE_SIZE_ITERS) => sumlinear(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumcartesian, string(typeof(A)), LARGE_SIZE_ITERS) => sumcartesian(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumcolon, string(typeof(A)), LARGE_SIZE_ITERS) => sumcolon(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumrange, string(typeof(A)), LARGE_SIZE_ITERS) => sumrange(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumlogical, string(typeof(A)), LARGE_SIZE_ITERS) => sumlogical(A, LARGE_SIZE_ITERS) for A in arrays]
-        [(:sumvector, string(typeof(A)), LARGE_SIZE_ITERS) => sumvector(A, LARGE_SIZE_ITERS) for A in arrays]
-    end
-    @tags "arrays" "float" "sums" "indexing" "slow"
+    @tags "arrays" "sums" "indexing" "simd"
 end
 
 ####################
@@ -95,7 +44,7 @@ include("lucompletepiv.jl")
         [(:lucompletepivCopy!, n) => lucompletepivCopy!(rand(n,n)) for n in sizes]
         [(:lucompletepivSub!, n) => lucompletepivSub!(rand(n,n)) for n in sizes]
     end
-    @tags "lucompletepiv" "arrays" "float" "linalg" "copy" "subarrays" "factorization"
+    @tags "lucompletepiv" "arrays" "linalg" "copy" "subarrays" "factorization"
 end
 
 end # module

@@ -1,130 +1,129 @@
+##########################
+# functions to benchmark #
+##########################
 
-function sumelt(A, n)
+function sumelt(A)
     s = zero(eltype(A)) + zero(eltype(A))
-    for k = 1:n
-        for a in A
-            s += a
-        end
+    for a in A
+        s += a
     end
-    s
+    return s
 end
 
-function sumeach(A, n)
+function sumeach(A)
     s = zero(eltype(A)) + zero(eltype(A))
-    for k = 1:n
-        for I in eachindex(A)
-            val = Base.unsafe_getindex(A, I)
-            s += val
-        end
+    for I in eachindex(A)
+        val = Base.unsafe_getindex(A, I)
+        s += val
     end
-    s
+    return s
 end
 
-function sumlinear(A, n)
+function sumlinear(A)
     s = zero(eltype(A)) + zero(eltype(A))
-    for k = 1:n
-        for I in 1:length(A)
-            val = Base.unsafe_getindex(A, I)
-            s += val
-        end
+    for I in 1:length(A)
+        val = Base.unsafe_getindex(A, I)
+        s += val
     end
-    s
+    return s
 end
-function sumcartesian(A, n)
+function sumcartesian(A)
     s = zero(eltype(A)) + zero(eltype(A))
-    for k = 1:n
-        for I in CartesianRange(size(A))
-            val = Base.unsafe_getindex(A, I)
-            s += val
-        end
+    for I in CartesianRange(size(A))
+        val = Base.unsafe_getindex(A, I)
+        s += val
     end
-    s
+    return s
 end
 
-function sumcolon(A, n)
+function sumcolon(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     c = Colon()
-    for k = 1:n
-        @simd for i = 1:ncols
-            val = Base.unsafe_getindex(A, c, i)
-            s += first(val)
-        end
+    @simd for i = 1:ncols
+        val = Base.unsafe_getindex(A, c, i)
+        s += first(val)
     end
-    s
+    return s
 end
 
-function sumrange(A, n)
+function sumrange(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = 1:nrows
-    for k = 1:n
-        @simd for i = 1:ncols
-            val = Base.unsafe_getindex(A, r, i)
-            s += first(val)
-        end
+    @simd for i = 1:ncols
+        val = Base.unsafe_getindex(A, r, i)
+        s += first(val)
     end
-    s
+    return s
 end
 
-function sumlogical(A, n)
+function sumlogical(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = falses(nrows)
     r[1:4:end] = true
-    for k = 1:n
-        @simd for i = 1:ncols
-            val = Base.unsafe_getindex(A, r, i)
-            s += first(val)
-        end
+    @simd for i = 1:ncols
+        val = Base.unsafe_getindex(A, r, i)
+        s += first(val)
     end
-    s
+    return s
 end
 
-function sumvector(A, n)
+function sumvector(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = rand(1:nrows, 5)
-    for k = 1:n
-        @simd for i = 1:ncols
-            val = Base.unsafe_getindex(A, r, i)
-            s += first(val)
-        end
+    @simd for i = 1:ncols
+        val = Base.unsafe_getindex(A, r, i)
+        s += first(val)
     end
-    s
+    return s
 end
+
+##########################
+# supporting definitions #
+##########################
 
 abstract MyArray{T,N} <: AbstractArray{T,N}
 
 immutable ArrayLS{T,N} <: MyArray{T,N}  # LinearSlow
     data::Array{T,N}
 end
+
 immutable ArrayLSLS{T,N} <: MyArray{T,N}  # LinearSlow with LinearSlow similar
     data::Array{T,N}
 end
-Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(similar(A.data, T, dims))
-@inline Base.setindex!(A::ArrayLSLS, v, I::Int...) = A.data[I...] = v
-@inline Base.unsafe_setindex!(A::ArrayLSLS, v, I::Int...) = Base.unsafe_setindex!(A.data, v, I...)
-Base.first(A::ArrayLSLS) = first(A.data)
 
 immutable ArrayLF{T,N} <: MyArray{T,N}  # LinearFast
     data::Array{T,N}
 end
+
 immutable ArrayStrides{T,N} <: MyArray{T,N}
     data::Array{T,N}
     strides::NTuple{N,Int}
 end
+
 ArrayStrides(A::Array) = ArrayStrides(A, strides(A))
 
 immutable ArrayStrides1{T} <: MyArray{T,2}
     data::Matrix{T}
     stride1::Int
 end
+
 ArrayStrides1(A::Array) = ArrayStrides1(A, size(A,1))
+
+Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(similar(A.data, T, dims))
+
+@inline Base.setindex!(A::ArrayLSLS, v, I::Int...) = A.data[I...] = v
+
+@inline Base.unsafe_setindex!(A::ArrayLSLS, v, I::Int...) = Base.unsafe_setindex!(A.data, v, I...)
+
+Base.first(A::ArrayLSLS) = first(A.data)
 
 Base.size(A::MyArray) = size(A.data)
 
@@ -150,7 +149,8 @@ if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     @inline Base.unsafe_getindex(A::BitArray, I1::BitArray, I2::Int) = Base.unsafe_getindex(A, Base.to_index(I1), I2)
 end
 
-function makearrays{T}(::Type{T}, sz)
+function makearrays{T}(::Type{T}, r::Integer, c::Integer)
+    sz = (r,c)
     L = prod(sz)
     A = reshape(convert(Vector{T}, [1:L;]), sz)
     AS = ArrayLS(A)
