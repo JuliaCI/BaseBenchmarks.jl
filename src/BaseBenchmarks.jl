@@ -10,4 +10,10 @@ include("lapack/LAPACKBenchmarks.jl")
 
 execute(istagged) = run(TRACKER, istagged)
 
+export ArrayBenchmarks,
+       BLASBenchmarks,
+       LAPACKBenchmarks
+
+export @tagged # reexported from BenchmarkTrackers
+
 end # module
