@@ -7,12 +7,14 @@ using BenchmarkTrackers
 include("arrays/ArrayBenchmarks.jl")
 include("blas/BLASBenchmarks.jl")
 include("lapack/LAPACKBenchmarks.jl")
+include("problem/ProblemBenchmarks.jl")
 
 execute(istagged) = run(TRACKER, istagged)
 
 export ArrayBenchmarks,
        BLASBenchmarks,
-       LAPACKBenchmarks
+       LAPACKBenchmarks,
+       ProblemBenchmarks
 
 export @tagged # reexported from BenchmarkTrackers
 
