@@ -16,14 +16,14 @@ include("indexing.jl")
         arrays = (int_arrs..., float_arrs...)
     end
     @benchmarks begin
-        [(:sumelt, string(typeof(A)), size(A)) => sumelt(A) for A in arrays]
-        [(:sumeach, string(typeof(A)), size(A)) => sumeach(A) for A in arrays]
-        [(:sumlinear, string(typeof(A)), size(A)) => sumlinear(A) for A in arrays]
-        [(:sumcartesian, string(typeof(A)), size(A)) => sumcartesian(A) for A in arrays]
-        [(:sumcolon, string(typeof(A)), size(A)) => sumcolon(A) for A in arrays]
-        [(:sumrange, string(typeof(A)), size(A)) => sumrange(A) for A in arrays]
-        [(:sumlogical, string(typeof(A)), size(A)) => sumlogical(A) for A in arrays]
-        [(:sumvector, string(typeof(A)), size(A)) => sumvector(A) for A in arrays]
+        [(:sumelt, string(typeof(A)), size(A)) => perf_sumelt(A) for A in arrays]
+        [(:sumeach, string(typeof(A)), size(A)) => perf_sumeach(A) for A in arrays]
+        [(:sumlinear, string(typeof(A)), size(A)) => perf_sumlinear(A) for A in arrays]
+        [(:sumcartesian, string(typeof(A)), size(A)) => perf_sumcartesian(A) for A in arrays]
+        [(:sumcolon, string(typeof(A)), size(A)) => perf_sumcolon(A) for A in arrays]
+        [(:sumrange, string(typeof(A)), size(A)) => perf_sumrange(A) for A in arrays]
+        [(:sumlogical, string(typeof(A)), size(A)) => perf_sumlogical(A) for A in arrays]
+        [(:sumvector, string(typeof(A)), size(A)) => perf_sumvector(A) for A in arrays]
     end
     @tags "array" "sum" "indexing" "simd"
 end
@@ -41,8 +41,8 @@ include("lucompletepiv.jl")
 @track BaseBenchmarks.TRACKER begin
     @setup sizes = (100, 250, 500, 1000)
     @benchmarks begin
-        [(:lucompletepivCopy!, n) => lucompletepivCopy!(rand(n,n)) for n in sizes]
-        [(:lucompletepivSub!, n) => lucompletepivSub!(rand(n,n)) for n in sizes]
+        [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(rand(n,n)) for n in sizes]
+        [(:lucompletepivSub!, n) => perf_lucompletepivSub!(rand(n,n)) for n in sizes]
     end
     @tags "lucompletepiv" "array" "linalg" "copy" "subarray" "factorization"
 end

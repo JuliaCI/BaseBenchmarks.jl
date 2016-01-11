@@ -1,5 +1,5 @@
 
-function lucompletepivCopy!(A)
+function perf_lucompletepivCopy!(A)
     n = size(A, 1)
     rowpiv=zeros(Int, n-1)
     colpiv=zeros(Int, n-1)
@@ -20,7 +20,7 @@ function lucompletepivCopy!(A)
     return (A, rowpiv, colpiv)
 end
 
-function lucompletepivSub!(A)
+function perf_lucompletepivSub!(A)
     n = size(A, 1)
     rowpiv=zeros(Int, n-1)
     colpiv=zeros(Int, n-1)

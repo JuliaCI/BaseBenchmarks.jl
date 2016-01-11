@@ -2,7 +2,7 @@
 # functions to benchmark #
 ##########################
 
-function sumelt(A)
+function perf_sumelt(A)
     s = zero(eltype(A)) + zero(eltype(A))
     for a in A
         s += a
@@ -10,7 +10,7 @@ function sumelt(A)
     return s
 end
 
-function sumeach(A)
+function perf_sumeach(A)
     s = zero(eltype(A)) + zero(eltype(A))
     for I in eachindex(A)
         val = Base.unsafe_getindex(A, I)
@@ -19,7 +19,7 @@ function sumeach(A)
     return s
 end
 
-function sumlinear(A)
+function perf_sumlinear(A)
     s = zero(eltype(A)) + zero(eltype(A))
     for I in 1:length(A)
         val = Base.unsafe_getindex(A, I)
@@ -27,7 +27,7 @@ function sumlinear(A)
     end
     return s
 end
-function sumcartesian(A)
+function perf_sumcartesian(A)
     s = zero(eltype(A)) + zero(eltype(A))
     for I in CartesianRange(size(A))
         val = Base.unsafe_getindex(A, I)
@@ -36,7 +36,7 @@ function sumcartesian(A)
     return s
 end
 
-function sumcolon(A)
+function perf_sumcolon(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
@@ -48,7 +48,7 @@ function sumcolon(A)
     return s
 end
 
-function sumrange(A)
+function perf_sumrange(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
@@ -60,7 +60,7 @@ function sumrange(A)
     return s
 end
 
-function sumlogical(A)
+function perf_sumlogical(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
@@ -73,7 +73,7 @@ function sumlogical(A)
     return s
 end
 
-function sumvector(A)
+function perf_sumvector(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
