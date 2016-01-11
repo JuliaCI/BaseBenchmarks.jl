@@ -28,11 +28,11 @@ include("indexing.jl")
     @tags "array" "sum" "indexing" "simd"
 end
 
-####################
-# views vs. copies #
-####################
+###############################
+# SubArray (views vs. copies) #
+###############################
 
-include("lucompletepiv.jl")
+include("subarray.jl")
 
 # LU factorization with complete pivoting. These functions deliberately allocate
 # a lot of temprorary arrays by working on vectors instead of looping through
