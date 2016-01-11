@@ -62,5 +62,17 @@ include("Laplacian.jl")
     @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
 end
 
+######################################
+# Grigoriadis Khachiyan Matrix Games #
+######################################
+
+include("GrigoriadisKhachiyan.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks begin
+        [(:grigoriadis_khachiyan, n) => GrigoriadisKhachiyan.perf_gk(n, [0.1]) for n in (10, 10^2, 10^3)]
+    end
+    @tags "problem" "example" "kernel" "grigoriadis" "khachiyan"
+end
 
 end # module
