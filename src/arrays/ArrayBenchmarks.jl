@@ -47,4 +47,28 @@ include("lucompletepiv.jl")
     @tags "lucompletepiv" "array" "linalg" "copy" "subarray" "factorization"
 end
 
+#################
+# concatenation #
+#################
+
+include("cat.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @setup begin
+        sizes = (5, 500)
+        arrays = map(n -> rand(n, n), sizes)
+    end
+    @benchmarks begin
+        [(:hvcat, size(A, 1)) => perf_hvcat(A, A) for A in arrays]
+        [(:hvcat_setind, size(A, 1)) => perf_hvcat_setind(A, A) for A in arrays]
+        [(:hcat, size(A, 1)) => perf_hcat(A, A) for A in arrays]
+        [(:hcat_setind, size(A, 1)) => perf_hcat_setind(A, A) for A in arrays]
+        [(:vcat, size(A, 1)) => perf_vcat(A, A) for A in arrays]
+        [(:vcat_setind, size(A, 1)) => perf_vcat_setind(A, A) for A in arrays]
+        [(:catnd, n) => perf_catnd(n) for n in sizes]
+        [(:catnd_setind, n) => perf_catnd_setind(n) for n in sizes]
+    end
+    @tags "array" "indexing" "cat" "hcat" "vcat" "hvcat" "setindex"
+end
+
 end # module
