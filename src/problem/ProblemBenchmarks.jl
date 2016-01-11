@@ -5,6 +5,12 @@ module ProblemBenchmarks
 # stress specific implementation details). A lot of the benchmarks here
 # originated from JuliaLang/julia/test/perf/kernel.
 
+# Some of these benchmarks are not written idiomatically, but instead follow
+# a MATLAB-like style. These kinds of benchmarks usually originate from people
+# sharing MATLAB code that runs faster than a direct Julia translation. Since
+# one of Julia's target audiences is the MATLAB crowd, we've kept some of
+# MATLABiness of the original code to make sure we cover this common case.
+
 import BaseBenchmarks
 using BenchmarkTrackers
 
@@ -35,5 +41,26 @@ include("MonteCarlo.jl")
     end
     @tags "problem" "example" "kernel" "monte carlo" "finance" "vectorization" "random" "inplace"
 end
+
+#############
+# Laplacian #
+#############
+
+include("Laplacian.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @setup begin
+        sparse_sizes = (8^4, 8^5)
+        iter_sizes = (8, 8^2)
+    end
+    @benchmarks begin
+        [(:laplace_sparse_matvec, n) => Laplacian.perf_laplace_sparse_matvec(n) for n in sparse_sizes]
+        [(:laplace_iter_devec, n) => Laplacian.perf_laplace_iter_devec(n) for n in iter_sizes]
+        [(:laplace_iter_vec, n) => Laplacian.perf_laplace_iter_vec(n) for n in iter_sizes]
+        [(:laplace_iter_sub, n) => Laplacian.perf_laplace_iter_devec(n) for n in iter_sizes]
+    end
+    @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
+end
+
 
 end # module
