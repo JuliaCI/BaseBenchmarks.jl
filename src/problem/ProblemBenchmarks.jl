@@ -131,5 +131,18 @@ include("StockCorr.jl")
     @tags "problem" "example" "kernel" "finance" "stockcorr"
 end
 
+#########################
+# Simplex (Issue #3142) #
+#########################
+
+include("Simplex.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks begin
+        (:simplex,) => Simplex.perf_simplex()
+    end
+    @tags "problem" "example" "kernel" "simplex"
+end
+
 
 end # module
