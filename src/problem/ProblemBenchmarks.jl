@@ -72,7 +72,20 @@ include("GrigoriadisKhachiyan.jl")
     @benchmarks begin
         [(:grigoriadis_khachiyan, n) => GrigoriadisKhachiyan.perf_gk(n, [0.1]) for n in (10, 10^2, 10^3)]
     end
-    @tags "problem" "example" "kernel" "grigoriadis" "khachiyan"
+    @tags "problem" "example" "kernel" "grigoriadis" "khachiyan" "game"
+end
+
+######################
+# Go Game Simulation #
+######################
+
+include("GoGame.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks begin
+        [(:go_game, n) => GoGame.perf_go_game(n) for n in (10, 20)]
+    end
+    @tags "problem" "example" "kernel" "go" "game"
 end
 
 end # module
