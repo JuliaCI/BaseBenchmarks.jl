@@ -105,5 +105,17 @@ include("JSONParse.jl")
     @tags "problem" "example" "kernel" "json" "parse" "closure"
 end
 
+############################
+# Raytracing (Issue #3811) #
+############################
+
+include("Raytracer.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks begin
+        (:raytrace,) => Raytracer.perf_raytrace(5, 256, 4)
+    end
+    @tags "problem" "example" "kernel" "raytrace"
+end
 
 end # module
