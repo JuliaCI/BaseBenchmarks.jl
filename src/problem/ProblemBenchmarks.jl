@@ -144,5 +144,18 @@ include("Simplex.jl")
     @tags "problem" "example" "kernel" "simplex"
 end
 
+####################################################
+# Ziggurat Gaussian Number Generator (Issue #1211) #
+####################################################
+
+include("Ziggurat.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks begin
+        (:ziggurat,) => Ziggurat.perf_ziggurat(10^6)
+    end
+    @tags "problem" "example" "kernel" "ziggurat"
+end
+
 
 end # module
