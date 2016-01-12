@@ -14,9 +14,9 @@ module ProblemBenchmarks
 import BaseBenchmarks
 using BenchmarkTrackers
 
-#########################
-# IMDB Actor Centrality #
-#########################
+#######################################
+# IMDB Actor Centrality (Issue #1163) #
+#######################################
 
 include("IMDBGraphs.jl")
 
@@ -42,9 +42,9 @@ include("MonteCarlo.jl")
     @tags "problem" "example" "kernel" "monte carlo" "finance" "vectorization" "random" "inplace"
 end
 
-#############
-# Laplacian #
-#############
+###################################
+# Laplacian (Issues #1168, #4707) #
+###################################
 
 include("Laplacian.jl")
 
@@ -62,9 +62,9 @@ include("Laplacian.jl")
     @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
 end
 
-######################################
-# Grigoriadis Khachiyan Matrix Games #
-######################################
+###################################################
+# Grigoriadis Khachiyan Matrix Games (Issue #950) #
+###################################################
 
 include("GrigoriadisKhachiyan.jl")
 
@@ -75,9 +75,9 @@ include("GrigoriadisKhachiyan.jl")
     @tags "problem" "example" "kernel" "grigoriadis" "khachiyan" "game"
 end
 
-######################
-# Go Game Simulation #
-######################
+####################################
+# Go Game Simulation (Issue #1169) #
+####################################
 
 include("GoGame.jl")
 
@@ -87,5 +87,23 @@ include("GoGame.jl")
     end
     @tags "problem" "example" "kernel" "go" "game"
 end
+
+################
+# JSON Parsing #
+################
+
+include("JSONParse.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @setup begin
+        json_path = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data", "test.json")
+        json_str = readall(json_path)
+    end
+    @benchmarks begin
+        (:parse_json,) => JSONParse.perf_parse_json(json_str)
+    end
+    @tags "problem" "example" "kernel" "json" "parse" "closure"
+end
+
 
 end # module
