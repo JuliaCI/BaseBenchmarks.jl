@@ -118,4 +118,18 @@ include("Raytracer.jl")
     @tags "problem" "example" "kernel" "raytrace"
 end
 
+#############################################
+# Correlated Asset Simulation (Issue #445) #
+#############################################
+
+include("StockCorr.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks begin
+        (:stockcorr,) => StockCorr.perf_stockcorr()
+    end
+    @tags "problem" "example" "kernel" "finance" "stockcorr"
+end
+
+
 end # module
