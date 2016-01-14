@@ -41,8 +41,8 @@ include("subarray.jl")
 @track BaseBenchmarks.TRACKER begin
     @setup sizes = (100, 250, 500, 1000)
     @benchmarks begin
-        [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(rand(n,n)) for n in sizes]
-        [(:lucompletepivSub!, n) => perf_lucompletepivSub!(rand(n,n)) for n in sizes]
+        [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(BaseBenchmarks.samerand(n, n)) for n in sizes]
+        [(:lucompletepivSub!, n) => perf_lucompletepivSub!(BaseBenchmarks.samerand(n, n)) for n in sizes]
     end
     @tags "lucompletepiv" "array" "linalg" "copy" "subarray" "factorization"
 end
@@ -56,7 +56,7 @@ include("cat.jl")
 @track BaseBenchmarks.TRACKER begin
     @setup begin
         sizes = (5, 500)
-        arrays = map(n -> rand(n, n), sizes)
+        arrays = map(n -> BaseBenchmarks.samerand(n, n), sizes)
     end
     @benchmarks begin
         [(:hvcat, size(A, 1)) => perf_hvcat(A, A) for A in arrays]

@@ -8,7 +8,7 @@ const LISTS = (
     (:ascending, collect(1:LIST_SIZE)),
     (:descending, collect(LIST_SIZE:-1:1)),
     (:ones, ones(LIST_SIZE)),
-    (:random, rand(MersenneTwister(1), LIST_SIZE))
+    (:random, BaseBenchmarks.samerand(LIST_SIZE))
 )
 
 #####################################

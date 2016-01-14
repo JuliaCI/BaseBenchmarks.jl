@@ -11,10 +11,10 @@ const SIZES = (2^2, 2^4, 2^6, 2^8, 2^10)
 
 @track BaseBenchmarks.TRACKER begin
     @setup begin
-        real_arrays = map(n -> rand(n, n), SIZES)
+        real_arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
         sym_arrays = map(A -> A + A', real_arrays)
         herm_arrays = map(real_arrays) do A
-            A = A + im*rand(A)
+            A = A + im*BaseBenchmarks.samerand(size(A)...)
             return A + A'
         end
     end
@@ -31,7 +31,7 @@ end
 #################
 
 @track BaseBenchmarks.TRACKER begin
-    @setup arrays = map(n -> rand(n, n), SIZES)
+    @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
     @benchmarks begin
         [(:svdfact, size(A, 1)) => svdfact(A) for A in arrays]
     end
@@ -39,7 +39,7 @@ end
 end
 
 @track BaseBenchmarks.TRACKER begin
-    @setup arrays = map(n -> rand(n, n), SIZES)
+    @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
     @benchmarks begin
         [(:lufact, size(A, 1)) => lufact(A) for A in arrays]
     end
@@ -47,7 +47,7 @@ end
 end
 
 @track BaseBenchmarks.TRACKER begin
-    @setup arrays = map(n -> rand(n, n), SIZES)
+    @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
     @benchmarks begin
         [(:qrfact, size(A, 1)) => qrfact(A) for A in arrays]
     end
@@ -55,7 +55,7 @@ end
 end
 
 @track BaseBenchmarks.TRACKER begin
-    @setup arrays = map(n -> rand(n, n), SIZES)
+    @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
     @benchmarks begin
         [(:schurfact, size(A, 1)) => schurfact(A) for A in arrays]
     end
@@ -65,7 +65,7 @@ end
 @track BaseBenchmarks.TRACKER begin
     @setup begin
         arrays = map(SIZES) do n
-            A = rand(n, n)
+            A = BaseBenchmarks.samerand(n, n)
             return A'*A
         end
     end

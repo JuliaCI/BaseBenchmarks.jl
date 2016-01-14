@@ -39,14 +39,14 @@ function perf_vcat_setind(A, B)
 end
 
 function perf_catnd(n)
-    A = rand(1, n, n, 1)
-    B = rand(1, n, n)
+    A = BaseBenchmarks.samerand(1, n, n, 1)
+    B = BaseBenchmarks.samerand(1, n, n)
     return cat(3, A, B, B, A)
 end
 
 function perf_catnd_setind(n)
-    A = rand(1, n, n, 1)
-    B = rand(1, n, n)
+    A = BaseBenchmarks.samerand(1, n, n, 1)
+    B = BaseBenchmarks.samerand(1, n, n)
     C = Array(Float64, 1, n, 4n, 1)
     C[1, :, 1:n, 1] = A
     C[1, :, (n+1):2n, 1] = B

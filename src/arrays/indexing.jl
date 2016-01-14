@@ -77,7 +77,7 @@ function perf_sumvector(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
-    r = rand(1:nrows, 5)
+    r = BaseBenchmarks.samerand(1:nrows, 5)
     @simd for i = 1:ncols
         val = Base.unsafe_getindex(A, r, i)
         s += first(val)
