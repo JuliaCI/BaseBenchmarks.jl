@@ -21,10 +21,10 @@ for (tag, T) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertion
     #------------#
     @track BaseBenchmarks.TRACKER begin
         @benchmarks begin
-            [(:sort, T, kind) => sort(list; alg = T) for (kind, list) in LISTS]
-            [(:sort_rev, T, kind) => sort(list; alg = T, rev = true) for (kind, list) in LISTS]
-            [(:sort!, T, kind) => sort!(copy(list); alg = T) for (kind, list) in LISTS]
-            [(:sort!_rev, T, kind) => sort!(copy(list); alg = T, rev = true) for (kind, list) in LISTS]
+            [(:sort, tag, kind) => sort(list; alg = T) for (kind, list) in LISTS]
+            [(:sort_rev, tag, kind) => sort(list; alg = T, rev = true) for (kind, list) in LISTS]
+            [(:sort!, tag, kind) => sort!(copy(list); alg = T) for (kind, list) in LISTS]
+            [(:sort!_rev, tag, kind) => sort!(copy(list); alg = T, rev = true) for (kind, list) in LISTS]
         end
         @tags "sort" "sort!" tag
     end
@@ -33,10 +33,10 @@ for (tag, T) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertion
     #--------------------#
     @track BaseBenchmarks.TRACKER begin
         @benchmarks begin
-            [(:sortperm, T, kind) => sort(list; alg = T) for (kind, list) in LISTS]
-            [(:sortperm_rev, T, kind) => sort(list; alg = T, rev = true) for (kind, list) in LISTS]
-            [(:sortperm!, T, kind) => sort!(copy(list); alg = T) for (kind, list) in LISTS]
-            [(:sortperm!_rev, T, kind) => sort!(copy(list); alg = T, rev = true) for (kind, list) in LISTS]
+            [(:sortperm, tag, kind) => sort(list; alg = T) for (kind, list) in LISTS]
+            [(:sortperm_rev, tag, kind) => sort(list; alg = T, rev = true) for (kind, list) in LISTS]
+            [(:sortperm!, tag, kind) => sort!(copy(list); alg = T) for (kind, list) in LISTS]
+            [(:sortperm!_rev, tag, kind) => sort!(copy(list); alg = T, rev = true) for (kind, list) in LISTS]
         end
         @tags "sort" "sort!" "sortperm" "sortperm!" tag
     end
