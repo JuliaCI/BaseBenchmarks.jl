@@ -15,7 +15,7 @@ include("indexing.jl")
         float_arrs = (makearrays(Float32, 3, 5)..., makearrays(Float32, 300, 500)...)
         arrays = (int_arrs..., float_arrs...)
     end
-    @benchmarks begin
+    @benchmarks "array indexing" begin
         [(:sumelt, string(typeof(A)), size(A)) => perf_sumelt(A) for A in arrays]
         [(:sumeach, string(typeof(A)), size(A)) => perf_sumeach(A) for A in arrays]
         [(:sumlinear, string(typeof(A)), size(A)) => perf_sumlinear(A) for A in arrays]
@@ -40,7 +40,7 @@ include("subarray.jl")
 # are provided.
 @track BaseBenchmarks.TRACKER begin
     @setup sizes = (100, 250, 500, 1000)
-    @benchmarks begin
+    @benchmarks "array subarray" begin
         [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(BaseBenchmarks.samerand(n, n)) for n in sizes]
         [(:lucompletepivSub!, n) => perf_lucompletepivSub!(BaseBenchmarks.samerand(n, n)) for n in sizes]
     end
@@ -58,7 +58,7 @@ include("cat.jl")
         sizes = (5, 500)
         arrays = map(n -> BaseBenchmarks.samerand(n, n), sizes)
     end
-    @benchmarks begin
+    @benchmarks "array cat" begin
         [(:hvcat, size(A, 1)) => perf_hvcat(A, A) for A in arrays]
         [(:hvcat_setind, size(A, 1)) => perf_hvcat_setind(A, A) for A in arrays]
         [(:hcat, size(A, 1)) => perf_hcat(A, A) for A in arrays]

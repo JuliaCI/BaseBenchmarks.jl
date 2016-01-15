@@ -12,8 +12,8 @@ using BenchmarkTrackers
         pid = first(addprocs(1))
         sizes = (2, 64, 512, 1024, 4096)
     end
-    @benchmarks begin
-        [(:remote_identity, n) => remotecall_fetch(identity, pid, zeros(UInt8, n)) for n in sizes]
+    @benchmarks "parallel" begin
+        [(:identity, n) => remotecall_fetch(identity, pid, zeros(UInt8, n)) for n in sizes]
     end
     @teardown rmprocs(pid)
     @tags "parallel" "identity" "echo" "remotecall_fetch" "remotecall" "io"

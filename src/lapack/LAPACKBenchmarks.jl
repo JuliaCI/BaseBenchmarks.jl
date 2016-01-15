@@ -4,6 +4,7 @@ import BaseBenchmarks
 using BenchmarkTrackers
 
 const SIZES = (2^2, 2^4, 2^6, 2^8, 2^10)
+const LAPACK_PREFIX = "LAPACK"
 
 #######
 # eig #
@@ -18,7 +19,7 @@ const SIZES = (2^2, 2^4, 2^6, 2^8, 2^10)
             return A + A'
         end
     end
-    @benchmarks begin
+    @benchmarks LAPACK_PREFIX begin
         [(:realeig, size(A, 1)) => eig(A) for A in real_arrays]
         [(:symeig, size(A, 1)) => eig(A) for A in sym_arrays]
         [(:hermeig, size(A, 1)) => eig(A) for A in herm_arrays]
@@ -32,7 +33,7 @@ end
 
 @track BaseBenchmarks.TRACKER begin
     @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
-    @benchmarks begin
+    @benchmarks LAPACK_PREFIX begin
         [(:svdfact, size(A, 1)) => svdfact(A) for A in arrays]
     end
     @tags "array" "lapack" "linalg" "factorization" "svd" "svdfact"
@@ -40,7 +41,7 @@ end
 
 @track BaseBenchmarks.TRACKER begin
     @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
-    @benchmarks begin
+    @benchmarks LAPACK_PREFIX begin
         [(:lufact, size(A, 1)) => lufact(A) for A in arrays]
     end
     @tags "array" "lapack" "linalg" "factorization" "lu" "lufact"
@@ -48,7 +49,7 @@ end
 
 @track BaseBenchmarks.TRACKER begin
     @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
-    @benchmarks begin
+    @benchmarks LAPACK_PREFIX begin
         [(:qrfact, size(A, 1)) => qrfact(A) for A in arrays]
     end
     @tags "array" "lapack" "linalg" "factorization" "qr" "qrfact"
@@ -56,7 +57,7 @@ end
 
 @track BaseBenchmarks.TRACKER begin
     @setup arrays = map(n -> BaseBenchmarks.samerand(n, n), SIZES)
-    @benchmarks begin
+    @benchmarks LAPACK_PREFIX begin
         [(:schurfact, size(A, 1)) => schurfact(A) for A in arrays]
     end
     @tags "array" "lapack" "linalg" "factorization" "schur" "schurfact"
@@ -69,7 +70,7 @@ end
             return A'*A
         end
     end
-    @benchmarks begin
+    @benchmarks LAPACK_PREFIX begin
         [(:cholfact, size(A, 1)) => cholfact(A) for A in arrays]
     end
     @tags "array" "lapack" "linalg" "factorization" "cholesky" "cholfact"
