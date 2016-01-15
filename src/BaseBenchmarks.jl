@@ -12,6 +12,7 @@ include("lapack/LAPACKBenchmarks.jl")
 include("micro/MicroBenchmarks.jl")
 include("parallel/ParallelBenchmarks.jl")
 include("problem/ProblemBenchmarks.jl")
+include("simd/SIMDBenchmarks.jl")
 include("sort/SortBenchmarks.jl")
 
 macro execute(tagpred)
@@ -26,6 +27,7 @@ export ArrayBenchmarks,
        MicroBenchmarks,
        ProblemBenchmarks,
        ParallelBenchmarks,
+       SIMDBenchmarks,
        SortBenchmarks
 
 end # module
