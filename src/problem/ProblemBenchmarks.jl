@@ -119,9 +119,9 @@ include("Raytracer.jl")
     @tags PROBLEM_PREFIX "example" "kernel" "raytrace"
 end
 
-#############################################
+############################################
 # Correlated Asset Simulation (Issue #445) #
-#############################################
+############################################
 
 include("StockCorr.jl")
 
@@ -170,6 +170,19 @@ include("SeismicSimulation.jl")
         [(:seismic, string(T)) => SeismicSimulation.perf_seismic_sim(T) for T in Ts]
     end
     @tags PROBLEM_PREFIX "example" "kernel" "seismic" "simd"
+end
+
+############################
+# Sparse FEM (Issue #9668) #
+############################
+
+include("SparseFEM.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks PROBLEM_PREFIX begin
+        (:sparse_fem,) => SparseFEM.perf_sparse_fem(256)
+    end
+    @tags PROBLEM_PREFIX "example" "kernel" "sparse" "fem"
 end
 
 end # module
