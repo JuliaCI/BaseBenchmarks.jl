@@ -1,15 +1,14 @@
 module ProblemBenchmarks
 
 # This module contains benchmarks that test against general problem cases taken
-# from real-world examples (as opposed to microbenchmarks, or benchmarks that
-# stress specific implementation details). A lot of the benchmarks here
-# originated from JuliaLang/julia/test/perf/kernel.
+# from real-world examples (as opposed to microbenchmarks, language-agnostic
+# benchmark suites, or benchmarks that stress specific implementation details).
+# A lot of the benchmarks here originated from JuliaLang/julia/test/perf/kernel.
 
-# Some of these benchmarks are not written idiomatically, but instead follow
-# a MATLAB-like style. These kinds of benchmarks usually originate from people
-# sharing MATLAB code that runs faster than a direct Julia translation. Since
-# one of Julia's target audiences is the MATLAB crowd, we've kept some of
-# MATLABiness of the original code to make sure we cover this common case.
+# Many of these benchmarks are not written idiomatically. Usually, this is the
+# result of users sharing a naive Julia translation of code written in a
+# different language which demonstrates a notable performance difference in
+# comparison with the original langauge implementation..
 
 import BaseBenchmarks
 using BenchmarkTrackers
@@ -22,7 +21,7 @@ include("IMDBGraphs.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:imdb_centrality,) => IMDBGraphs.perf_imdb_centrality(50)
+        (:problem, :imdb_centrality) => IMDBGraphs.perf_imdb_centrality(50)
     end
     @tags "problem" "example" "kernel" "graph" "centrality" "imdb"
 end
@@ -36,8 +35,8 @@ include("MonteCarlo.jl")
 @track BaseBenchmarks.TRACKER begin
     @setup n = 10^4
     @benchmarks begin
-        (:euro_option_devec,) => MonteCarlo.perf_euro_option_devec(n)
-        (:euro_option_vec,) => MonteCarlo.perf_euro_option_vec(n)
+        (:problem, :euro_option_devec) => MonteCarlo.perf_euro_option_devec(n)
+        (:problem, :euro_option_vec) => MonteCarlo.perf_euro_option_vec(n)
     end
     @tags "problem" "example" "kernel" "monte carlo" "finance" "vectorization" "random" "inplace"
 end
@@ -54,10 +53,10 @@ include("Laplacian.jl")
         iter_size = 8^2
     end
     @benchmarks begin
-        (:laplace_sparse_matvec,) => Laplacian.perf_laplace_sparse_matvec(sparse_size)
-        (:laplace_iter_devec,) => Laplacian.perf_laplace_iter_devec(iter_size)
-        (:laplace_iter_vec,) => Laplacian.perf_laplace_iter_vec(iter_size)
-        (:laplace_iter_sub,) => Laplacian.perf_laplace_iter_devec(iter_size)
+        (:problem, :laplace_sparse_matvec) => Laplacian.perf_laplace_sparse_matvec(sparse_size)
+        (:problem, :laplace_iter_devec) => Laplacian.perf_laplace_iter_devec(iter_size)
+        (:problem, :laplace_iter_vec) => Laplacian.perf_laplace_iter_vec(iter_size)
+        (:problem, :laplace_iter_sub) => Laplacian.perf_laplace_iter_devec(iter_size)
     end
     @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
 end
@@ -70,7 +69,7 @@ include("GrigoriadisKhachiyan.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:grigoriadis_khachiyan,) => GrigoriadisKhachiyan.perf_gk(350, [0.1])
+        (:problem, :grigoriadis_khachiyan) => GrigoriadisKhachiyan.perf_gk(350, [0.1])
     end
     @tags "problem" "example" "kernel" "grigoriadis" "khachiyan" "game"
 end
@@ -83,7 +82,7 @@ include("GoGame.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:go_game,) => GoGame.perf_go_game(10)
+        (:problem, :go_game) => GoGame.perf_go_game(10)
     end
     @tags "problem" "example" "kernel" "go" "game"
 end
@@ -100,7 +99,7 @@ include("JSONParse.jl")
         json_str = readall(json_path)
     end
     @benchmarks begin
-        (:parse_json,) => JSONParse.perf_parse_json(json_str)
+        (:problem, :parse_json) => JSONParse.perf_parse_json(json_str)
     end
     @tags "problem" "example" "kernel" "json" "parse" "closure"
 end
@@ -113,7 +112,7 @@ include("Raytracer.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:raytrace,) => Raytracer.perf_raytrace(5, 256, 4)
+        (:problem, :raytrace) => Raytracer.perf_raytrace(5, 256, 4)
     end
     @tags "problem" "example" "kernel" "raytrace"
 end
@@ -126,7 +125,7 @@ include("StockCorr.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:stockcorr,) => StockCorr.perf_stockcorr()
+        (:problem, :stockcorr) => StockCorr.perf_stockcorr()
     end
     @tags "problem" "example" "kernel" "finance" "stockcorr"
 end
@@ -139,7 +138,7 @@ include("Simplex.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:simplex,) => Simplex.perf_simplex()
+        (:problem, :simplex) => Simplex.perf_simplex()
     end
     @tags "problem" "example" "kernel" "simplex"
 end
@@ -152,7 +151,7 @@ include("Ziggurat.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @benchmarks begin
-        (:ziggurat,) => Ziggurat.perf_ziggurat(10^6)
+        (:problem, :ziggurat) => Ziggurat.perf_ziggurat(10^6)
     end
     @tags "problem" "example" "kernel" "ziggurat"
 end
@@ -166,7 +165,7 @@ include("SeismicSimulation.jl")
 @track BaseBenchmarks.TRACKER begin
     @setup Ts = (Float32, Float64)
     @benchmarks begin
-        [(:seismic_sim, string(T)) => SeismicSimulation.perf_seismic_sim(T) for T in Ts]
+        [(:problem, :seismic, string(T)) => SeismicSimulation.perf_seismic_sim(T) for T in Ts]
     end
     @tags "problem" "example" "kernel" "seismic" "simd"
 end

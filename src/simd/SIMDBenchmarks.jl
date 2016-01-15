@@ -38,9 +38,9 @@ end
 @track BaseBenchmarks.TRACKER begin
     @setup vectors = map(T -> BaseBenchmarks.samerand(T, 1000), (Float32, Float64))
     @benchmarks begin
-        [(:simd_axpy!, string(eltype(v))) => perf_simd_axpy!(first(v), v, copy(v)) for v in vectors]
-        [(:simd_inner, string(eltype(v))) => perf_simd_inner(v, v) for v in vectors]
-        [(:simd_sumreduce, string(eltype(v))) => perf_simd_sumreduce(v, 500, 700) for v in vectors]
+        [(:simd, :axpy!, string(eltype(v))) => perf_simd_axpy!(first(v), v, copy(v)) for v in vectors]
+        [(:simd, :inner, string(eltype(v))) => perf_simd_inner(v, v) for v in vectors]
+        [(:simd, :sumreduce, string(eltype(v))) => perf_simd_sumreduce(v, 500, 700) for v in vectors]
     end
     @tags "array" "simd" "inbounds" "mul" "axpy!" "inner" "sum" "reduce"
 end
