@@ -21,13 +21,4 @@ macro execute(tagpred)
     end)
 end
 
-export ArrayBenchmarks,
-       BLASBenchmarks,
-       LAPACKBenchmarks,
-       MicroBenchmarks,
-       ProblemBenchmarks,
-       ParallelBenchmarks,
-       SIMDBenchmarks,
-       SortBenchmarks
-
 end # module
