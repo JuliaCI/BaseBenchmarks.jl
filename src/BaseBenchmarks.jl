@@ -13,6 +13,7 @@ include("micro/MicroBenchmarks.jl")
 include("parallel/ParallelBenchmarks.jl")
 include("problem/ProblemBenchmarks.jl")
 include("simd/SIMDBenchmarks.jl")
+include("shootout/ShootoutBenchmarks.jl")
 include("sort/SortBenchmarks.jl")
 
 macro execute(tagpred)
