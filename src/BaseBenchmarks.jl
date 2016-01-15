@@ -14,7 +14,11 @@ include("parallel/ParallelBenchmarks.jl")
 include("problem/ProblemBenchmarks.jl")
 include("sort/SortBenchmarks.jl")
 
-execute(istagged) = run(TRACKER, istagged)
+macro execute(tagpred)
+    return esc(quote
+        run(BaseBenchmarks.TRACKER, BaseBenchmarks.BenchmarkTrackers.@tagged $tagpred)
+    end)
+end
 
 export ArrayBenchmarks,
        BLASBenchmarks,
@@ -23,7 +27,5 @@ export ArrayBenchmarks,
        ProblemBenchmarks,
        ParallelBenchmarks,
        SortBenchmarks
-
-export @tagged # reexported from BenchmarkTrackers
 
 end # module
