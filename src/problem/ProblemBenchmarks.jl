@@ -157,5 +157,18 @@ include("Ziggurat.jl")
     @tags "problem" "example" "kernel" "ziggurat"
 end
 
+######################
+# Seismic Simulation #
+######################
+
+include("SeismicSimulation.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @setup Ts = (Float32, Float64)
+    @benchmarks begin
+        [(:seismic_sim, string(T)) => SeismicSimulation.perf_seismic_sim(T) for T in Ts]
+    end
+    @tags "problem" "example" "kernel" "seismic" "simd"
+end
 
 end # module
