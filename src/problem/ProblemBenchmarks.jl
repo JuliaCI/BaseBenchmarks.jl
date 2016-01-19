@@ -3,12 +3,10 @@ module ProblemBenchmarks
 # This module contains benchmarks that test against general problem cases taken
 # from real-world examples (as opposed to microbenchmarks, language-agnostic
 # benchmark suites, or benchmarks that stress specific implementation details).
-# A lot of the benchmarks here originated from JuliaLang/julia/test/perf/kernel.
 
-# Many of these benchmarks are not written idiomatically. Usually, this is the
-# result of users sharing a naive Julia translation of code written in a
-# different language which demonstrates a notable performance difference in
-# comparison with the original langauge implementation..
+# A lot of the benchmarks here originated from JuliaLang/julia/test/perf/kernel,
+# where much of the code was naively translated to Julia from other languages,
+# and thus is written non-idiomatically.
 
 import BaseBenchmarks
 using BenchmarkTrackers
