@@ -21,7 +21,7 @@ samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
         lens = (10^3, 10^4, 10^5)
         vectors = map(n -> samesprand(n, inv(sqrt(n))), lens)
         iter = zip(lens, vectors)
-        splogvecs = map(n -> samesprandbool(n, 0.5), lens)
+        splogvecs = map(n -> samesprandbool(n, 1e-5), lens)
         splogiter = zip(lens, vectors, splogvecs)
     end
     @benchmarks "sparse vector indexing" begin
@@ -38,17 +38,19 @@ end
 #--------#
 
 let
-    lens = (10^3, 10^4, 10^5)
+    lens = (10, 10^2, 10^3)
     inds = map(n -> samerand(1:n), lens)
     matrices = map(n -> samesprand(n, n, inv(sqrt(n))), lens)
     vectors = map(n -> samerand(1:n, n), lens)
     logvecs = map(n -> samerand(Bool, n), lens)
-    splogvecs = map(n -> samesprandbool(n, 0.5), lens)
+    splogvecs = map(n -> samesprandbool(n, 1e-5), lens)
+    splogmats = map(n -> samesprandbool(n, n, 1e-5), lens)
 
     iter = zip(lens, matrices, inds)
     arr_iter = zip(lens, matrices, vectors, inds)
     log_iter = zip(lens, matrices, logvecs, inds)
-    splog_iter = zip(lens, matrices, splogvecs, inds)
+    splogvec_iter = zip(lens, matrices, splogvecs, inds)
+    splogmat_iter = zip(lens, matrices, splogmats, inds)
 
     @track BaseBenchmarks.TRACKER begin
         @benchmarks "sparse matrix row indexing" begin
@@ -76,7 +78,7 @@ let
             [("integer", n, nnz(A), r) => getindex(A, r, r) for (n, A, r) in iter]
             [("range", n, nnz(A)) => getindex(A, 1:n, 1:n) for (n, A, r) in iter]
             [("dense logical", n, nnz(A)) => getindex(A, L, L) for (n, A, L, r) in log_iter]
-            # [("sparse logical", n, nnz(A), nnz(L)) => getindex(A, L, L) for (n, A, L, r) in splog_iter]
+            [("sparse logical", n, nnz(A), nnz(L)) => getindex(A, L) for (n, A, L, r) in splogmat_iter]
         end
         @tags "sparse" "indexing" "array" "getindex" "matrix" "row" "column"
     end
