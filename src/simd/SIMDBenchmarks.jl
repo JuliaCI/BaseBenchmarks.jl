@@ -1,7 +1,7 @@
 module SIMDBenchmarks
 
-import BaseBenchmarks
-using BenchmarkTrackers
+import ..BaseBenchmarks
+using ..BenchmarkTrackers
 
 ###########
 # Methods #
@@ -35,14 +35,14 @@ end
 # Benchmarks #
 ##############
 
-@track BaseBenchmarks.TRACKER begin
+@track BaseBenchmarks.TRACKER "simd" begin
     @setup vectors = map(T -> BaseBenchmarks.samerand(T, 1000), (Float32, Float64))
-    @benchmarks "simd" begin
+    @benchmarks begin
         [(:axpy!, string(eltype(v))) => perf_simd_axpy!(first(v), v, copy(v)) for v in vectors]
         [(:inner, string(eltype(v))) => perf_simd_inner(v, v) for v in vectors]
         [(:sumreduce, string(eltype(v))) => perf_simd_sumreduce(v, 500, 700) for v in vectors]
     end
-    @tags "array" "simd" "inbounds" "mul" "axpy!" "inner" "sum" "reduce"
+    @tags "array" "inbounds" "mul" "axpy!" "inner" "sum" "reduce"
 end
 
 end # module

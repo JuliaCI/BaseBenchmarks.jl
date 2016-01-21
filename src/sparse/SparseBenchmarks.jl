@@ -1,7 +1,8 @@
 module SparseBenchmarks
 
-import BaseBenchmarks
-using BenchmarkTrackers, BaseBenchmarks.samerand
+import ..BaseBenchmarks
+using ..BenchmarkTrackers
+using ..BaseBenchmarks.samerand
 
 samesprand(args...) = sprand(MersenneTwister(1), args...)
 samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
@@ -16,7 +17,7 @@ samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
 # vector #
 #--------#
 
-@track BaseBenchmarks.TRACKER begin
+@track BaseBenchmarks.TRACKER "sparse vector indexing" begin
     @setup begin
         lens = (10^3, 10^4, 10^5)
         vectors = map(n -> samesprand(n, inv(sqrt(n))), lens)
@@ -24,7 +25,7 @@ samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
         splogvecs = map(n -> samesprandbool(n, 1e-5), lens)
         splogiter = zip(lens, vectors, splogvecs)
     end
-    @benchmarks "sparse vector indexing" begin
+    @benchmarks begin
         [("array", n, nnz(V)) => getindex(V, samerand(1:n, n)) for (n, V) in iter]
         [("integer", n, nnz(V)) => getindex(V, samerand(1:n)) for (n, V) in iter]
         [("range", n, nnz(V)) => getindex(V, 1:n) for (n, V) in iter]
@@ -52,8 +53,8 @@ let
     splogvec_iter = zip(lens, matrices, splogvecs, inds)
     splogmat_iter = zip(lens, matrices, splogmats, inds)
 
-    @track BaseBenchmarks.TRACKER begin
-        @benchmarks "sparse matrix row indexing" begin
+    @track BaseBenchmarks.TRACKER "sparse matrix row indexing" begin
+        @benchmarks begin
             [("array", n, nnz(A), c) => getindex(A, V, c) for (n, A, V, c) in arr_iter]
             [("range", n, nnz(A), c) => getindex(A, 1:n, c) for (n, A, c) in iter]
             [("dense logical", n, nnz(A), c) => getindex(A, L, c) for (n, A, L, c) in log_iter]
@@ -62,8 +63,8 @@ let
         @tags "sparse" "indexing" "array" "getindex" "matrix" "row"
     end
 
-    @track BaseBenchmarks.TRACKER begin
-        @benchmarks "sparse matrix column indexing" begin
+    @track BaseBenchmarks.TRACKER  "sparse matrix column indexing" begin
+        @benchmarks begin
             [("array", n, nnz(A), r) => getindex(A, r, V) for (n, A, V, r) in arr_iter]
             [("range", n, nnz(A), r) => getindex(A, r, 1:n) for (n, A, r) in iter]
             [("dense logical", n, nnz(A), r) => getindex(A, r, L) for (n, A, L, r) in log_iter]
@@ -72,8 +73,8 @@ let
         @tags "sparse" "indexing" "array" "getindex" "matrix" "column"
     end
 
-    @track BaseBenchmarks.TRACKER begin
-        @benchmarks "sparse matrix row + column indexing" begin
+    @track BaseBenchmarks.TRACKER "sparse matrix row + column indexing" begin
+        @benchmarks  begin
             [("array", n, nnz(A)) => getindex(A, V, V) for (n, A, V, r) in arr_iter]
             [("integer", n, nnz(A), r) => getindex(A, r, r) for (n, A, r) in iter]
             [("range", n, nnz(A)) => getindex(A, 1:n, 1:n) for (n, A, r) in iter]

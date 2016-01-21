@@ -6,10 +6,9 @@ module ShootoutBenchmarks
 #
 # See https://github.com/JuliaLang/julia/issues/660 for details.
 
-import BaseBenchmarks
-using BenchmarkTrackers
+import ..BaseBenchmarks
+using ..BenchmarkTrackers
 
-const SHOOTOUT_PREFIX = "shootout"
 const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout", "data")
 
 ##################################################
@@ -18,11 +17,11 @@ const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout"
 
 include("binary_trees.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout binary_trees" begin
+    @benchmarks begin
         (:binary_trees,) => perf_binary_trees(10)
     end
-    @tags SHOOTOUT_PREFIX "trees"
+    @tags "shootout" "trees"
 end
 
 ###########################################
@@ -31,11 +30,11 @@ end
 
 include("fannkuch.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout fannkuch" begin
+    @benchmarks begin
         (:fannkuch,) => perf_fannkuch(7)
     end
-    @tags SHOOTOUT_PREFIX "fannkuch"
+    @tags "shootout" "fannkuch"
 end
 
 ###########################################
@@ -44,11 +43,11 @@ end
 
 include("fasta.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout fasta" begin
+    @benchmarks begin
         (:fasta,) => perf_fasta(100)
     end
-    @tags SHOOTOUT_PREFIX "fasta"
+    @tags "shootout" "fasta"
 end
 
 #############################################
@@ -57,11 +56,11 @@ end
 
 include("k_nucleotide.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout k_nucleotide" begin
+    @benchmarks begin
         (:k_nucleotide,) => perf_k_nucleotide()
     end
-    @tags SHOOTOUT_PREFIX "k_nucleotide"
+    @tags "shootout" "k_nucleotide"
 end
 
 
@@ -71,11 +70,11 @@ end
 
 include("mandelbrot.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout mandelbrot" begin
+    @benchmarks begin
         (:mandelbrot,) => perf_mandelbrot(200)
     end
-    @tags SHOOTOUT_PREFIX "mandelbrot"
+    @tags "shootout" "mandelbrot"
 end
 
 
@@ -85,11 +84,11 @@ end
 
 include("meteor_contest.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout meteor_contest" begin
+    @benchmarks begin
         (:meteor_contest,) => perf_meteor_contest()
     end
-    @tags SHOOTOUT_PREFIX "meteor_contest"
+    @tags "shootout" "meteor_contest"
 end
 
 ######################################
@@ -99,12 +98,12 @@ end
 include("nbody.jl")
 include("nbody_vec.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout nbody_vec" begin
+    @benchmarks begin
         (:nbody,) => NBody.perf_nbody()
         (:nbody_vec,) => NBodyVec.perf_nbody_vec()
     end
-    @tags SHOOTOUT_PREFIX "nbody" "nbody_vec"
+    @tags "shootout" "nbody" "nbody_vec"
 end
 
 ############################################
@@ -113,11 +112,11 @@ end
 
 include("pidigits.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout pidigits" begin
+    @benchmarks begin
         (:pidigits,) => perf_pidigits(1000)
     end
-    @tags SHOOTOUT_PREFIX "pidigits" "pi" "π"
+    @tags "shootout" "pidigits" "pi" "π"
 end
 
 #############################################################
@@ -126,11 +125,11 @@ end
 
 include("regex_dna.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout regex_dna" begin
+    @benchmarks begin
         (:regex_dna,) => perf_regex_dna()
     end
-    @tags SHOOTOUT_PREFIX "regex_dna" "regex"
+    @tags "shootout" "regex_dna" "regex"
 end
 
 #######################################################
@@ -139,11 +138,11 @@ end
 
 include("revcomp.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout revcomp" begin
+    @benchmarks begin
         (:revcomp,) => perf_revcomp()
     end
-    @tags SHOOTOUT_PREFIX "revcomp"
+    @tags "shootout" "revcomp"
 end
 
 
@@ -153,11 +152,11 @@ end
 
 include("spectralnorm.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks SHOOTOUT_PREFIX begin
+@track BaseBenchmarks.TRACKER "shootout spectralnorm" begin
+    @benchmarks begin
         (:spectralnorm,) => perf_spectralnorm()
     end
-    @tags SHOOTOUT_PREFIX "spectralnorm"
+    @tags "shootout" "spectralnorm"
 end
 
 end # module

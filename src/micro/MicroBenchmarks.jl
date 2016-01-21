@@ -3,13 +3,13 @@ module MicroBenchmarks
 # This module contains the Julia microbenchmarks shown in the language
 # comparison table at http://julialang.org/.
 
-import BaseBenchmarks
-using BenchmarkTrackers
+import ..BaseBenchmarks
+using ..BenchmarkTrackers
 
 include("methods.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks "micro" begin
+@track BaseBenchmarks.TRACKER "micro" begin
+    @benchmarks begin
         (:fib,) => perf_micro_fib(20)
         (:parseint,) => perf_micro_parseint(1000)
         (:mandel,) => perf_micro_mandel()

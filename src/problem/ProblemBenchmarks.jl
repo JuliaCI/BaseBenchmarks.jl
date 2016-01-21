@@ -9,9 +9,8 @@ module ProblemBenchmarks
 # and thus is written non-idiomatically.
 
 import ..BaseBenchmarks
-using BenchmarkTrackers
+using ..BenchmarkTrackers
 
-const PROBLEM_PREFIX = "problem"
 const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
 
 #######################################
@@ -20,11 +19,11 @@ const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "
 
 include("IMDBGraphs.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem imdb graphs" begin
+    @benchmarks begin
         (:imdb_centrality,) => IMDBGraphs.perf_imdb_centrality(50)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "graph" "centrality" "imdb"
+    @tags "problem" "example" "kernel" "graph" "centrality" "imdb"
 end
 
 ###############
@@ -33,13 +32,13 @@ end
 
 include("MonteCarlo.jl")
 
-@track BaseBenchmarks.TRACKER begin
+@track BaseBenchmarks.TRACKER "problem monte carlo" begin
     @setup n = 10^4
-    @benchmarks PROBLEM_PREFIX begin
+    @benchmarks begin
         (:euro_option_devec,) => MonteCarlo.perf_euro_option_devec(n)
         (:euro_option_vec,) => MonteCarlo.perf_euro_option_vec(n)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "monte carlo" "finance" "vectorization" "random" "inplace"
+    @tags "problem" "example" "kernel" "monte carlo" "finance" "vectorization" "random" "inplace"
 end
 
 ###################################
@@ -48,18 +47,18 @@ end
 
 include("Laplacian.jl")
 
-@track BaseBenchmarks.TRACKER begin
+@track BaseBenchmarks.TRACKER "problem laplacian" begin
     @setup begin
         sparse_size = 8^5
         iter_size = 8^2
     end
-    @benchmarks PROBLEM_PREFIX begin
+    @benchmarks begin
         (:laplace_sparse_matvec,) => Laplacian.perf_laplace_sparse_matvec(sparse_size)
         (:laplace_iter_devec,) => Laplacian.perf_laplace_iter_devec(iter_size)
         (:laplace_iter_vec,) => Laplacian.perf_laplace_iter_vec(iter_size)
         (:laplace_iter_sub,) => Laplacian.perf_laplace_iter_devec(iter_size)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
+    @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
 end
 
 ###################################################
@@ -68,11 +67,11 @@ end
 
 include("GrigoriadisKhachiyan.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem grigoriadis khachiyan" begin
+    @benchmarks begin
         (:grigoriadis_khachiyan,) => GrigoriadisKhachiyan.perf_gk(350, [0.1])
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "grigoriadis" "khachiyan" "game"
+    @tags "problem" "example" "kernel" "grigoriadis" "khachiyan" "game"
 end
 
 ####################################
@@ -81,11 +80,11 @@ end
 
 include("GoGame.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem go game" begin
+    @benchmarks begin
         (:go_game,) => GoGame.perf_go_game(10)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "go" "game"
+    @tags "problem" "example" "kernel" "go" "game"
 end
 
 ################
@@ -94,15 +93,15 @@ end
 
 include("JSONParse.jl")
 
-@track BaseBenchmarks.TRACKER begin
+@track BaseBenchmarks.TRACKER "problem json parse" begin
     @setup begin
         json_path = joinpath(PROBLEM_DATA_DIR, "test.json")
         json_str = readall(json_path)
     end
-    @benchmarks PROBLEM_PREFIX begin
+    @benchmarks begin
         (:parse_json,) => JSONParse.perf_parse_json(json_str)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "json" "parse" "closure"
+    @tags "problem" "example" "kernel" "json" "parse" "closure"
 end
 
 ############################
@@ -111,11 +110,11 @@ end
 
 include("Raytracer.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem raytrace" begin
+    @benchmarks begin
         (:raytrace,) => Raytracer.perf_raytrace(5, 256, 4)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "raytrace"
+    @tags "problem" "example" "kernel" "raytrace"
 end
 
 ############################################
@@ -124,11 +123,11 @@ end
 
 include("StockCorr.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem stockcorr" begin
+    @benchmarks begin
         (:stockcorr,) => StockCorr.perf_stockcorr()
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "finance" "stockcorr"
+    @tags "problem" "example" "kernel" "finance" "stockcorr"
 end
 
 #########################
@@ -137,11 +136,11 @@ end
 
 include("Simplex.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem simplex" begin
+    @benchmarks begin
         (:simplex,) => Simplex.perf_simplex()
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "simplex"
+    @tags "problem" "example" "kernel" "simplex"
 end
 
 ####################################################
@@ -150,11 +149,11 @@ end
 
 include("Ziggurat.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem ziggurat" begin
+    @benchmarks begin
         (:ziggurat,) => Ziggurat.perf_ziggurat(10^6)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "ziggurat"
+    @tags "problem" "example" "kernel" "ziggurat"
 end
 
 ######################
@@ -163,12 +162,12 @@ end
 
 include("SeismicSimulation.jl")
 
-@track BaseBenchmarks.TRACKER begin
+@track BaseBenchmarks.TRACKER "problem seismic simulation" begin
     @setup Ts = (Float32, Float64)
-    @benchmarks PROBLEM_PREFIX begin
+    @benchmarks begin
         [(:seismic, string(T)) => SeismicSimulation.perf_seismic_sim(T) for T in Ts]
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "seismic" "simd"
+    @tags "problem" "example" "kernel" "seismic" "simd"
 end
 
 ############################
@@ -177,11 +176,11 @@ end
 
 include("SparseFEM.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem sparse fem" begin
+    @benchmarks begin
         (:sparse_fem,) => SparseFEM.perf_sparse_fem(256)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "sparse" "fem"
+    @tags "problem" "example" "kernel" "sparse" "fem"
 end
 
 ###############
@@ -190,11 +189,11 @@ end
 
 include("SpellCheck.jl")
 
-@track BaseBenchmarks.TRACKER begin
-    @benchmarks PROBLEM_PREFIX begin
+@track BaseBenchmarks.TRACKER "problem spellcheck" begin
+    @benchmarks begin
         (:spellcheck,) => SpellCheck.perf_spellcheck(SpellCheck.TEST_DATA)
     end
-    @tags PROBLEM_PREFIX "example" "kernel" "spell" "check" "spellcheck" "string"
+    @tags "problem" "example" "kernel" "spell" "check" "spellcheck" "string"
 end
 
 

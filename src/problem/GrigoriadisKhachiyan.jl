@@ -1,6 +1,6 @@
 module GrigoriadisKhachiyan
 
-import BaseBenchmarks
+import ..BaseBenchmarks
 
 # Code from Dilys Thomas <dilys@cs.stanford.edu>
 
