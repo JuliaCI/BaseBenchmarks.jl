@@ -21,8 +21,9 @@ samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
     @setup begin
         lens = (10^3, 10^4, 10^5)
         vectors = map(n -> samesprand(n, inv(sqrt(n))), lens)
-        iter = zip(lens, vectors)
         splogvecs = map(n -> samesprandbool(n, 1e-5), lens)
+
+        iter = zip(lens, vectors)
         splogiter = zip(lens, vectors, splogvecs)
     end
     @benchmarks begin
