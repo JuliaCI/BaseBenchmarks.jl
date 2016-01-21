@@ -19,4 +19,20 @@ using ..BenchmarkTrackers
     @tags "parallel" "identity" "echo" "remotecall_fetch" "remotecall" "io"
 end
 
+##################
+# Multithreading #
+##################
+
+include("Laplace3D.jl")
+include("ThreadedStockCorr.jl")
+
+@track BaseBenchmarks.TRACKER "parallel multithread" begin
+    @benchmarks begin
+        (:laplace3d,) => Laplace3D.perf_laplace3d()
+        (:pstockcorr,) => ThreadedStockCorr.perf_pstockcorr(10^4)
+    end
+    @tags "parallel" "thread" "multithread" "laplace" "laplacian"
+end
+
+
 end # module
