@@ -1,5 +1,7 @@
 module IMDBGraphs
 
+import ..ProblemBenchmarks: PROBLEM_DATA_DIR
+
 type IMDBNode
     name::UTF8String # actor//film name
     neighbors::Set{IMDBNode} # adjacent nodes
@@ -55,7 +57,7 @@ function read_graph(path)
 end
 
 function perf_imdb_centrality(n_actors)
-    path = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data", "imdb.tsv")
+    path = joinpath(PROBLEM_DATA_DIR, "imdb.tsv")
     G, actor_names = read_graph(path)
     results = Dict{UTF8String, Float64}()
     for name in take(actor_names, n_actors)

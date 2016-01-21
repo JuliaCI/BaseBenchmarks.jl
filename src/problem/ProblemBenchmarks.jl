@@ -8,10 +8,11 @@ module ProblemBenchmarks
 # where much of the code was naively translated to Julia from other languages,
 # and thus is written non-idiomatically.
 
-import BaseBenchmarks
+import ..BaseBenchmarks
 using BenchmarkTrackers
 
 const PROBLEM_PREFIX = "problem"
+const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
 
 #######################################
 # IMDB Actor Centrality (Issue #1163) #
@@ -95,7 +96,7 @@ include("JSONParse.jl")
 
 @track BaseBenchmarks.TRACKER begin
     @setup begin
-        json_path = joinpath(Pkg.dir("BaseBenchmarks"), "src", PROBLEM_PREFIX, "data", "test.json")
+        json_path = joinpath(PROBLEM_DATA_DIR, "test.json")
         json_str = readall(json_path)
     end
     @benchmarks PROBLEM_PREFIX begin
@@ -182,5 +183,19 @@ include("SparseFEM.jl")
     end
     @tags PROBLEM_PREFIX "example" "kernel" "sparse" "fem"
 end
+
+###############
+# Spell Check #
+###############
+
+include("SpellCheck.jl")
+
+@track BaseBenchmarks.TRACKER begin
+    @benchmarks PROBLEM_PREFIX begin
+        (:spellcheck,) => SpellCheck.perf_spellcheck(SpellCheck.TEST_DATA)
+    end
+    @tags PROBLEM_PREFIX "example" "kernel" "spell" "check" "spellcheck" "string"
+end
+
 
 end # module
