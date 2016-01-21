@@ -19,7 +19,7 @@ include("sparse/SparseBenchmarks.jl")
 
 macro execute(tagpred)
     return esc(quote
-        run(BaseBenchmarks.TRACKER, BaseBenchmarks.BenchmarkTrackers.@tagged $tagpred)
+        run(BaseBenchmarks.TRACKER, BaseBenchmarks.BenchmarkTrackers.@tagged($tagpred); verbose = true)
     end)
 end
 
