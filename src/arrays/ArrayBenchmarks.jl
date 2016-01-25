@@ -2,14 +2,18 @@ module ArrayBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
+using ..BaseBenchmarks.samerand
 
 ############
 # indexing #
 ############
 
-include("indexing.jl")
+# PR #10525 #
+#-----------#
 
-@track BaseBenchmarks.TRACKER "array indexing" begin
+include("sumindex.jl")
+
+@track BaseBenchmarks.TRACKER "array index sum" begin
     @setup begin
         int_arrs = (makearrays(Int32, 3, 5)..., makearrays(Int32, 300, 500)...)
         float_arrs = (makearrays(Float32, 3, 5)..., makearrays(Float32, 300, 500)...)
@@ -28,6 +32,22 @@ include("indexing.jl")
     @tags "array" "sum" "indexing" "simd"
 end
 
+# Issue #10301 #
+#--------------#
+
+include("loadindex.jl")
+
+@track BaseBenchmarks.TRACKER "array index load" begin
+    @setup n = 10^6
+    @benchmarks begin
+        (:rev_load_slow!,) => perf_rev_load_slow!(samerand(n))
+        (:rev_load_fast!,) => perf_rev_load_fast!(samerand(n))
+        (:rev_loadmul_slow!,) => perf_rev_loadmul_slow!(samerand(n), samerand(n))
+        (:rev_loadmul_fast!,) => perf_rev_loadmul_fast!(samerand(n), samerand(n))
+    end
+    @tags "array" "load" "indexing" "reverse"
+end
+
 ###############################
 # SubArray (views vs. copies) #
 ###############################
@@ -41,8 +61,8 @@ include("subarray.jl")
 @track BaseBenchmarks.TRACKER "array subarray" begin
     @setup sizes = (100, 250, 500, 1000)
     @benchmarks begin
-        [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(BaseBenchmarks.samerand(n, n)) for n in sizes]
-        [(:lucompletepivSub!, n) => perf_lucompletepivSub!(BaseBenchmarks.samerand(n, n)) for n in sizes]
+        [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(samerand(n, n)) for n in sizes]
+        [(:lucompletepivSub!, n) => perf_lucompletepivSub!(samerand(n, n)) for n in sizes]
     end
     @tags "lucompletepiv" "array" "linalg" "copy" "subarray" "factorization"
 end
@@ -56,7 +76,7 @@ include("cat.jl")
 @track BaseBenchmarks.TRACKER "array cat" begin
     @setup begin
         sizes = (5, 500)
-        arrays = map(n -> BaseBenchmarks.samerand(n, n), sizes)
+        arrays = map(n -> samerand(n, n), sizes)
     end
     @benchmarks begin
         [(:hvcat, size(A, 1)) => perf_hvcat(A, A) for A in arrays]
