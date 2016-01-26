@@ -15,6 +15,6 @@ Here are some contribution tips:
 
 #### Versioning
 
-The `master` branch holds benchmarks written for Julia v0.5, while the `release-0.4` branch holds benchmarks written for Julia v0.4. These branches should differ as little as possible - they only exist separately to avoid breakage between versions.
+Each tagged release of BaseBenchmarks.jl aims to support the most recent v0.4 and v0.5 builds of Julia, with an emphasis on forward compatibility.
 
-To see what versions of this package are currently deployed on our CI tracking hardware, simply refer to the git tags: the latest version tagged `vA.B.C` is currently deployed to test Julia `vA.B`. For example, BaseBenchmarks `v0.5.x` runs against Julia v0.5, while BaseBenchmarks `v0.4.x` runs against Julia v0.4.
+Note that each new tagged version corresponds to a deployment to our CI tracking infrastructure. Thus, to see which benchmarks are currently available on the CI tracker, just look at the most recently tagged version of this package.

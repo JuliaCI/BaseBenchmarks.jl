@@ -1,6 +1,7 @@
 module BaseBenchmarks
 
 using BenchmarkTrackers
+using Compat
 
 @tracker TRACKER
 

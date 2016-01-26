@@ -2,6 +2,7 @@ module ParallelBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
+using ..Compat
 
 #################################################
 # Echoing data between processes (Issue #14467) #
@@ -23,18 +24,19 @@ end
 # Multithreading #
 ##################
 
-include("Laplace3D.jl")
-include("ThreadedStockCorr.jl")
-include("LatticeBoltzmann.jl")
+if VERSION >= v"0.5.0-dev+923"
+    include("Laplace3D.jl")
+    include("ThreadedStockCorr.jl")
+    include("LatticeBoltzmann.jl")
 
-@track BaseBenchmarks.TRACKER "parallel multithread" begin
-    @benchmarks begin
-        (:laplace3d,) => Laplace3D.perf_laplace3d()
-        (:pstockcorr,) => ThreadedStockCorr.perf_pstockcorr(10^4)
-        (:lattice_boltzmann,) => LatticeBoltzmann.perf_lattice_boltzmann(36)
+    @track BaseBenchmarks.TRACKER "parallel multithread" begin
+        @benchmarks begin
+            (:laplace3d,) => Laplace3D.perf_laplace3d()
+            (:pstockcorr,) => ThreadedStockCorr.perf_pstockcorr(10^4)
+            (:lattice_boltzmann,) => LatticeBoltzmann.perf_lattice_boltzmann(36)
+        end
+        @tags "parallel" "thread" "multithread" "laplace" "laplacian"
     end
-    @tags "parallel" "thread" "multithread" "laplace" "laplacian"
 end
-
 
 end # module
