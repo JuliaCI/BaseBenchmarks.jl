@@ -91,4 +91,32 @@ include("cat.jl")
     @tags "array" "indexing" "cat" "hcat" "vcat" "hvcat" "setindex"
 end
 
+#################
+# comprehension #
+#################
+
+# Issue #13401 #
+#--------------#
+
+perf_compr_collect(X) = [x for x in X]
+perf_compr_iter(X) = [sin(x) + x^2 - 3 for x in X]
+perf_compr_index(X) = [sin(X[i]) + (X[i])^2 - 3 for i in eachindex(X)]
+
+@track BaseBenchmarks.TRACKER "array comprehension" begin
+    @setup begin
+        order = 7
+        ls = linspace(0,1,10^order)
+        rg = 0.0:(10.0^(-order)):1.0
+        arr = collect(ls)
+        iters = (ls, arr, rg)
+    end
+    @benchmarks begin
+        [(:collect, string(typeof(i))) => collect(i) for i in iters]
+        [(:comprehension_collect, string(typeof(i))) => perf_compr_collect(i) for i in iters]
+        [(:comprehension_iteration, string(typeof(i))) => perf_compr_iter(i) for i in iters]
+        [(:comprehension_indexing, string(typeof(i))) => perf_compr_index(i) for i in iters]
+    end
+    @tags "array" "comprehension" "iteration" "indexing" "linspace" "collect" "range"
+end
+
 end # module
