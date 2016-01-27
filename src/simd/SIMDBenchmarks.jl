@@ -126,7 +126,7 @@ end
         [(:two_reductions, string(eltype(v)), length(v)) => perf_two_reductions(v, v, v) for v in vectors]
         [(:conditional_loop!, string(eltype(v)), length(v)) => perf_conditional_loop!(v, v, v) for v in vectors]
         [(:local_arrays, string(eltype(v)), length(v)) => perf_local_arrays(v) for v in vectors]
-        [(:loop_fields!, T, string(eltype(v)), length(v)) => perf_loop_fields!(T(v)) for v in vectors, T in (MutableFields, ImmutableFields)]
+        [(:loop_fields!, string(T), string(eltype(v)), length(v)) => perf_loop_fields!(T(v)) for v in vectors, T in (MutableFields, ImmutableFields)]
     end
     @tags "array" "inbounds" "mul" "axpy!" "inner" "sum" "reduce"
 end
