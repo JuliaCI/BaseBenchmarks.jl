@@ -8,8 +8,8 @@ using ..BaseBenchmarks.samerand
 # indexing #
 ############
 
-# PR #10525 #
-#-----------#
+# #10525 #
+#--------#
 
 include("sumindex.jl")
 
@@ -32,8 +32,8 @@ include("sumindex.jl")
     @tags "array" "sum" "indexing" "simd"
 end
 
-# Issue #10301 #
-#--------------#
+# #10301 #
+#--------#
 
 include("loadindex.jl")
 
@@ -91,12 +91,34 @@ include("cat.jl")
     @tags "array" "indexing" "cat" "hcat" "vcat" "hvcat" "setindex"
 end
 
-#################
-# comprehension #
-#################
+############################
+# in-place growth (#13977) #
+############################
 
-# Issue #13401 #
-#--------------#
+function push_multiple!(collection, items)
+    for item in items
+        push!(collection, item)
+    end
+    return collection
+end
+
+@track BaseBenchmarks.TRACKER "array growth" begin
+    @setup begin
+        sizes = (8, 256, 2048)
+        vectors = map(samerand, sizes)
+    end
+    @benchmarks begin
+        [(:push_single!, length(v)) => push!(copy(v), samerand()) for v in vectors]
+        [(:push_multiple!, length(v)) => push_multiple!(copy(v), v) for v in vectors]
+        [(:append!, length(v)) => append!(copy(v), v) for v in vectors]
+        [(:prerend!, length(v)) => prepend!(copy(v), v) for v in vectors]
+    end
+    @tags "array" "growth" "push!" "append!" "prepend!"
+end
+
+##########################
+# comprehension (#13401) #
+##########################
 
 perf_compr_collect(X) = [x for x in X]
 perf_compr_iter(X) = [sin(x) + x^2 - 3 for x in X]
