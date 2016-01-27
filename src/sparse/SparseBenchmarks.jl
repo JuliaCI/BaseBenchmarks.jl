@@ -90,5 +90,26 @@ let
     end
 end
 
+######################
+# transpose (#14631) #
+######################
+
+@track BaseBenchmarks.TRACKER "sparse matrix transpose" begin
+    @setup begin
+        small_sqr = samesprand(600, 600, 0.01)
+        small_rct = samesprand(600, 400, 0.01)
+        large_sqr = samesprand(20000, 20000, 0.01)
+        large_rct = samesprand(20000, 10000, 0.01)
+        spmats = (small_sqr, small_rct, large_sqr, large_rct)
+        complex_spmats = map(A -> A + A*im, spmats)
+    end
+    @benchmarks begin
+        [(:transpose, size(A)) => transpose(A) for A in spmats]
+        [(:transpose!, size(A)) => transpose!(A.', A) for A in spmats]
+        [(:ctranspose, size(A)) => ctranspose(A) for A in complex_spmats]
+        [(:ctranspose!, size(A)) => ctranspose!(A.', A) for A in complex_spmats]
+    end
+    @tags "sparse" "array" "ctranspose" "transpose" "matrix" "linalg" "hermitian" "conjugate"
+end
 
 end # module
