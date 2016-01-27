@@ -35,9 +35,9 @@ end
 # #10301 #
 #--------#
 
-include("loadindex.jl")
+include("revloadindex.jl")
 
-@track BaseBenchmarks.TRACKER "array index load" begin
+@track BaseBenchmarks.TRACKER "array index load reverse" begin
     @setup n = 10^6
     @benchmarks begin
         (:rev_load_slow!,) => perf_rev_load_slow!(samerand(n))
@@ -45,7 +45,7 @@ include("loadindex.jl")
         (:rev_loadmul_slow!,) => perf_rev_loadmul_slow!(samerand(n), samerand(n))
         (:rev_loadmul_fast!,) => perf_rev_loadmul_fast!(samerand(n), samerand(n))
     end
-    @tags "array" "load" "indexing" "reverse"
+    @tags "array" "indexing" "load" "reverse"
 end
 
 ###############################
@@ -139,6 +139,41 @@ perf_compr_index(X) = [sin(X[i]) + (X[i])^2 - 3 for i in eachindex(X)]
         [(:comprehension_indexing, string(typeof(i))) => perf_compr_index(i) for i in iters]
     end
     @tags "array" "comprehension" "iteration" "indexing" "linspace" "collect" "range"
+end
+
+###############################
+# BoolArray/BitArray (#13946) #
+###############################
+
+function perf_bool_load!(result, a, b)
+    for i in eachindex(result)
+        result[i] = a[i] != b
+    end
+    return result
+end
+
+function perf_true_load!(result)
+    for i in eachindex(result)
+        result[i] = true
+    end
+    return result
+end
+
+@track BaseBenchmarks.TRACKER "array bool" begin
+    @setup begin
+        n, range = 10^6, -3:3
+        a, b = samerand(range, n), samerand(range)
+        boolarr, bitarr = Vector{Bool}(n), BitArray(n)
+    end
+    @benchmarks begin
+        (:bitarray_bool_load!,) => perf_bool_load!(bitarr, a, b)
+        (:boolarray_bool_load!,) => perf_bool_load!(boolarr, a, b)
+        (:bitarray_true_load!,) => perf_true_load!(bitarr)
+        (:boolarray_true_load!,) => perf_true_load!(boolarr)
+        (:bitarray_true_fill!,) => fill!(bitarr, true)
+        (:boolarray_true_fill!,) => fill!(boolarr, true)
+    end
+    @tags "array" "indexing" "load" "bool" "bitarray" "fill!"
 end
 
 end # module
