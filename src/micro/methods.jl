@@ -11,7 +11,7 @@ perf_micro_fib(n) = n < 2 ? n : perf_micro_fib(n-1) + perf_micro_fib(n-2)
 function perf_micro_parseint(t)
     local n, m
     for i=1:t
-        n = BaseBenchmarks.samerand(UInt32)
+        n = rand(UInt32)
         s = hex(n)
         m = UInt32(parse(Int64,s,16))
     end
@@ -59,7 +59,7 @@ function quicksort!(a, lo, hi)
     return a
 end
 
-perf_micro_quicksort(n) = quicksort!(BaseBenchmarks.samerand(n), 1, n)
+perf_micro_quicksort(n) = quicksort!(rand(n), 1, n)
 
 ########
 # πsum #
@@ -101,4 +101,4 @@ end
 # randmatmul #
 ##############
 
-perf_micro_randmatmul(t) = BaseBenchmarks.samerand(t,t)*BaseBenchmarks.samerand(t,t)
+perf_micro_randmatmul(t) = rand(t,t)*rand(t,t)
