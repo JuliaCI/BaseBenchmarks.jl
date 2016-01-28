@@ -14,6 +14,7 @@ samerand(args...) = rand(MersenneTwister(1), args...)
 
 include("arrays/ArrayBenchmarks.jl")
 include("blas/BLASBenchmarks.jl")
+include("io/IOBenchmarks.jl")
 include("lapack/LAPACKBenchmarks.jl")
 include("micro/MicroBenchmarks.jl")
 include("parallel/ParallelBenchmarks.jl")
