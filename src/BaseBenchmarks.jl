@@ -24,6 +24,7 @@ include("simd/SIMDBenchmarks.jl")
 include("shootout/ShootoutBenchmarks.jl")
 include("sort/SortBenchmarks.jl")
 include("sparse/SparseBenchmarks.jl")
+include("string/StringBenchmarks.jl")
 
 macro execute(tagpred)
     return esc(quote
