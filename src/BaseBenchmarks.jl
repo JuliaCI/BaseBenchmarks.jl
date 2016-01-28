@@ -3,6 +3,11 @@ module BaseBenchmarks
 using BenchmarkTrackers
 using Compat
 
+# This is a temporary patch until JuliaLang/Compat.jl#162 is merged.
+if VERSION < v"0.5.0-dev+2228"
+    const readstring = readall
+end
+
 @tracker TRACKER
 
 samerand(args...) = rand(MersenneTwister(1), args...)
