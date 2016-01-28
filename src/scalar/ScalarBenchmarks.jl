@@ -3,27 +3,28 @@ module ScalarBenchmarks
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
 
+const INTS = (UInt, Int, BigInt)
+const FLOATS = (Float32, Float64, BigFloat)
+const REALS = (INTS..., FLOATS...)
+const COMPS = map(R -> Complex{R}, REALS)
+const NUMS = (REALS..., COMPS...)
+
 ##############
 # predicates #
 ##############
 
 @track BaseBenchmarks.TRACKER "scalar predicate" begin
-    @setup begin
-        Rs = (UInt8, UInt16, UInt32, UInt64, UInt128,
-              Int8, Int16, Int32, Int64, Int128, BigInt,
-              Float16, Float32, Float64, BigFloat)
-        Cs = map(R -> Complex{R}, Rs)
-        Ts = (Rs..., Cs...)
-    end
     @benchmarks begin
-        [(:isequal, string(Ti), string(Tj)) => isequal(one(Ti), one(Tj)) for Ti in Ts, Tj in Ts]
-        [(:isinteger, string(T)) => isinteger(one(T)) for T in Ts]
-        [(:isinf, string(T)) => isinf(one(T)) for T in Ts]
-        [(:isfinite, string(T)) => isfinite(one(T)) for T in Ts]
-        [(:isnan, string(T)) => isnan(one(T)) for T in Ts]
-        [(:iseven, string(T)) => iseven(one(T)) for T in Ts]
-        [(:isodd, string(T)) => isodd(one(T)) for T in Ts]
+        [(:isequal, string(T)) => isequal(one(T), one(T)) for T in NUMS]
+        [(:isless, string(T)) => isequal(one(T), one(T)) for T in NUMS]
+        [(:isinteger, string(T)) => isinteger(one(T)) for T in NUMS]
+        [(:isinf, string(T)) => isinf(one(T)) for T in NUMS]
+        [(:isfinite, string(T)) => isfinite(one(T)) for T in NUMS]
+        [(:isnan, string(T)) => isnan(one(T)) for T in NUMS]
+        [(:iseven, string(T)) => iseven(one(T)) for T in INTS]
+        [(:isodd, string(T)) => isodd(one(T)) for T in INTS]
     end
+    @constraints gc=>false
     @tags "scalar" "predicate" "isinteger" "isinf" "isnan" "iseven" "isodd" "slow"
 end
 
