@@ -1,5 +1,7 @@
 # BaseBenchmarks.jl
 
+[![Build Status](https://travis-ci.org/JuliaCI/BaseBenchmarks.jl.svg?branch=master)](https://travis-ci.org/JuliaCI/BaseBenchmarks.jl)
+
 This package is a collection of Julia benchmarks available for CI performance tracking from the JuliaLang/julia repository.
 
 #### Contributing
