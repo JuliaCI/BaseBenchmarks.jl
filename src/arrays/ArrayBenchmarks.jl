@@ -48,6 +48,20 @@ include("revloadindex.jl")
     @tags "array" "indexing" "load" "reverse"
 end
 
+# #9622 #
+#-------#
+
+perf_setindex!(A, val, inds) = setindex!(A, val, inds...)
+
+@track BaseBenchmarks.TRACKER "array index setindex!" begin
+    @setup arrays = map(n -> Array(Float64, ntuple(one, n)), (1,2,3,4,5))
+    @benchmarks begin
+        [(:setindex!, ndims(A)) => perf_setindex!(A, one(eltype(A)), size(A)) for A in arrays]
+    end
+    @constraints gc=>false
+    @tags "array" "indexing" "setindex!"
+end
+
 ###############################
 # SubArray (views vs. copies) #
 ###############################
