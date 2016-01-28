@@ -25,7 +25,31 @@ const NUMS = (REALS..., COMPS...)
         [(:isodd, string(T)) => isodd(one(T)) for T in INTS]
     end
     @constraints gc=>false
-    @tags "scalar" "predicate" "isinteger" "isinf" "isnan" "iseven" "isodd" "slow"
+    @tags "scalar" "predicate" "isinteger" "isinf" "isnan" "iseven" "isodd"
+end
+
+##############
+# arithmetic #
+##############
+
+perf_fastmath_mul(a, b) = @fastmath a * b
+perf_fastmath_div(a, b) = @fastmath a / b
+perf_fastmath_add(a, b) = @fastmath a + b
+perf_fastmath_sub(a, b) = @fastmath a - b
+
+@track BaseBenchmarks.TRACKER "scalar arithmetic" begin
+    @benchmarks begin
+        [(:scalar_add, string(Ti), string(Tj)) => +(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_sub, string(Ti), string(Tj)) => -(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_mul, string(Ti), string(Tj)) => *(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_div, string(Ti), string(Tj)) => /(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_fastmath_add, string(Ti), string(Tj)) => perf_fastmath_add(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_fastmath_sub, string(Ti), string(Tj)) => perf_fastmath_sub(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_fastmath_mul, string(Ti), string(Tj)) => perf_fastmath_mul(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+        [(:scalar_fastmath_div, string(Ti), string(Tj)) => perf_fastmath_div(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
+    end
+    @constraints seconds=>1 gc=>false
+    @tags "scalar" "arithmetic" "fastmath"
 end
 
 end # module
