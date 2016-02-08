@@ -9,7 +9,7 @@ This package is a collection of Julia benchmarks available for CI performance tr
 ```julia
 julia> using BaseBenchmarks
 
-julia> BaseBenchmarks.@execute ("array" || "linalg") && !("simd")`
+julia> BaseBenchmarks.@execute ("array" || "linalg") && !("simd")
 ```
 
 The syntax for the tag predicate matches [the syntax used by BenchmarkTrackers.jl](https://github.com/JuliaCI/BenchmarkTrackers.jl#running-benchmarks).
