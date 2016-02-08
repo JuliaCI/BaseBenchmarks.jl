@@ -4,6 +4,16 @@
 
 This package is a collection of Julia benchmarks available for CI performance tracking from the JuliaLang/julia repository.
 
+#### Executing Benchmarks
+
+```julia
+julia> using BaseBenchmarks
+
+julia> BaseBenchmarks.@execute ("array" || "linalg") && !("simd")`
+```
+
+The syntax for the tag predicate matches [the syntax used by BenchmarkTrackers.jl](https://github.com/JuliaCI/BenchmarkTrackers.jl#running-benchmarks).
+
 #### Contributing
 
 Our performance tracker could always benefit from more benchmarks! If you have a benchmark that depends only on `Base` Julia code, it is welcome here.
