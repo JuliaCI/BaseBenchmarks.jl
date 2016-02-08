@@ -10,7 +10,7 @@ const SIZES = (2^2, 2^4, 2^6, 2^8, 2^10)
 ###########
 
 @track BaseBenchmarks.TRACKER "blas 1" begin
-    @setup vectors = map(rand, SIZES)
+    @setup vectors = map(BaseBenchmarks.samerand, SIZES)
     @benchmarks begin
         [(:dot, length(v)) => dot(v, v) for v in vectors]
         [(:scal!, length(v)) => BLAS.scal!(length(v), BaseBenchmarks.samerand(), v, 1) for v in vectors]
