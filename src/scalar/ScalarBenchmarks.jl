@@ -24,7 +24,7 @@ const NUMS = (REALS..., COMPS...)
         [(:iseven, string(T)) => iseven(one(T)) for T in INTS]
         [(:isodd, string(T)) => isodd(one(T)) for T in INTS]
     end
-    @constraints gc=>false
+    @constraints disablegc=>false
     @tags "scalar" "predicate" "isinteger" "isinf" "isnan" "iseven" "isodd"
 end
 
@@ -48,7 +48,7 @@ perf_fastmath_sub(a, b) = @fastmath a - b
         [(:scalar_fastmath_mul, string(Ti), string(Tj)) => perf_fastmath_mul(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
         [(:scalar_fastmath_div, string(Ti), string(Tj)) => perf_fastmath_div(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
     end
-    @constraints seconds=>1 gc=>false
+    @constraints time_limit=>1 disablegc=>false
     @tags "scalar" "arithmetic" "fastmath"
 end
 
