@@ -10,6 +10,7 @@ module ProblemBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
+using ..RandUtils
 
 const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
 

@@ -2,7 +2,7 @@ module ArrayBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
-using ..BaseBenchmarks.samerand
+using ..RandUtils
 
 ############
 # indexing #

@@ -2,7 +2,7 @@ module SparseBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
-using ..BaseBenchmarks.samerand
+using ..RandUtils
 
 samesprand(args...) = sprand(MersenneTwister(1), args...)
 samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)

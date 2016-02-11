@@ -1,6 +1,7 @@
 module Ziggurat
 
 import ..BaseBenchmarks
+using ..RandUtils
 
 # Based on http://m.seehuhn.de/data/ziggurat/gauss.c
 
@@ -116,7 +117,7 @@ function randn_zig()
     x = 0.0
 
     while (true)
-        U = BaseBenchmarks.samerand(UInt32)
+        U = samerand(UInt32)
         i = 1 + (U & 0x0000007F)     # 7 bit to choose the step
         sign = U & 0x00000080        # 1 bit for the sign
         j = U>>8                     # 24 bit for the x-value
@@ -128,10 +129,10 @@ function randn_zig()
         if i < 128
             y0 = ytab[i]
             y1 = ytab[i+1]
-            y = y1 + (y0-y1)*BaseBenchmarks.samerand()
+            y = y1 + (y0-y1)*samerand()
         else
-            x = PARAM_R - log(1.0-BaseBenchmarks.samerand()) / PARAM_R
-            y = exp(-PARAM_R * (x - 0.5*PARAM_R)) * BaseBenchmarks.samerand()
+            x = PARAM_R - log(1.0-samerand()) / PARAM_R
+            y = exp(-PARAM_R * (x - 0.5*PARAM_R)) * samerand()
         end
 
         if y < exp(-0.5*x*x); break; end

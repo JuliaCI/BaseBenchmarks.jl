@@ -2,13 +2,14 @@ module SortBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
+using ..RandUtils
 
 const LIST_SIZE = 50000
 const LISTS = (
     (:ascending, collect(1:LIST_SIZE)),
     (:descending, collect(LIST_SIZE:-1:1)),
     (:ones, ones(LIST_SIZE)),
-    (:random, BaseBenchmarks.samerand(LIST_SIZE))
+    (:random, samerand(LIST_SIZE))
 )
 
 #####################################

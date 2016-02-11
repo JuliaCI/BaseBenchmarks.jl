@@ -1,6 +1,7 @@
 module GrigoriadisKhachiyan
 
 import ..BaseBenchmarks
+using ..RandUtils
 
 # Code from Dilys Thomas <dilys@cs.stanford.edu>
 
@@ -8,13 +9,13 @@ function myunifskew(n)
     A = zeros(n, n)
     for i=1:n
         for j=1:i-1
-            temp=BaseBenchmarks.samerand()
+            temp = samerand()
             if (temp < 0.5)
-                temp = BaseBenchmarks.samerand()
+                temp = samerand()
                 A[i,j]= temp
                 A[j,i]= -A[i,j]
             else
-                temp = BaseBenchmarks.samerand()
+                temp = samerand()
                 A[j,i]= temp
                 A[i,j]= -A[j,i]
             end
@@ -45,7 +46,7 @@ function perf_gk(n, myeps)
                 csum[i] = sum(p[1:i])
             end
 
-            marker = BaseBenchmarks.samerand()
+            marker = samerand()
 
             k = 1
             for i = 2:n
