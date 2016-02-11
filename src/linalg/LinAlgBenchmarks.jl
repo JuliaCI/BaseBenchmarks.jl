@@ -6,7 +6,7 @@ using ..RandUtils
 
 const SIZES = (16, 256)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
-const V = typeof(randvec(1))
+const V = Vector
 
 linalgmat(::Type{Matrix}, n) = randmat(n)
 linalgmat(::Type{Diagonal}, n) = Diagonal(randvec(n))
@@ -32,7 +32,6 @@ end
         [(:-, string(V), string(V), n) => -(randvec(n), randvec(n)) for n in SIZES]
         [(:*, string(M), string(V), n) => *(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
         [(:\, string(M), string(V), n) => \(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
-        [(:/, string(M), string(V), n) => /(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
         [(:+, string(M), string(M), n) => +(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
         [(:-, string(M), string(M), n) => -(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
         [(:*, string(M), string(M), n) => *(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
@@ -107,10 +106,10 @@ end
         (:dot, n) => BLAS.dot(n, randvec(n), 1, randvec(n), 1)
         (:dotu, n) => BLAS.dotu(n, randvec(Complex{Float64}, n), 1, randvec(Complex{Float64}, n), 1)
         (:dotc, n) => BLAS.dotc(n, randvec(Complex{Float64}, n), 1, randvec(Complex{Float64}, n), 1)
-        (:blascopy!, n) => BLAS.blascopy!(n, randvec(n), 1, V(n), 1)
+        (:blascopy!, n) => BLAS.blascopy!(n, randvec(n), 1, randvec(n), 1)
         (:nrm2, n) => BLAS.nrm2(n, randvec(n), 1)
         (:asum, n) => BLAS.asum(n, randvec(n), 1)
-        (:axpy!, n) => BLAS.axpy!(samerand(), randvec(n), V(n))
+        (:axpy!, n) => BLAS.axpy!(samerand(), randvec(n), randvec(n))
         (:scal!, n) => BLAS.scal!(n, samerand(), randvec(n), 1)
         (:scal, n) => BLAS.scal(n, samerand(), randvec(n), 1)
         (:ger!, n) => BLAS.ger!(samerand(), randvec(n), randvec(n), randmat(n))
