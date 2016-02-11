@@ -4,7 +4,7 @@ import ..BaseBenchmarks
 using ..BenchmarkTrackers
 using ..RandUtils
 
-const SIZES = (16, 256)
+const SIZES = (16, 512)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
 const V = Vector
 
