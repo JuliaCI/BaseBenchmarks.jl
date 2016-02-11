@@ -90,10 +90,9 @@ end
 end
 
 @track BaseBenchmarks.TRACKER "factorization chol" begin
-    @setup mats = (Matrix, Hermitian, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
     @benchmarks begin
-        [(:chol, string(M), n) => chol(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:cholfact, string(M), n) => cholfact(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:chol, "Array{T,2}", n) => chol(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
+        [(:cholfact, "Array{T,2}", n) => cholfact(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
     end
     @tags "array" "linalg" "factorization" "chol" "cholfact"
 end
