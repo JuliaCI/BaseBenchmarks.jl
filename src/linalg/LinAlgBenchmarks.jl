@@ -94,8 +94,8 @@ end
 
 @track BaseBenchmarks.TRACKER "factorization chol" begin
     @benchmarks begin
-        [(:chol, id(Matrix), n) => chol(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
-        [(:cholfact, id(Matrix), n) => cholfact(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
+        [(:chol, id(Matrix), n) => chol(randmat(n)'*randmat(n)) for n in SIZES]
+        [(:cholfact, id(Matrix), n) => cholfact(randmat(n)'*randmat(n)) for n in SIZES]
     end
     @tags "array" "linalg" "factorization" "chol" "cholfact"
 end
