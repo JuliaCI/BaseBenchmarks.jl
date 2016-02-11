@@ -6,7 +6,11 @@ using ..RandUtils
 
 const SIZES = (16, 512)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
-const V = Vector
+const DIVMATS = filter(x -> !(in(x, (Bidiagonal, Tridiagonal, SymTridiagonal))), MATS)
+
+id{T}(::Type{T}) = string(T.name)
+id{M<:Matrix}(::Type{M}) = "Matrix"
+id{V<:Vector}(::Type{V}) = "Vector"
 
 linalgmat(::Type{Matrix}, n) = randmat(n)
 linalgmat(::Type{Diagonal}, n) = Diagonal(randvec(n))
@@ -28,15 +32,15 @@ end
 
 @track BaseBenchmarks.TRACKER  "linalg arithmetic" begin
     @benchmarks begin
-        [(:+, string(V), string(V), n) => +(randvec(n), randvec(n)) for n in SIZES]
-        [(:-, string(V), string(V), n) => -(randvec(n), randvec(n)) for n in SIZES]
-        [(:*, string(M), string(V), n) => *(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
-        [(:\, string(M), string(V), n) => \(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
-        [(:+, string(M), string(M), n) => +(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:-, string(M), string(M), n) => -(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:*, string(M), string(M), n) => *(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:/, string(M), string(M), n) => /(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:\, string(M), string(M), n) => \(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
+        [(:+, id(Vector), id(Vector), n) => +(randvec(n), randvec(n)) for n in SIZES]
+        [(:-, id(Vector), id(Vector), n) => -(randvec(n), randvec(n)) for n in SIZES]
+        [(:*, id(M), id(Vector), n) => *(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
+        [(:\, id(M), id(Vector), n) => \(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
+        [(:+, id(M), id(M), n) => +(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
+        [(:-, id(M), id(M), n) => -(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
+        [(:*, id(M), id(M), n) => *(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
+        [(:/, id(M), id(M), n) => /(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in DIVMATS]
+        [(:\, id(M), id(M), n) => \(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in DIVMATS]
     end
     @tags "array" "linalg" "arithmetic"
 end
@@ -48,8 +52,8 @@ end
 @track BaseBenchmarks.TRACKER "factorization eig" begin
     @setup mats = (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
     @benchmarks begin
-        [(:eig, string(M), n) => eig(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:eigfact, string(M), n) => eigfact(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:eig, id(M), n) => eig(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:eigfact, id(M), n) => eigfact(linalgmat(M, n)) for n in SIZES, M in mats]
     end
     @tags "array" "linalg" "factorization" "eig" "eigfact"
 end
@@ -57,8 +61,8 @@ end
 @track BaseBenchmarks.TRACKER "factorization svd" begin
     @setup mats = (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
     @benchmarks begin
-        [(:svd, string(M), n) => svd(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:svdfact, string(M), n) => svdfact(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:svd, id(M), n) => svd(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:svdfact, id(M), n) => svdfact(linalgmat(M, n)) for n in SIZES, M in mats]
     end
     @tags "array" "linalg" "factorization" "svd" "svdfact"
 end
@@ -66,32 +70,32 @@ end
 @track BaseBenchmarks.TRACKER "factorization lu" begin
     @setup mats = (Matrix, Tridiagonal)
     @benchmarks begin
-        [(:lu, string(M), n) => lu(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:lufact, string(M), n) => lufact(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:lu, id(M), n) => lu(linalgmat(M, n)) for n in SIZES, M in mats]
+        [(:lufact, id(M), n) => lufact(linalgmat(M, n)) for n in SIZES, M in mats]
     end
     @tags "array" "linalg" "factorization" "lu" "lufact"
 end
 
 @track BaseBenchmarks.TRACKER "factorization qr" begin
     @benchmarks begin
-        [(:qr, "Array{T,2}", n) => qr(randmat(n)) for n in SIZES]
-        [(:qrfact, "Array{T,2}", n) => qrfact(randmat(n)) for n in SIZES]
+        [(:qr, id(Matrix), n) => qr(randmat(n)) for n in SIZES]
+        [(:qrfact, id(Matrix), n) => qrfact(randmat(n)) for n in SIZES]
     end
     @tags "array" "linalg" "factorization" "qr" "qrfact"
 end
 
 @track BaseBenchmarks.TRACKER "factorization schur" begin
     @benchmarks begin
-        [(:schur, "Array{T,2}", n) => schur(randmat(n)) for n in SIZES]
-        [(:schurfact, "Array{T,2}", n) => schurfact(randmat(n)) for n in SIZES]
+        [(:schur, id(Matrix), n) => schur(randmat(n)) for n in SIZES]
+        [(:schurfact, id(Matrix), n) => schurfact(randmat(n)) for n in SIZES]
     end
     @tags "array" "linalg" "factorization" "schur" "schurfact"
 end
 
 @track BaseBenchmarks.TRACKER "factorization chol" begin
     @benchmarks begin
-        [(:chol, "Array{T,2}", n) => chol(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
-        [(:cholfact, "Array{T,2}", n) => cholfact(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
+        [(:chol, id(Matrix), n) => chol(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
+        [(:cholfact, id(Matrix), n) => cholfact(randmat(n)'*randmat(n)) for n in SIZES, M in mats]
     end
     @tags "array" "linalg" "factorization" "chol" "cholfact"
 end
