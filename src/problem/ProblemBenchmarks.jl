@@ -59,7 +59,7 @@ include("Laplacian.jl")
         (:laplace_iter_vec,) => Laplacian.perf_laplace_iter_vec(iter_size)
         (:laplace_iter_sub,) => Laplacian.perf_laplace_iter_sub(iter_size)
     end
-    @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "linalg" "array"
+    @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "array"
 end
 
 ###################################################

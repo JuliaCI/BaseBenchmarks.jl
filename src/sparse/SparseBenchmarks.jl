@@ -109,7 +109,7 @@ end
         [(:ctranspose, size(A)) => ctranspose(A) for A in complex_spmats]
         [(:ctranspose!, size(A)) => ctranspose!(A.', A) for A in complex_spmats]
     end
-    @tags "sparse" "array" "ctranspose" "transpose" "matrix" "linalg" "hermitian" "conjugate"
+    @tags "sparse" "array" "ctranspose" "transpose" "matrix"
 end
 
 end # module

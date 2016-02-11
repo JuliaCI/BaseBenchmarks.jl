@@ -78,7 +78,7 @@ include("subarray.jl")
         [(:lucompletepivCopy!, n) => perf_lucompletepivCopy!(samerand(n, n)) for n in sizes]
         [(:lucompletepivSub!, n) => perf_lucompletepivSub!(samerand(n, n)) for n in sizes]
     end
-    @tags "lucompletepiv" "array" "linalg" "copy" "subarray" "factorization"
+    @tags "lucompletepiv" "array" "subarray"
 end
 
 #################
