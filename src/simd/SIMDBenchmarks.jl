@@ -2,7 +2,7 @@ module SIMDBenchmarks
 
 import ..BaseBenchmarks
 using ..BenchmarkTrackers
-using ..BaseBenchmarks: samerand
+using ..RandUtils
 
 ###########
 # Methods #
@@ -109,24 +109,19 @@ end
 # Benchmarks #
 ##############
 
+const SIZES = (9, 10, 255, 256, 999, 1000)
+const Ts = (Int32, Int64, Float32, Float64)
+
 @track BaseBenchmarks.TRACKER "simd" begin
-    @setup begin
-        lens = (9, 10, 255, 256, 999, 1000)
-        int32_vecs = map(n -> samerand(Int32, n), lens)
-        int64_vecs = map(n -> samerand(Int64, n), lens)
-        float32_vecs = map(n -> samerand(Float32, n), lens)
-        float64_vecs = map(n -> samerand(Float64, n), lens)
-        vectors = (int32_vecs..., int64_vecs..., float32_vecs..., float64_vecs...)
-    end
     @benchmarks begin
-        [(:axpy!, string(eltype(v)), length(v)) => perf_axpy!(first(v), v, copy(v)) for v in vectors]
-        [(:inner, string(eltype(v)), length(v)) => perf_inner(v, v) for v in vectors]
-        [(:sum_reduce, string(eltype(v)), length(v)) => perf_sum_reduce(v) for v in vectors]
-        [(:manual_example!, string(eltype(v)), length(v)) => perf_manual_example!(v, v, v) for v in vectors]
-        [(:two_reductions, string(eltype(v)), length(v)) => perf_two_reductions(v, v, v) for v in vectors]
-        [(:conditional_loop!, string(eltype(v)), length(v)) => perf_conditional_loop!(v, v, v) for v in vectors]
-        [(:local_arrays, string(eltype(v)), length(v)) => perf_local_arrays(v) for v in vectors]
-        [(:loop_fields!, string(T), string(eltype(v)), length(v)) => perf_loop_fields!(T(v)) for v in vectors, T in (MutableFields, ImmutableFields)]
+        [(:axpy!, string(T), n) => perf_axpy!(samerand(T), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
+        [(:inner, string(T), n) => perf_inner(randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
+        [(:sum_reduce, string(T), n) => perf_sum_reduce(randvec(T, n)) for n in SIZES, T in Ts]
+        [(:manual_example!, string(T), n) => perf_manual_example!(randvec(T, n), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
+        [(:two_reductions, string(T), n) => perf_two_reductions(randvec(T, n), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
+        [(:conditional_loop!, string(T), n) => perf_conditional_loop!(randvec(T, n), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
+        [(:local_arrays, string(T), n) => perf_local_arrays(randvec(T, n)) for n in SIZES, T in Ts]
+        [(:loop_fields!, string(T), string(F), n) => perf_loop_fields!(F(randvec(T, n))) for n in SIZES, T in Ts, F in (MutableFields, ImmutableFields)]
     end
     @tags "array" "inbounds" "mul" "axpy!" "inner" "sum" "reduce"
 end
