@@ -1,7 +1,7 @@
 module IOBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 
 #################
 # read (#12364) #
@@ -16,13 +16,9 @@ function perf_read!(io)
     return x
 end
 
-@track BaseBenchmarks.TRACKER "iobuffer read" begin
-    @setup io = IOBuffer(randstring(10^4))
-    @benchmarks begin
-        (:read,) => perf_read!(io)
-        (:readstring,) => BaseBenchmarks.readstring(io)
-    end
-    @tags "io" "buffer" "stream" "read" "string"
-end
+g = addgroup!(ENSEMBLE, "iobuffer read", ["io", "buffer", "stream", "read", "string"])
+
+g["read"] = @benchmarkable perf_read!(IOBuffer(randstring(10^4)))
+g["readstring"] = @benchmarkable readstring(IOBuffer(randstring(10^4)))
 
 end # module

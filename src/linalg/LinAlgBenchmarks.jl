@@ -1,27 +1,27 @@
 module LinAlgBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 using ..RandUtils
 
 const SIZES = (16, 512)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
 const DIVMATS = filter(x -> !(in(x, (Bidiagonal, Tridiagonal, SymTridiagonal))), MATS)
 
-id{T}(::Type{T}) = string(T.name)
-id{M<:Matrix}(::Type{M}) = "Matrix"
-id{V<:Vector}(::Type{V}) = "Vector"
+typename{T}(::Type{T}) = string(T.name)
+typename{M<:Matrix}(::Type{M}) = "Matrix"
+typename{V<:Vector}(::Type{V}) = "Vector"
 
-linalgmat(::Type{Matrix}, n) = randmat(n)
-linalgmat(::Type{Diagonal}, n) = Diagonal(randvec(n))
-linalgmat(::Type{Bidiagonal}, n) = Bidiagonal(randvec(n), randvec(n-1), true)
-linalgmat(::Type{Tridiagonal}, n) = Tridiagonal(randvec(n-1), randvec(n), randvec(n-1))
-linalgmat(::Type{SymTridiagonal}, n) = SymTridiagonal(randvec(n), randvec(n-1))
-linalgmat(::Type{UpperTriangular}, n) = UpperTriangular(randmat(n))
-linalgmat(::Type{LowerTriangular}, n) = LowerTriangular(randmat(n))
+linalgmat(::Type{Matrix}, s) = randmat(s)
+linalgmat(::Type{Diagonal}, s) = Diagonal(randvec(s))
+linalgmat(::Type{Bidiagonal}, s) = Bidiagonal(randvec(s), randvec(s-1), true)
+linalgmat(::Type{Tridiagonal}, s) = Tridiagonal(randvec(s-1), randvec(s), randvec(s-1))
+linalgmat(::Type{SymTridiagonal}, s) = SymTridiagonal(randvec(s), randvec(s-1))
+linalgmat(::Type{UpperTriangular}, s) = UpperTriangular(randmat(s))
+linalgmat(::Type{LowerTriangular}, s) = LowerTriangular(randmat(s))
 
-function linalgmat(::Type{Hermitian}, n)
-    A = randmat(n)
+function linalgmat(::Type{Hermitian}, s)
+    A = randmat(s)
     A = A + im*A
     return Hermitian(A + A')
 end
@@ -30,121 +30,131 @@ end
 # matrix/vector arithmetic #
 ############################
 
-@track BaseBenchmarks.TRACKER  "linalg arithmetic" begin
-    @benchmarks begin
-        [(:+, id(Vector), id(Vector), n) => +(randvec(n), randvec(n)) for n in SIZES]
-        [(:-, id(Vector), id(Vector), n) => -(randvec(n), randvec(n)) for n in SIZES]
-        [(:*, id(M), id(Vector), n) => *(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
-        [(:\, id(M), id(Vector), n) => \(linalgmat(M, n), randvec(n)) for n in SIZES, M in MATS]
-        [(:+, id(M), id(M), n) => +(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:-, id(M), id(M), n) => -(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:*, id(M), id(M), n) => *(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in MATS]
-        [(:/, id(M), id(M), n) => /(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in DIVMATS]
-        [(:\, id(M), id(M), n) => \(linalgmat(M, n), linalgmat(M, n)) for n in SIZES, M in DIVMATS]
+g = addgroup!(ENSEMBLE, "linalg arithmetic", ["array", "linalg", "arithmetic"])
+
+for s in SIZES
+    v = typename(Vector)
+    g["+", v, v, s] = @benchmarkable +(randvec($s), randvec($s))
+    g["-", v, v, s] = @benchmarkable -(randvec($s), randvec($s))
+    for M in MATS
+        m = typename(M)
+        g["*", m, v, s] = @benchmarkable *(linalgmat($M, $s), randvec($s))
+        g["\\", m, v, s] = @benchmarkable \(linalgmat($M, $s), randvec($s))
+        g["+", m, m, s] = @benchmarkable +(linalgmat($M, $s), linalgmat($M, $s))
+        g["-", m, m, s] = @benchmarkable -(linalgmat($M, $s), linalgmat($M, $s))
+        g["*", m, m, s] = @benchmarkable *(linalgmat($M, $s), linalgmat($M, $s))
     end
-    @tags "array" "linalg" "arithmetic"
+    for M in DIVMATS
+        m = typename(M)
+        g["/", m, m, s] = @benchmarkable /(linalgmat($M, $s), linalgmat($M, $s))
+        g["\\", m, m, s] = @benchmarkable \(linalgmat($M, $s), linalgmat($M, $s))
+    end
 end
 
 ##################
 # factorizations #
 ##################
 
-@track BaseBenchmarks.TRACKER "factorization eig" begin
-    @setup mats = (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
-    @benchmarks begin
-        [(:eig, id(M), n) => eig(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:eigfact, id(M), n) => eigfact(linalgmat(M, n)) for n in SIZES, M in mats]
+g = addgroup!(ENSEMBLE, "factorization eig", ["array", "linalg", "factorization", "eig", "eigfact"])
+
+for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
+    m = typename(M)
+    for s in SIZES
+        g["eig", m, s] = @benchmarkable eig(linalgmat($M, $s))
+        g["eigfact", m, s] = @benchmarkable eigfact(linalgmat($M, $s))
     end
-    @tags "array" "linalg" "factorization" "eig" "eigfact"
 end
 
-@track BaseBenchmarks.TRACKER "factorization svd" begin
-    @setup mats = (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
-    @benchmarks begin
-        [(:svd, id(M), n) => svd(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:svdfact, id(M), n) => svdfact(linalgmat(M, n)) for n in SIZES, M in mats]
+g = addgroup!(ENSEMBLE, "factorization svd", ["array", "linalg", "factorization", "svd", "svdfact"])
+
+for M in (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
+    m = typename(M)
+    for s in SIZES
+        g["svd", m, s] = @benchmarkable svd(linalgmat($M, $s))
+        g["svdfact", m, s] = @benchmarkable svdfact(linalgmat($M, $s))
     end
-    @tags "array" "linalg" "factorization" "svd" "svdfact"
 end
 
-@track BaseBenchmarks.TRACKER "factorization lu" begin
-    @setup mats = (Matrix, Tridiagonal)
-    @benchmarks begin
-        [(:lu, id(M), n) => lu(linalgmat(M, n)) for n in SIZES, M in mats]
-        [(:lufact, id(M), n) => lufact(linalgmat(M, n)) for n in SIZES, M in mats]
+g = addgroup!(ENSEMBLE, "factorization lu", ["array", "linalg", "factorization", "lu", "lufact"])
+
+for M in (Matrix, Tridiagonal)
+    m = typename(M)
+    for s in SIZES
+        g["lu", m, s] = @benchmarkable lu(linalgmat($M, $s))
+        g["lufact", m, s] = @benchmarkable lufact(linalgmat($M, $s))
     end
-    @tags "array" "linalg" "factorization" "lu" "lufact"
 end
 
-@track BaseBenchmarks.TRACKER "factorization qr" begin
-    @benchmarks begin
-        [(:qr, id(Matrix), n) => qr(randmat(n)) for n in SIZES]
-        [(:qrfact, id(Matrix), n) => qrfact(randmat(n)) for n in SIZES]
-    end
-    @tags "array" "linalg" "factorization" "qr" "qrfact"
+g = addgroup!(ENSEMBLE, "factorization qr", ["array", "linalg", "factorization", "qr", "qrfact"])
+
+for s in SIZES
+    m = typename(Matrix)
+    g["qr", m, s] = @benchmarkable qr(randmat($s))
+    g["qrfact", m, s] = @benchmarkable qrfact(randmat($s))
 end
 
-@track BaseBenchmarks.TRACKER "factorization schur" begin
-    @benchmarks begin
-        [(:schur, id(Matrix), n) => schur(randmat(n)) for n in SIZES]
-        [(:schurfact, id(Matrix), n) => schurfact(randmat(n)) for n in SIZES]
-    end
-    @tags "array" "linalg" "factorization" "schur" "schurfact"
+g = addgroup!(ENSEMBLE, "factorization schur", ["array", "linalg", "factorization", "schur", "schurfact"])
+
+for s in SIZES
+    m = typename(Matrix)
+    g["schur", m, s] = @benchmarkable schur(randmat($s))
+    g["schurfact", m, s] = @benchmarkable schurfact(randmat($s))
 end
 
-@track BaseBenchmarks.TRACKER "factorization chol" begin
-    @benchmarks begin
-        [(:chol, id(Matrix), n) => chol(randmat(n)'*randmat(n)) for n in SIZES]
-        [(:cholfact, id(Matrix), n) => cholfact(randmat(n)'*randmat(n)) for n in SIZES]
-    end
-    @tags "array" "linalg" "factorization" "chol" "cholfact"
+g = addgroup!(ENSEMBLE, "factorization chol", ["array", "linalg", "factorization", "chol", "cholfact"])
+
+for s in SIZES
+    m = typename(Matrix)
+    arr = randmat(s)'*randmat(s)
+    g["chol", m, s] = @benchmarkable chol(copy($arr))
+    g["cholfact", m, s] = @benchmarkable cholfact(copy($arr))
 end
 
 ########
 # BLAS #
 ########
 
-@track BaseBenchmarks.TRACKER "blas" begin
-    @setup n = 1024
-    @benchmarks begin
-        (:dot, n) => BLAS.dot(n, randvec(n), 1, randvec(n), 1)
-        (:dotu, n) => BLAS.dotu(n, randvec(Complex{Float64}, n), 1, randvec(Complex{Float64}, n), 1)
-        (:dotc, n) => BLAS.dotc(n, randvec(Complex{Float64}, n), 1, randvec(Complex{Float64}, n), 1)
-        (:blascopy!, n) => BLAS.blascopy!(n, randvec(n), 1, randvec(n), 1)
-        (:nrm2, n) => BLAS.nrm2(n, randvec(n), 1)
-        (:asum, n) => BLAS.asum(n, randvec(n), 1)
-        (:axpy!, n) => BLAS.axpy!(samerand(), randvec(n), randvec(n))
-        (:scal!, n) => BLAS.scal!(n, samerand(), randvec(n), 1)
-        (:scal, n) => BLAS.scal(n, samerand(), randvec(n), 1)
-        (:ger!, n) => BLAS.ger!(samerand(), randvec(n), randvec(n), randmat(n))
-        (:syr!, n) => BLAS.syr!('U', 1.0, randvec(n), randmat(n))
-        (:syrk!, n) => BLAS.syrk!('U', 'N', samerand(), randmat(n), samerand(), randmat(n))
-        (:syrk, n) => BLAS.syrk('U', 'N', samerand(), randmat(n))
-        (:her!, n) => BLAS.her!('U', samerand(), randvec(Complex{Float64}, n), randmat(Complex{Float64}, n))
-        (:herk!, n) => BLAS.herk!('U', 'N', samerand(), randmat(Complex{Float64}, n), samerand(), randmat(Complex{Float64}, n))
-        (:herk, n) => BLAS.herk('U', 'N', samerand(), randmat(Complex{Float64}, n))
-        (:gbmv!, n) => BLAS.gbmv!('N', n, 1, 1, samerand(), randmat(n), randvec(n), samerand(), randvec(n))
-        (:gbmv, n) => BLAS.gbmv('N', n, 1, 1, samerand(), randmat(n), randvec(n))
-        (:sbmv!, n) => BLAS.sbmv!('U', n-1, samerand(), randmat(n), randvec(n), samerand(), randvec(n))
-        (:sbmv, n) => BLAS.sbmv('U', n-1, samerand(), randmat(n), randvec(n))
-        (:gemm!, n) => BLAS.gemm!('N', 'N', samerand(), randmat(n), randmat(n), samerand(), randmat(n))
-        (:gemm, n) => BLAS.gemm('N', 'N', samerand(), randmat(n), randmat(n))
-        (:gemv!, n) => BLAS.gemv!('N', samerand(), randmat(n), randvec(n), samerand(), randvec(n))
-        (:gemv, n) => BLAS.gemv('N', samerand(), randmat(n), randvec(n))
-        (:symm!, n) => BLAS.symm!('L', 'U', samerand(), randmat(n), randmat(n), samerand(), randmat(n))
-        (:symm, n) => BLAS.symm('L', 'U', samerand(), randmat(n), randmat(n))
-        (:symv!, n) => BLAS.symv!('U', samerand(), randmat(n), randvec(n), samerand(), randvec(n))
-        (:symv, n) => BLAS.symv('U', samerand(), randmat(n), randvec(n))
-        (:trmm!, n) => BLAS.trmm!('L', 'U', 'N', 'N', samerand(), randmat(n), randmat(n))
-        (:trmm, n) => BLAS.trmm('L', 'U', 'N', 'N', samerand(), randmat(n), randmat(n))
-        (:trsm!, n) => BLAS.trsm!('L', 'U', 'N', 'N', samerand(), randmat(n), randmat(n))
-        (:trsm, n) => BLAS.trsm('L', 'U', 'N', 'N', samerand(), randmat(n), randmat(n))
-        (:trmv!, n) => BLAS.trmv!('L', 'N', 'U', randmat(n), randvec(n))
-        (:trmv, n) => BLAS.trmv('L', 'N', 'U', randmat(n), randvec(n))
-        (:trsv!, n) => BLAS.trsv!('U', 'N', 'N', randmat(n), randvec(n))
-        (:trsv, n) => BLAS.trsv('U', 'N', 'N', randmat(n), randvec(n))
-    end
-    @tags "array" "linalg" "blas"
-end
+g = addgroup!(ENSEMBLE, "blas", ["array", "linalg"])
+
+s = 1024
+C = Complex{Float64}
+
+g["dot", s]       = @benchmarkable BLAS.dot($s, randvec($s), 1, randvec($s), 1)
+g["dotu", s]      = @benchmarkable BLAS.dotu($s, randvec($C, $s), 1, randvec($C, $s), 1)
+g["dotc", s]      = @benchmarkable BLAS.dotc($s, randvec($C, $s), 1, randvec($C, $s), 1)
+g["blascopy!", s] = @benchmarkable BLAS.blascopy!($s, randvec($s), 1, randvec($s), 1)
+g["nrm2", s]      = @benchmarkable BLAS.nrm2($s, randvec($s), 1)
+g["asum", s]      = @benchmarkable BLAS.asum($s, randvec($s), 1)
+g["axpy!", s]     = @benchmarkable BLAS.axpy!(samerand(), randvec($s), randvec($s))
+g["scal!", s]     = @benchmarkable BLAS.scal!($s, samerand(), randvec($s), 1)
+g["scal", s]      = @benchmarkable BLAS.scal($s, samerand(), randvec($s), 1)
+g["ger!", s]      = @benchmarkable BLAS.ger!(samerand(), randvec($s), randvec($s), randmat($s))
+g["syr!", s]      = @benchmarkable BLAS.syr!('U', 1.0, randvec($s), randmat($s))
+g["syrk!", s]     = @benchmarkable BLAS.syrk!('U', 'N', samerand(), randmat($s), samerand(), randmat($s))
+g["syrk", s]      = @benchmarkable BLAS.syrk('U', 'N', samerand(), randmat($s))
+g["her!", s]      = @benchmarkable BLAS.her!('U', samerand(), randvec($C, $s), randmat($C, $s))
+g["herk!", s]     = @benchmarkable BLAS.herk!('U', 'N', samerand(), randmat($C, $s), samerand(), randmat($C, $s))
+g["herk", s]      = @benchmarkable BLAS.herk('U', 'N', samerand(), randmat($C, $s))
+g["gbmv!", s]     = @benchmarkable BLAS.gbmv!('N', $s, 1, 1, samerand(), randmat($s), randvec($s), samerand(), randvec($s))
+g["gbmv", s]      = @benchmarkable BLAS.gbmv('N', $s, 1, 1, samerand(), randmat($s), randvec($s))
+g["sbmv!", s]     = @benchmarkable BLAS.sbmv!('U', $s-1, samerand(), randmat($s), randvec($s), samerand(), randvec($s))
+g["sbmv", s]      = @benchmarkable BLAS.sbmv('U', $s-1, samerand(), randmat($s), randvec($s))
+g["gemm!", s]     = @benchmarkable BLAS.gemm!('N', 'N', samerand(), randmat($s), randmat($s), samerand(), randmat($s))
+g["gemm", s]      = @benchmarkable BLAS.gemm('N', 'N', samerand(), randmat($s), randmat($s))
+g["gemv!", s]     = @benchmarkable BLAS.gemv!('N', samerand(), randmat($s), randvec($s), samerand(), randvec($s))
+g["gemv", s]      = @benchmarkable BLAS.gemv('N', samerand(), randmat($s), randvec($s))
+g["symm!", s]     = @benchmarkable BLAS.symm!('L', 'U', samerand(), randmat($s), randmat($s), samerand(), randmat($s))
+g["symm", s]      = @benchmarkable BLAS.symm('L', 'U', samerand(), randmat($s), randmat($s))
+g["symv!", s]     = @benchmarkable BLAS.symv!('U', samerand(), randmat($s), randvec($s), samerand(), randvec($s))
+g["symv", s]      = @benchmarkable BLAS.symv('U', samerand(), randmat($s), randvec($s))
+g["trmm!", s]     = @benchmarkable BLAS.trmm!('L', 'U', 'N', 'N', samerand(), randmat($s), randmat($s))
+g["trmm", s]      = @benchmarkable BLAS.trmm('L', 'U', 'N', 'N', samerand(), randmat($s), randmat($s))
+g["trsm!", s]     = @benchmarkable BLAS.trsm!('L', 'U', 'N', 'N', samerand(), randmat($s), randmat($s))
+g["trsm", s]      = @benchmarkable BLAS.trsm('L', 'U', 'N', 'N', samerand(), randmat($s), randmat($s))
+g["trmv!", s]     = @benchmarkable BLAS.trmv!('L', 'N', 'U', randmat($s), randvec($s))
+g["trmv", s]      = @benchmarkable BLAS.trmv('L', 'N', 'U', randmat($s), randvec($s))
+g["trsv!", s]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', randmat($s), randvec($s))
+g["trsv", s]      = @benchmarkable BLAS.trsv('U', 'N', 'N', randmat($s), randvec($s))
+
 
 end # module

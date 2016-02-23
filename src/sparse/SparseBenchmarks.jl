@@ -1,7 +1,7 @@
 module SparseBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 using ..RandUtils
 
 samesprand(args...) = sprand(MersenneTwister(1), args...)
@@ -11,105 +11,94 @@ samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
 # indexing #
 ############
 
-# Note that some of the code related to the "sparse logical" tests is commented
-# out because it requires resolution of JuliaLang/julia#14717.
+# Note that some of the "sparse logical" tests are commented
+# out because they requires resolution of JuliaLang/julia#14717.
 
 # vector #
 #--------#
 
-@track BaseBenchmarks.TRACKER "sparse vector indexing" begin
-    @setup begin
-        lens = (10^3, 10^4, 10^5)
-        if VERSION < v"0.5.0-dev+763"
-            vectors = map(n -> samesprand(n, 1, inv(sqrt(n))), lens)
-            splogvecs = map(n -> samesprandbool(n, 1, 1e-5), lens)
-        else
-            vectors = map(n -> samesprand(n, inv(sqrt(n))), lens)
-            splogvecs = map(n -> samesprandbool(n, 1e-5), lens)
-        end
-        iter = zip(lens, vectors)
-        splog_iter = zip(lens, vectors, splogvecs)
-    end
-    @benchmarks begin
-        [("array", n, nnz(V)) => getindex(V, samerand(1:n, n)) for (n, V) in iter]
-        [("integer", n, nnz(V)) => getindex(V, samerand(1:n)) for (n, V) in iter]
-        [("range", n, nnz(V)) => getindex(V, 1:n) for (n, V) in iter]
-        [("dense logical", n, nnz(V)) => getindex(V, samerand(Bool, n)) for (n, V) in iter]
-        # [("sparse logical", n, nnz(V), nnz(L)) => getindex(V, L) for (n, V, L) in splogiter]
-    end
-    @tags "sparse" "indexing" "array" "getindex" "vector"
+sizes = (10^3, 10^4, 10^5)
+
+if VERSION < v"0.5.0-dev+763"
+    spvecs = map(s -> samesprand(s, 1, inv(sqrt(s))), sizes)
+    splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
+else
+    spvecs = map(s -> samesprand(s, inv(sqrt(s))), sizes)
+    splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
+end
+
+g = addgroup!(ENSEMBLE, "sparse vector indexing", ["sparse", "indexing", "array",
+                                                   "getindex", "vector"])
+
+for (s, v, l) in zip(sizes, spvecs, splogvecs)
+    g["array", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(1:s, s)))
+    g["integer", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(1:s)))
+    g["range", s, nnz(v)] = @benchmarkable getindex($v, $(1:s))
+    g["dense logical", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(Bool, s)))
+    # g["sparse logical", s, nnz(v), nnz(l)] = @benchmarkable getindex($v, $l)
 end
 
 # matrix #
 #--------#
 
-let
-    lens = (10, 10^2, 10^3)
-    inds = map(n -> samerand(1:n), lens)
-    matrices = map(n -> samesprand(n, n, inv(sqrt(n))), lens)
-    vectors = map(n -> samerand(1:n, n), lens)
-    logvecs = map(n -> samerand(Bool, n), lens)
-    # splogvecs = map(n -> samesprandbool(n, 1e-5), lens)
-    splogmats = map(n -> samesprandbool(n, n, 1e-5), lens)
+sizes = (10, 10^2, 10^3)
+inds = map(s -> samerand(1:s), sizes)
+matrices = map(s -> samesprand(s, s, inv(sqrt(s))), sizes)
+vectors = map(s -> samerand(1:s, s), sizes)
+logvecs = map(s -> samerand(Bool, s), sizes)
+splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
+splogmats = map(s -> samesprandbool(s, s, 1e-5), sizes)
 
-    iter = zip(lens, matrices, inds)
-    arr_iter = zip(lens, matrices, vectors, inds)
-    log_iter = zip(lens, matrices, logvecs, inds)
-    # splogvec_iter = zip(lens, matrices, splogvecs, inds)
-    splogmat_iter = zip(lens, matrices, splogmats, inds)
+g = addgroup!(ENSEMBLE, "sparse matrix row indexing", ["sparse", "indexing", "array",
+                                                       "getindex", "matrix", "row"])
 
-    @track BaseBenchmarks.TRACKER "sparse matrix row indexing" begin
-        @benchmarks begin
-            [("array", n, nnz(A), c) => getindex(A, V, c) for (n, A, V, c) in arr_iter]
-            [("range", n, nnz(A), c) => getindex(A, 1:n, c) for (n, A, c) in iter]
-            [("dense logical", n, nnz(A), c) => getindex(A, L, c) for (n, A, L, c) in log_iter]
-            # [("sparse logical", n, nnz(A), nnz(L), c) => getindex(A, L, c) for (n, A, L, c) in splogvec_iter]
-        end
-        @tags "sparse" "indexing" "array" "getindex" "matrix" "row"
-    end
+for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
+    g["array", s, nnz(m), c] = @benchmarkable getindex($m, $v, $c)
+    g["range", s, nnz(m), c] = @benchmarkable getindex($m, $(1:s), $c)
+    g["dense logical", s, nnz(m), c] = @benchmarkable getindex($m, $l, $c)
+    # g["sparse logical", s, nnz(m), nnz(sl), c] = @benchmarkable getindex($m, $sl, $c)
+end
 
-    @track BaseBenchmarks.TRACKER  "sparse matrix column indexing" begin
-        @benchmarks begin
-            [("array", n, nnz(A), r) => getindex(A, r, V) for (n, A, V, r) in arr_iter]
-            [("range", n, nnz(A), r) => getindex(A, r, 1:n) for (n, A, r) in iter]
-            [("dense logical", n, nnz(A), r) => getindex(A, r, L) for (n, A, L, r) in log_iter]
-            # [("sparse logical", n, nnz(A), nnz(L), r) => getindex(A, r, L) for (n, A, L, r) in splogvec_iter]
-        end
-        @tags "sparse" "indexing" "array" "getindex" "matrix" "column"
-    end
+g = addgroup!(ENSEMBLE, "sparse matrix column indexing", ["sparse", "indexing", "array",
+                                                          "getindex", "matrix", "column"])
 
-    @track BaseBenchmarks.TRACKER "sparse matrix row + column indexing" begin
-        @benchmarks  begin
-            [("array", n, nnz(A)) => getindex(A, V, V) for (n, A, V, r) in arr_iter]
-            [("integer", n, nnz(A), r) => getindex(A, r, r) for (n, A, r) in iter]
-            [("range", n, nnz(A)) => getindex(A, 1:n, 1:n) for (n, A, r) in iter]
-            [("dense logical", n, nnz(A)) => getindex(A, L, L) for (n, A, L, r) in log_iter]
-            [("sparse logical", n, nnz(A), nnz(L)) => getindex(A, L) for (n, A, L, r) in splogmat_iter]
-        end
-        @tags "sparse" "indexing" "array" "getindex" "matrix" "row" "column"
-    end
+for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
+    g["array", s, nnz(m), r] = @benchmarkable getindex($m, $r, $v)
+    g["range", s, nnz(m), r] = @benchmarkable getindex($m, $r, $(1:s))
+    g["dense logical", s, nnz(m), r] = @benchmarkable getindex($m, $r, $l)
+    # g["sparse logical", s, nnz(m), nnz(sl), r] = @benchmarkable getindex($m, $r, $sl)
+end
+
+g = addgroup!(ENSEMBLE, "sparse matrix row + column indexing", ["sparse", "indexing", "array",
+                                                                "getindex", "matrix", "row",
+                                                                "column"])
+
+for (s, m, v, l, sl, i) in zip(sizes, matrices, vectors, logvecs, splogmats, inds)
+    g["array", s, nnz(m)] = @benchmarkable getindex($m, $v, $v)
+    g["integer", s, nnz(m), i] = @benchmarkable getindex($m, $i, $i)
+    g["range", s, nnz(m)] = @benchmarkable getindex($m, $(1:s), $(1:s))
+    g["dense logical", s, nnz(m)] = @benchmarkable getindex($m, $l, $l)
+    g["sparse logical", s, nnz(m), nnz(sl)] = @benchmarkable getindex($m, $sl)
 end
 
 ######################
 # transpose (#14631) #
 ######################
 
-@track BaseBenchmarks.TRACKER "sparse matrix transpose" begin
-    @setup begin
-        small_sqr = samesprand(600, 600, 0.01)
-        small_rct = samesprand(600, 400, 0.01)
-        large_sqr = samesprand(20000, 20000, 0.01)
-        large_rct = samesprand(20000, 10000, 0.01)
-        spmats = (small_sqr, small_rct, large_sqr, large_rct)
-        complex_spmats = map(A -> A + A*im, spmats)
-    end
-    @benchmarks begin
-        [(:transpose, size(A)) => transpose(A) for A in spmats]
-        [(:transpose!, size(A)) => transpose!(A.', A) for A in spmats]
-        [(:ctranspose, size(A)) => ctranspose(A) for A in complex_spmats]
-        [(:ctranspose!, size(A)) => ctranspose!(A.', A) for A in complex_spmats]
-    end
-    @tags "sparse" "array" "ctranspose" "transpose" "matrix"
+small_sqr = samesprand(600, 600, 0.01)
+small_rct = samesprand(600, 400, 0.01)
+large_sqr = samesprand(20000, 20000, 0.01)
+large_rct = samesprand(20000, 10000, 0.01)
+
+g = addgroup!(ENSEMBLE, "sparse matrix transpose", ["sparse", "array", "ctranspose", "transpose", "matrix"])
+
+for m in (small_sqr, small_rct, large_sqr, large_rct)
+    cm = m + m*im
+    s = size(m)
+    g["transpose", s] = @benchmarkable transpose($m)
+    g["transpose!", s] = @benchmarkable transpose!($(m.'), $m)
+    g["ctranspose", s] = @benchmarkable ctranspose($cm)
+    g["ctranspose!", s] = @benchmarkable ctranspose!($(cm.'), $cm)
 end
 
 end # module

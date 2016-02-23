@@ -65,7 +65,7 @@ perf_micro_quicksort(n) = quicksort!(rand(n), 1, n)
 # πsum #
 ########
 
-function perf_micro_πsum()
+function perf_micro_pisum()
     sum = 0.0
     for j = 1:500
         sum = 0.0

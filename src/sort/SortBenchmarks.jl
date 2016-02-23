@@ -1,15 +1,15 @@
 module SortBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 using ..RandUtils
 
 const LIST_SIZE = 50000
 const LISTS = (
-    (:ascending, collect(1:LIST_SIZE)),
-    (:descending, collect(LIST_SIZE:-1:1)),
-    (:ones, ones(LIST_SIZE)),
-    (:random, samerand(LIST_SIZE))
+    ("ascending", collect(1:LIST_SIZE)),
+    ("descending", collect(LIST_SIZE:-1:1)),
+    ("ones", ones(LIST_SIZE)),
+    ("random", samerand(LIST_SIZE))
 )
 
 #####################################
@@ -17,29 +17,18 @@ const LISTS = (
 #####################################
 
 for (tag, T) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertionsort", InsertionSort))
-
-    # sort/sort! #
-    #------------#
-    @track BaseBenchmarks.TRACKER "sort $tag" begin
-        @benchmarks begin
-            [(:sort, tag, kind) => sort(list; alg = T) for (kind, list) in LISTS]
-            [(:sort_rev, tag, kind) => sort(list; alg = T, rev = true) for (kind, list) in LISTS]
-            [(:sort!, tag, kind) => sort!(copy(list); alg = T) for (kind, list) in LISTS]
-            [(:sort!_rev, tag, kind) => sort!(copy(list); alg = T, rev = true) for (kind, list) in LISTS]
-        end
-        @tags "sort" "sort!" tag
-    end
-
-    # sortperm/sortperm! #
-    #--------------------#
-    @track BaseBenchmarks.TRACKER "sort sortperm $tag" begin
-        @benchmarks begin
-            [(:sortperm, tag, kind) => sort(list; alg = T) for (kind, list) in LISTS]
-            [(:sortperm_rev, tag, kind) => sort(list; alg = T, rev = true) for (kind, list) in LISTS]
-            [(:sortperm!, tag, kind) => sort!(copy(list); alg = T) for (kind, list) in LISTS]
-            [(:sortperm!_rev, tag, kind) => sort!(copy(list); alg = T, rev = true) for (kind, list) in LISTS]
-        end
-        @tags "sort" "sort!" "sortperm" "sortperm!" tag
+    sortgroup = addgroup!(ENSEMBLE, "sort $tag", ["sort", "sort!", tag])
+    sortpermgroup = addgroup!(ENSEMBLE, "sort sortperm $tag", ["sort", "sort!", "sortperm", "sortperm!", tag])
+    for (kind, list) in LISTS
+        ix = collect(1:length(list))
+        sortgroup["sort", tag, kind] = @benchmarkable sort($list; alg = $T)
+        sortgroup["sort reverse", tag, kind] = @benchmarkable sort($list; alg = $T, rev = true)
+        sortgroup["sort!", tag, kind] = @benchmarkable sort!(copy($list); alg = $T)
+        sortgroup["sort! reverse", tag, kind] = @benchmarkable sort!(copy($list); alg = $T, rev = true)
+        sortpermgroup["sortperm", tag, kind] = @benchmarkable sortperm($list; alg = $T)
+        sortpermgroup["sortperm reverse", tag, kind] = @benchmarkable sortperm($list; alg = $T, rev = true)
+        sortpermgroup["sortperm!", tag, kind] = @benchmarkable sortperm!(copy($ix), $list; alg = $T)
+        sortpermgroup["sortperm! reverse", tag, kind] = @benchmarkable sortperm!(copy($ix), $list; alg = $T, rev = true)
     end
 end
 
@@ -47,12 +36,11 @@ end
 # issorted #
 ############
 
-@track BaseBenchmarks.TRACKER "sort issorted" begin
-    @benchmarks begin
-        [(:issorted, kind) => issorted(list) for (kind, list) in LISTS]
-        [(:issorted_rev, kind) => issorted(list; rev = true) for (kind, list) in LISTS]
-    end
-    @tags "sort"
+g = addgroup!(ENSEMBLE, "sort issorted", ["sort", "issorted"])
+
+for (kind, list) in LISTS
+    g["issorted", kind] = @benchmarkable issorted($list)
+    g["issorted reverse", kind] = @benchmarkable issorted($list; rev = true)
 end
 
 end # module

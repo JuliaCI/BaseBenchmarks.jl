@@ -164,7 +164,7 @@ function perf_lattice_boltzmann(n)
     deltaU = 1e-7
     numactivenodes = sum(1-BOUND)
 
-    @time while (ts < 4000  &&  (1e-10 < abs((prevavu-avu)/avu)))  ||  ts < 100
+    while (ts < 4000  &&  (1e-10 < abs((prevavu-avu)/avu)))  ||  ts < 100
         tic()
         # Propagate -- nearest and next-nearest neighbors
         for i = 2:19

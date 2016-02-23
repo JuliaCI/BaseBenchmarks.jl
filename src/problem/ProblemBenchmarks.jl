@@ -8,8 +8,8 @@ module ProblemBenchmarks
 # where much of the code was naively translated to Julia from other languages,
 # and thus is written non-idiomatically.
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 using ..RandUtils
 
 const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
@@ -20,12 +20,9 @@ const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "
 
 include("IMDBGraphs.jl")
 
-@track BaseBenchmarks.TRACKER "problem imdb graphs" begin
-    @benchmarks begin
-        (:imdb_centrality,) => IMDBGraphs.perf_imdb_centrality(50)
-    end
-    @tags "problem" "example" "kernel" "graph" "centrality" "imdb"
-end
+g = addgroup!(ENSEMBLE, "problem imdb graphs", ["problem", "example", "kernel", "graph", "centrality", "imdb"])
+
+g["imdb_centrality"] = @benchmarkable IMDBGraphs.perf_imdb_centrality(50)
 
 ###############
 # Monte Carlo #
@@ -33,14 +30,11 @@ end
 
 include("MonteCarlo.jl")
 
-@track BaseBenchmarks.TRACKER "problem monte carlo" begin
-    @setup n = 10^4
-    @benchmarks begin
-        (:euro_option_devec,) => MonteCarlo.perf_euro_option_devec(n)
-        (:euro_option_vec,) => MonteCarlo.perf_euro_option_vec(n)
-    end
-    @tags "problem" "example" "kernel" "monte carlo" "finance" "vectorization" "random" "inplace"
-end
+g = addgroup!(ENSEMBLE, "problem monte carlo", ["problem", "example", "kernel", "monte carlo",
+                                                "finance", "vectorization", "random", "inplace"])
+
+g["euro_option_devec"] = @benchmarkable MonteCarlo.perf_euro_option_devec(10^4)
+g["euro_option_vec"] = @benchmarkable MonteCarlo.perf_euro_option_vec(10^4)
 
 ###################################
 # Laplacian (Issues #1168, #4707) #
@@ -48,19 +42,13 @@ end
 
 include("Laplacian.jl")
 
-@track BaseBenchmarks.TRACKER "problem laplacian" begin
-    @setup begin
-        sparse_size = 8^5
-        iter_size = 8^2
-    end
-    @benchmarks begin
-        (:laplace_sparse_matvec,) => Laplacian.perf_laplace_sparse_matvec(sparse_size)
-        (:laplace_iter_devec,) => Laplacian.perf_laplace_iter_devec(iter_size)
-        (:laplace_iter_vec,) => Laplacian.perf_laplace_iter_vec(iter_size)
-        (:laplace_iter_sub,) => Laplacian.perf_laplace_iter_sub(iter_size)
-    end
-    @tags "problem" "example" "kernel" "laplacian" "iterative" "sparse" "vectorization" "subarray" "array"
-end
+g = addgroup!(ENSEMBLE, "problem laplacian", ["problem", "example", "kernel", "laplacian", "iterative",
+                                              "sparse", "vectorization", "subarray", "array"])
+
+g["laplace_sparse_matvec"] = @benchmarkable Laplacian.perf_laplace_sparse_matvec(8^5)
+g["laplace_iter_devec"] = @benchmarkable Laplacian.perf_laplace_iter_devec(8^2)
+g["laplace_iter_vec"] = @benchmarkable Laplacian.perf_laplace_iter_vec(8^2)
+g["laplace_iter_sub"] = @benchmarkable Laplacian.perf_laplace_iter_sub(8^2)
 
 ###################################################
 # Grigoriadis Khachiyan Matrix Games (Issue #950) #
@@ -68,12 +56,10 @@ end
 
 include("GrigoriadisKhachiyan.jl")
 
-@track BaseBenchmarks.TRACKER "problem grigoriadis khachiyan" begin
-    @benchmarks begin
-        (:grigoriadis_khachiyan,) => GrigoriadisKhachiyan.perf_gk(350, [0.1])
-    end
-    @tags "problem" "example" "kernel" "grigoriadis" "khachiyan" "game"
-end
+g = addgroup!(ENSEMBLE, "problem grigoriadis khachiyan", ["problem", "example", "kernel",
+                                                          "grigoriadis", "khachiyan", "game"])
+
+g["grigoriadis_khachiyan"] = @benchmarkable GrigoriadisKhachiyan.perf_gk(350, [0.1])
 
 ####################################
 # Go Game Simulation (Issue #1169) #
@@ -81,12 +67,9 @@ end
 
 include("GoGame.jl")
 
-@track BaseBenchmarks.TRACKER "problem go game" begin
-    @benchmarks begin
-        (:go_game,) => GoGame.perf_go_game(10)
-    end
-    @tags "problem" "example" "kernel" "go" "game"
-end
+g = addgroup!(ENSEMBLE, "problem go game", ["problem", "example", "kernel", "go", "game"])
+
+g["grigoriadis_khachiyan"] = @benchmarkable GoGame.perf_go_game(10)
 
 ################
 # JSON Parsing #
@@ -94,16 +77,11 @@ end
 
 include("JSONParse.jl")
 
-@track BaseBenchmarks.TRACKER "problem json parse" begin
-    @setup begin
-        json_path = joinpath(PROBLEM_DATA_DIR, "test.json")
-        json_str = readall(json_path)
-    end
-    @benchmarks begin
-        (:parse_json,) => JSONParse.perf_parse_json(json_str)
-    end
-    @tags "problem" "example" "kernel" "json" "parse" "closure"
-end
+g = addgroup!(ENSEMBLE, "problem json parse", ["problem", "example", "kernel", "json", "parse", "closure"])
+
+jstr = readstring(joinpath(PROBLEM_DATA_DIR, "test.json"))
+
+g["parse_json"] = @benchmarkable JSONParse.perf_parse_json($(jstr))
 
 ############################
 # Raytracing (Issue #3811) #
@@ -111,12 +89,9 @@ end
 
 include("Raytracer.jl")
 
-@track BaseBenchmarks.TRACKER "problem raytrace" begin
-    @benchmarks begin
-        (:raytrace,) => Raytracer.perf_raytrace(5, 256, 4)
-    end
-    @tags "problem" "example" "kernel" "raytrace"
-end
+g = addgroup!(ENSEMBLE, "problem raytrace", ["problem", "example", "kernel", "raytrace"])
+
+g["raytrace"] = @benchmarkable Raytracer.perf_raytrace(5, 256, 4)
 
 ############################################
 # Correlated Asset Simulation (Issue #445) #
@@ -124,12 +99,9 @@ end
 
 include("StockCorr.jl")
 
-@track BaseBenchmarks.TRACKER "problem stockcorr" begin
-    @benchmarks begin
-        (:stockcorr,) => StockCorr.perf_stockcorr()
-    end
-    @tags "problem" "example" "kernel" "finance" "stockcorr"
-end
+g = addgroup!(ENSEMBLE, "problem stockcorr", ["problem", "example", "kernel", "finance", "stockcorr"])
+
+g["stockcorr"] = @benchmarkable StockCorr.perf_stockcorr()
 
 #########################
 # Simplex (Issue #3142) #
@@ -137,12 +109,9 @@ end
 
 include("Simplex.jl")
 
-@track BaseBenchmarks.TRACKER "problem simplex" begin
-    @benchmarks begin
-        (:simplex,) => Simplex.perf_simplex()
-    end
-    @tags "problem" "example" "kernel" "simplex"
-end
+g = addgroup!(ENSEMBLE, "problem simplex", ["problem", "example", "kernel", "simplex"])
+
+g["simplex"] = @benchmarkable Simplex.perf_simplex()
 
 ####################################################
 # Ziggurat Gaussian Number Generator (Issue #1211) #
@@ -150,12 +119,9 @@ end
 
 include("Ziggurat.jl")
 
-@track BaseBenchmarks.TRACKER "problem ziggurat" begin
-    @benchmarks begin
-        (:ziggurat,) => Ziggurat.perf_ziggurat(10^6)
-    end
-    @tags "problem" "example" "kernel" "ziggurat"
-end
+g = addgroup!(ENSEMBLE, "problem ziggurat", ["problem", "example", "kernel", "ziggurat"])
+
+g["ziggurat"] = @benchmarkable Ziggurat.perf_ziggurat(10^6)
 
 ######################
 # Seismic Simulation #
@@ -163,12 +129,10 @@ end
 
 include("SeismicSimulation.jl")
 
-@track BaseBenchmarks.TRACKER "problem seismic simulation" begin
-    @setup Ts = (Float32, Float64)
-    @benchmarks begin
-        [(:seismic, string(T)) => SeismicSimulation.perf_seismic_sim(T) for T in Ts]
-    end
-    @tags "problem" "example" "kernel" "seismic" "simd"
+g = addgroup!(ENSEMBLE, "problem seismic simulation", ["problem", "example", "kernel", "seismic", "simd"])
+
+for T in (Float32, Float64)
+    g["seismic", string(T)] = @benchmarkable SeismicSimulation.perf_seismic_sim($T)
 end
 
 ############################
@@ -177,12 +141,9 @@ end
 
 include("SparseFEM.jl")
 
-@track BaseBenchmarks.TRACKER "problem sparse fem" begin
-    @benchmarks begin
-        (:sparse_fem,) => SparseFEM.perf_sparse_fem(256)
-    end
-    @tags "problem" "example" "kernel" "sparse" "fem"
-end
+g = addgroup!(ENSEMBLE, "problem sparse fem", ["problem", "example", "kernel", "sparse", "fem"])
+
+g["sparse_fem"] = @benchmarkable SparseFEM.perf_sparse_fem(256)
 
 ###############
 # Spell Check #
@@ -190,12 +151,9 @@ end
 
 include("SpellCheck.jl")
 
-@track BaseBenchmarks.TRACKER "problem spellcheck" begin
-    @benchmarks begin
-        (:spellcheck,) => SpellCheck.perf_spellcheck(SpellCheck.TEST_DATA)
-    end
-    @tags "problem" "example" "kernel" "spell" "check" "spellcheck" "string"
-end
+g = addgroup!(ENSEMBLE, "problem spellcheck", ["problem", "example", "kernel", "spell",
+                                               "check", "spellcheck", "string"])
 
+g["spellcheck"] = @benchmarkable SpellCheck.perf_spellcheck()
 
 end # module

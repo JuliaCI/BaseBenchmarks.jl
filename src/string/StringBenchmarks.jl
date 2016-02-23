@@ -1,19 +1,17 @@
 module StringBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 using ..RandUtils
 
 ####################
 # replace (#12224) #
 ####################
 
-@track BaseBenchmarks.TRACKER "string replace" begin
-    @setup str = join(samerand('a':'d', 10^4))
-    @benchmarks begin
-        (:replace,) => replace(str, "a", "b")
-    end
-    @tags "string" "replace"
-end
+str = join(samerand('a':'d', 10^4))
+
+g = addgroup!(ENSEMBLE, "string replace", ["string", "replace"])
+
+g["replace"] = @benchmarkable replace($str, "a", "b")
 
 end # module

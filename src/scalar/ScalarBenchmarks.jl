@@ -1,7 +1,7 @@
 module ScalarBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 
 const INTS = (UInt, Int, BigInt)
 const FLOATS = (Float32, Float64, BigFloat)
@@ -13,19 +13,25 @@ const NUMS = (REALS..., COMPS...)
 # predicates #
 ##############
 
-@track BaseBenchmarks.TRACKER "scalar predicate" begin
-    @benchmarks begin
-        [(:isequal, string(T)) => isequal(one(T), one(T)) for T in NUMS]
-        [(:isless, string(T)) => isequal(one(T), one(T)) for T in NUMS]
-        [(:isinteger, string(T)) => isinteger(one(T)) for T in NUMS]
-        [(:isinf, string(T)) => isinf(one(T)) for T in NUMS]
-        [(:isfinite, string(T)) => isfinite(one(T)) for T in NUMS]
-        [(:isnan, string(T)) => isnan(one(T)) for T in NUMS]
-        [(:iseven, string(T)) => iseven(one(T)) for T in INTS]
-        [(:isodd, string(T)) => isodd(one(T)) for T in INTS]
-    end
-    @constraints disablegc=>false
-    @tags "scalar" "predicate" "isinteger" "isinf" "isnan" "iseven" "isodd"
+g = addgroup!(ENSEMBLE, "scalar predicate",  ["scalar", "predicate", "isinteger", "isinf",
+                                              "isnan", "iseven", "isodd"])
+
+for T in NUMS
+    x = one(T)
+    tstr = string(T)
+    g["isequal", tstr]   = @benchmarkable isequal($x, $x)
+    g["isless", tstr]    = @benchmarkable isequal($x, $x)
+    g["isinteger", tstr] = @benchmarkable isinteger($x)
+    g["isinf", tstr]     = @benchmarkable isinf($x)
+    g["isfinite", tstr]  = @benchmarkable isfinite($x)
+    g["isnan", tstr]     = @benchmarkable isnan($x)
+end
+
+for T in INTS
+    x = one(T)
+    tstr = string(T)
+    g["iseven", tstr] = @benchmarkable iseven($x)
+    g["isodd", tstr] = @benchmarkable isodd($x)
 end
 
 ##############
@@ -37,19 +43,19 @@ perf_fastmath_div(a, b) = @fastmath a / b
 perf_fastmath_add(a, b) = @fastmath a + b
 perf_fastmath_sub(a, b) = @fastmath a - b
 
-@track BaseBenchmarks.TRACKER "scalar arithmetic" begin
-    @benchmarks begin
-        [(:scalar_add, string(Ti), string(Tj)) => +(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_sub, string(Ti), string(Tj)) => -(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_mul, string(Ti), string(Tj)) => *(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_div, string(Ti), string(Tj)) => /(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_fastmath_add, string(Ti), string(Tj)) => perf_fastmath_add(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_fastmath_sub, string(Ti), string(Tj)) => perf_fastmath_sub(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_fastmath_mul, string(Ti), string(Tj)) => perf_fastmath_mul(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-        [(:scalar_fastmath_div, string(Ti), string(Tj)) => perf_fastmath_div(one(Ti), one(Tj)) for Ti in NUMS, Tj in NUMS]
-    end
-    @constraints time_limit=>1 disablegc=>false
-    @tags "scalar" "arithmetic" "fastmath"
+g = addgroup!(ENSEMBLE, "scalar arithmetic",  ["scalar", "arithmetic", "fastmath"])
+
+for Ti in NUMS, Tj in NUMS
+    xi, xj = one(Ti), one(Tj)
+    tistr, tjstr = string(Ti), string(Tj)
+    g["scalar_add", tistr, tjstr] = @benchmarkable +($xi, $xj)
+    g["scalar_sub", tistr, tjstr] = @benchmarkable -($xi, $xj)
+    g["scalar_mul", tistr, tjstr] = @benchmarkable *($xi, $xj)
+    g["scalar_div", tistr, tjstr] = @benchmarkable /($xi, $xj)
+    g["scalar_fastmath_add", tistr, tjstr] = @benchmarkable perf_fastmath_add($xi, $xj)
+    g["scalar_fastmath_sub", tistr, tjstr] = @benchmarkable perf_fastmath_sub($xi, $xj)
+    g["scalar_fastmath_mul", tistr, tjstr] = @benchmarkable perf_fastmath_mul($xi, $xj)
+    g["scalar_fastmath_div", tistr, tjstr] = @benchmarkable perf_fastmath_div($xi, $xj)
 end
 
 end # module

@@ -1,7 +1,7 @@
 module SIMDBenchmarks
 
-import ..BaseBenchmarks
-using ..BenchmarkTrackers
+using ..BaseBenchmarks
+using ..BenchmarkTools
 using ..RandUtils
 
 ###########
@@ -109,21 +109,20 @@ end
 # Benchmarks #
 ##############
 
-const SIZES = (9, 10, 255, 256, 999, 1000)
-const Ts = (Int32, Int64, Float32, Float64)
+g = addgroup!(ENSEMBLE, "simd", ["array", "inbounds", "mul", "axpy!", "inner", "sum", "reduce"])
 
-@track BaseBenchmarks.TRACKER "simd" begin
-    @benchmarks begin
-        [(:axpy!, string(T), n) => perf_axpy!(samerand(T), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
-        [(:inner, string(T), n) => perf_inner(randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
-        [(:sum_reduce, string(T), n) => perf_sum_reduce(randvec(T, n)) for n in SIZES, T in Ts]
-        [(:manual_example!, string(T), n) => perf_manual_example!(randvec(T, n), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
-        [(:two_reductions, string(T), n) => perf_two_reductions(randvec(T, n), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
-        [(:conditional_loop!, string(T), n) => perf_conditional_loop!(randvec(T, n), randvec(T, n), randvec(T, n)) for n in SIZES, T in Ts]
-        [(:local_arrays, string(T), n) => perf_local_arrays(randvec(T, n)) for n in SIZES, T in Ts]
-        [(:loop_fields!, string(T), string(F), n) => perf_loop_fields!(F(randvec(T, n))) for n in SIZES, T in Ts, F in (MutableFields, ImmutableFields)]
+for s in (9, 10, 255, 256, 999, 1000), T in (Int32, Int64, Float32, Float64)
+    tstr = string(T)
+    g["axpy!", tstr, s] = @benchmarkable perf_axpy!(samerand($T), randvec($T, $s), randvec($T, $s))
+    g["inner", tstr, s] = @benchmarkable perf_inner(randvec($T, $s), randvec($T, $s))
+    g["sum_reduce", tstr, s] = @benchmarkable perf_sum_reduce(randvec($T, $s))
+    g["manual_example!", tstr, s] = @benchmarkable perf_manual_example!(randvec($T, $s), randvec($T, $s), randvec($T, $s))
+    g["two_reductions", tstr, s] = @benchmarkable perf_two_reductions(randvec($T, $s), randvec($T, $s), randvec($T, $s))
+    g["conditional_loop!", tstr, s] = @benchmarkable perf_conditional_loop!(randvec($T, $s), randvec($T, $s), randvec($T, $s))
+    g["local_arrays", tstr, s] = @benchmarkable perf_local_arrays(randvec($T, $s))
+    for F in (MutableFields, ImmutableFields)
+        g["loop_fields!", tstr, string(F), s] = @benchmarkable perf_loop_fields!($(F)(randvec($T, $s)))
     end
-    @tags "array" "inbounds" "mul" "axpy!" "inner" "sum" "reduce"
 end
 
 end # module

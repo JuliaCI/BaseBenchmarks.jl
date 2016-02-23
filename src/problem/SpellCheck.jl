@@ -61,14 +61,14 @@ function correct(word::AbstractString)
     return maximum(x->(get(NWORDS, x, 0),x), candidates)[2]
 end
 
-function perf_spellcheck(test_data; bias=0, verbose=false)
+function perf_spellcheck(; bias=0, verbose=false)
     n, bad, unknown, start = 0, 0, 0, tic()
     if bias > 0
-        for target in keys(test_data)
+        for target in keys(TEST_DATA)
             NWORDS[target] = get(NWORDS, target, 1) + bias
         end
     end
-    for (target,wrongs) in test_data
+    for (target,wrongs) in TEST_DATA
         for wrong in split(wrongs)
             n += 1
             w = correct(wrong)
