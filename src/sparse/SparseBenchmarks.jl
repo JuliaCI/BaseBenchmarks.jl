@@ -46,8 +46,13 @@ inds = map(s -> samerand(1:s), sizes)
 matrices = map(s -> samesprand(s, s, inv(sqrt(s))), sizes)
 vectors = map(s -> samerand(1:s, s), sizes)
 logvecs = map(s -> samerand(Bool, s), sizes)
-splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
 splogmats = map(s -> samesprandbool(s, s, 1e-5), sizes)
+
+if VERSION < v"0.5.0-dev+763"
+    splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
+else
+    splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
+end
 
 g = addgroup!(ENSEMBLE, "sparse matrix row indexing", ["sparse", "indexing", "array",
                                                        "getindex", "matrix", "row"])
