@@ -6,22 +6,27 @@ redirect_stdout(trialsout)
 
 trialslog = open("trials.log", "w")
 
-using BaseBenchmarks
-using JLD
-
 const times = (5.0, 5.0)
-const group = ENSEMBLE["factorization eig"]
+const group = "factorization eig"
 const trials = 50
-
-println(trialslog, now(), " | WARMING UP BENCHMARKS..."); flush(trialslog)
-ntrials(group, 1, 1e-6; verbose = true)
 
 for i in 1:length(times)
     t = times[i]
-    println(trialslog, now(), " | RUNNING $(trials) TRIALS AT T = $(t)..."); flush(trialslog)
-    jldopen("trials_$(Int(t))_$(i).jld", "w") do file
-        write(file, "trials", ntrials(group, trials, t; verbose = true))
-    end
+    print(trialslog, now(), " | RUNNING $(trials) TRIALS AT T = $(t)..."); flush(trialslog)
+    cmd = """
+          using BaseBenchmarks;
+          using JLD;
+          t = $(t);
+          trials = $(trials);
+          group = ENSEMBLE[\"$(group)\"];
+          ntrials(group, 1, 1e-6; verbose = true);
+          file = jldopen(\"trials_$(Int(t))_$(i).jld\", \"w\");
+          write(file, \"trials\", ntrials(group, trials, t; verbose = true));
+          close(file);
+          """
+    run(`$(homedir())/julia-dev/julia-0.5/julia -e $(cmd)`)
+    println(trialslog, now(), "done."); flush(trialslog)
+    sleep(60 * 30)
 end
 
 println(trialslog, now(), " | BENCHMARKING COMPLETE!"); flush(trialslog)
