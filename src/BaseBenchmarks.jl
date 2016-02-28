@@ -20,6 +20,7 @@ include("simd/SIMDBenchmarks.jl")
 include("sort/SortBenchmarks.jl")
 include("sparse/SparseBenchmarks.jl")
 include("string/StringBenchmarks.jl")
+include("tuples/TupleBenchmarks.jl")
 
 end # module
 
