@@ -23,6 +23,7 @@ include("shootout/ShootoutBenchmarks.jl")
 include("sort/SortBenchmarks.jl")
 include("sparse/SparseBenchmarks.jl")
 include("string/StringBenchmarks.jl")
+include("tuples/TupleBenchmarks.jl")
 
 macro execute(tagpred)
     return esc(quote
