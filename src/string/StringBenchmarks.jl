@@ -1,8 +1,8 @@
 module StringBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
 using ..RandUtils
+using BenchmarkTools
 
 ####################
 # replace (#12224) #
@@ -10,7 +10,7 @@ using ..RandUtils
 
 str = join(samerand('a':'d', 10^4))
 
-g = addgroup!(ENSEMBLE, "string replace", ["string", "replace"])
+g = addgroup!(GROUPS, "string replace", ["string", "replace"])
 
 g["replace"] = @benchmarkable replace($str, "a", "b")
 

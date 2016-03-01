@@ -1,8 +1,8 @@
 module SortBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
 using ..RandUtils
+using BenchmarkTools
 
 const LIST_SIZE = 50000
 const LISTS = (
@@ -17,8 +17,8 @@ const LISTS = (
 #####################################
 
 for (tag, T) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertionsort", InsertionSort))
-    sortgroup = addgroup!(ENSEMBLE, "sort $tag", ["sort", "sort!", tag])
-    sortpermgroup = addgroup!(ENSEMBLE, "sort sortperm $tag", ["sort", "sort!", "sortperm", "sortperm!", tag])
+    sortgroup = addgroup!(GROUPS, "sort $tag", ["sort", "sort!", tag])
+    sortpermgroup = addgroup!(GROUPS, "sort sortperm $tag", ["sort", "sort!", "sortperm", "sortperm!", tag])
     for (kind, list) in LISTS
         ix = collect(1:length(list))
         sortgroup["sort", tag, kind] = @benchmarkable sort($list; alg = $T)
@@ -36,7 +36,7 @@ end
 # issorted #
 ############
 
-g = addgroup!(ENSEMBLE, "sort issorted", ["sort", "issorted"])
+g = addgroup!(GROUPS, "sort issorted", ["sort", "issorted"])
 
 for (kind, list) in LISTS
     g["issorted", kind] = @benchmarkable issorted($list)

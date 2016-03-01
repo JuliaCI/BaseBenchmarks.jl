@@ -1,6 +1,7 @@
 module IMDBGraphs
 
-import ..ProblemBenchmarks: PROBLEM_DATA_DIR
+using ..ProblemBenchmarks: PROBLEM_DATA_DIR
+using Compat
 
 type IMDBNode
     name::UTF8String # actor//film name

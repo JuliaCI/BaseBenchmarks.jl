@@ -1,7 +1,7 @@
 module SpellCheck
 
-import ..BaseBenchmarks
-import ..ProblemBenchmarks: PROBLEM_DATA_DIR
+using ..ProblemBenchmarks: PROBLEM_DATA_DIR
+using Compat
 
 # Peter Norvig's Spelling Corrector (http://norvig.com/spell-correct.html)
 
@@ -24,7 +24,7 @@ function train(features)
     return model
 end
 
-const NWORDS = train(words(BaseBenchmarks.readstring(joinpath(PROBLEM_DATA_DIR, "norvig_spellcheck.txt"))))
+const NWORDS = train(words(readstring(joinpath(PROBLEM_DATA_DIR, "norvig_spellcheck.txt"))))
 
 function edits(word::AbstractString)
     splits     = [(word[1:i], word[i+1:end]) for i=0:length(word) ]

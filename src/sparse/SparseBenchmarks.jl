@@ -1,8 +1,8 @@
 module SparseBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
 using ..RandUtils
+using BenchmarkTools
 
 samesprand(args...) = sprand(MersenneTwister(1), args...)
 samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
@@ -27,7 +27,7 @@ else
     splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
 end
 
-g = addgroup!(ENSEMBLE, "sparse vector indexing", ["sparse", "indexing", "array",
+g = addgroup!(GROUPS, "sparse vector indexing", ["sparse", "indexing", "array",
                                                    "getindex", "vector"])
 
 for (s, v, l) in zip(sizes, spvecs, splogvecs)
@@ -54,7 +54,7 @@ else
     splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
 end
 
-g = addgroup!(ENSEMBLE, "sparse matrix row indexing", ["sparse", "indexing", "array",
+g = addgroup!(GROUPS, "sparse matrix row indexing", ["sparse", "indexing", "array",
                                                        "getindex", "matrix", "row"])
 
 for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
@@ -64,7 +64,7 @@ for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, ind
     # g["sparse logical", s, nnz(m), nnz(sl), c] = @benchmarkable getindex($m, $sl, $c)
 end
 
-g = addgroup!(ENSEMBLE, "sparse matrix column indexing", ["sparse", "indexing", "array",
+g = addgroup!(GROUPS, "sparse matrix column indexing", ["sparse", "indexing", "array",
                                                           "getindex", "matrix", "column"])
 
 for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
@@ -74,7 +74,7 @@ for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, ind
     # g["sparse logical", s, nnz(m), nnz(sl), r] = @benchmarkable getindex($m, $r, $sl)
 end
 
-g = addgroup!(ENSEMBLE, "sparse matrix row + column indexing", ["sparse", "indexing", "array",
+g = addgroup!(GROUPS, "sparse matrix row + column indexing", ["sparse", "indexing", "array",
                                                                 "getindex", "matrix", "row",
                                                                 "column"])
 
@@ -95,7 +95,7 @@ small_rct = samesprand(600, 400, 0.01)
 large_sqr = samesprand(20000, 20000, 0.01)
 large_rct = samesprand(20000, 10000, 0.01)
 
-g = addgroup!(ENSEMBLE, "sparse matrix transpose", ["sparse", "array", "ctranspose", "transpose", "matrix"])
+g = addgroup!(GROUPS, "sparse matrix transpose", ["sparse", "array", "ctranspose", "transpose", "matrix"])
 
 for m in (small_sqr, small_rct, large_sqr, large_rct)
     cm = m + m*im

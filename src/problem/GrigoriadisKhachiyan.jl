@@ -1,6 +1,5 @@
 module GrigoriadisKhachiyan
 
-import ..BaseBenchmarks
 using ..RandUtils
 
 # Code from Dilys Thomas <dilys@cs.stanford.edu>

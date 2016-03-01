@@ -1,6 +1,5 @@
 module Ziggurat
 
-import ..BaseBenchmarks
 using ..RandUtils
 
 # Based on http://m.seehuhn.de/data/ziggurat/gauss.c

@@ -1,7 +1,8 @@
 module IOBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
+using Compat
+using BenchmarkTools
 
 #################
 # read (#12364) #
@@ -16,7 +17,7 @@ function perf_read!(io)
     return x
 end
 
-g = addgroup!(ENSEMBLE, "iobuffer read", ["io", "buffer", "stream", "read", "string"])
+g = addgroup!(GROUPS, "iobuffer read", ["io", "buffer", "stream", "read", "string"])
 
 g["read"] = @benchmarkable perf_read!(IOBuffer(randstring(10^4)))
 g["readstring"] = @benchmarkable readstring(IOBuffer(randstring(10^4)))

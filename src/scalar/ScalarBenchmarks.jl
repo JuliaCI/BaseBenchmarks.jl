@@ -1,7 +1,7 @@
 module ScalarBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
+using BenchmarkTools
 
 const INTS = (UInt, Int, BigInt)
 const FLOATS = (Float32, Float64, BigFloat)
@@ -13,7 +13,7 @@ const NUMS = (REALS..., COMPS...)
 # predicates #
 ##############
 
-g = addgroup!(ENSEMBLE, "scalar predicate",  ["scalar", "predicate", "isinteger", "isinf",
+g = addgroup!(GROUPS, "scalar predicate",  ["scalar", "predicate", "isinteger", "isinf",
                                               "isnan", "iseven", "isodd"])
 
 for T in NUMS
@@ -43,7 +43,7 @@ perf_fastmath_div(a, b) = @fastmath a / b
 perf_fastmath_add(a, b) = @fastmath a + b
 perf_fastmath_sub(a, b) = @fastmath a - b
 
-g = addgroup!(ENSEMBLE, "scalar arithmetic",  ["scalar", "arithmetic", "fastmath"])
+g = addgroup!(GROUPS, "scalar arithmetic",  ["scalar", "arithmetic", "fastmath"])
 
 for Ti in NUMS, Tj in NUMS
     xi, xj = one(Ti), one(Tj)

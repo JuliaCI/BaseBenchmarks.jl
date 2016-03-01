@@ -1,16 +1,11 @@
 module BaseBenchmarks
 
+info("loading BaseBenchmarks.jl (this could take a few seconds)...")
+
 using BenchmarkTools
 using Compat
 
-# This is a temporary patch until JuliaLang/Compat.jl#162 is merged.
-if VERSION < v"0.5.0-dev+2228"
-    const readstring = readall
-    export readstring
-end
-
-const ENSEMBLE = BenchmarkEnsemble()
-export ENSEMBLE
+const GROUPS = BenchmarkTools.GroupCollection()
 
 include("utils/RandUtils.jl")
 include("arrays/ArrayBenchmarks.jl")

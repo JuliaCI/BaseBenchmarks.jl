@@ -6,8 +6,9 @@ module ShootoutBenchmarks
 #
 # See https://github.com/JuliaLang/julia/issues/660 for details.
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
+using Compat
+using BenchmarkTools
 
 const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout", "data")
 
@@ -17,7 +18,7 @@ const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout"
 
 include("binary_trees.jl")
 
-g = addgroup!(ENSEMBLE, "shootout binary_trees", ["shootout", "trees"])
+g = addgroup!(GROUPS, "shootout binary_trees", ["shootout", "trees"])
 
 g["binary_trees"] = @benchmarkable perf_binary_trees(10)
 
@@ -27,7 +28,7 @@ g["binary_trees"] = @benchmarkable perf_binary_trees(10)
 
 include("fannkuch.jl")
 
-g = addgroup!(ENSEMBLE, "shootout fannkuch", ["shootout", "fannkuch"])
+g = addgroup!(GROUPS, "shootout fannkuch", ["shootout", "fannkuch"])
 
 g["fannkuch"] = @benchmarkable perf_fannkuch(7)
 
@@ -37,7 +38,7 @@ g["fannkuch"] = @benchmarkable perf_fannkuch(7)
 
 include("fasta.jl")
 
-g = addgroup!(ENSEMBLE, "shootout fasta", ["shootout", "fasta"])
+g = addgroup!(GROUPS, "shootout fasta", ["shootout", "fasta"])
 
 g["fasta"] = @benchmarkable perf_fasta(100)
 
@@ -47,7 +48,7 @@ g["fasta"] = @benchmarkable perf_fasta(100)
 
 include("k_nucleotide.jl")
 
-g = addgroup!(ENSEMBLE, "shootout k_nucleotide", ["shootout", "k_nucleotide"])
+g = addgroup!(GROUPS, "shootout k_nucleotide", ["shootout", "k_nucleotide"])
 
 g["k_nucleotide"] = @benchmarkable perf_k_nucleotide()
 
@@ -57,7 +58,7 @@ g["k_nucleotide"] = @benchmarkable perf_k_nucleotide()
 
 include("mandelbrot.jl")
 
-g = addgroup!(ENSEMBLE, "shootout mandelbrot", ["shootout", "mandelbrot"])
+g = addgroup!(GROUPS, "shootout mandelbrot", ["shootout", "mandelbrot"])
 
 g["mandelbrot"] = @benchmarkable perf_mandelbrot(200)
 
@@ -67,7 +68,7 @@ g["mandelbrot"] = @benchmarkable perf_mandelbrot(200)
 
 include("meteor_contest.jl")
 
-g = addgroup!(ENSEMBLE, "shootout meteor_contest", ["shootout", "meteor_contest"])
+g = addgroup!(GROUPS, "shootout meteor_contest", ["shootout", "meteor_contest"])
 
 g["meteor_contest"] = @benchmarkable perf_meteor_contest()
 
@@ -78,7 +79,7 @@ g["meteor_contest"] = @benchmarkable perf_meteor_contest()
 include("nbody.jl")
 include("nbody_vec.jl")
 
-g = addgroup!(ENSEMBLE, "shootout nbody_vec", ["shootout", "nbody", "nbody_vec"])
+g = addgroup!(GROUPS, "shootout nbody_vec", ["shootout", "nbody", "nbody_vec"])
 
 g["nbody"] = @benchmarkable NBody.perf_nbody()
 g["nbody_vec"] = @benchmarkable NBodyVec.perf_nbody_vec()
@@ -89,7 +90,7 @@ g["nbody_vec"] = @benchmarkable NBodyVec.perf_nbody_vec()
 
 include("pidigits.jl")
 
-g = addgroup!(ENSEMBLE, "shootout pidigits", ["shootout", "pidigits", "pi", "π"])
+g = addgroup!(GROUPS, "shootout pidigits", ["shootout", "pidigits", "pi", "π"])
 
 g[:pidigits] = @benchmarkable perf_pidigits(1000)
 
@@ -99,7 +100,7 @@ g[:pidigits] = @benchmarkable perf_pidigits(1000)
 
 include("regex_dna.jl")
 
-g = addgroup!(ENSEMBLE, "shootout regex_dna", ["shootout", "regex_dna", "regex"])
+g = addgroup!(GROUPS, "shootout regex_dna", ["shootout", "regex_dna", "regex"])
 
 g["regex_dna"] = @benchmarkable perf_regex_dna()
 
@@ -109,7 +110,7 @@ g["regex_dna"] = @benchmarkable perf_regex_dna()
 
 include("revcomp.jl")
 
-g = addgroup!(ENSEMBLE, "shootout revcomp", ["shootout", "revcomp"])
+g = addgroup!(GROUPS, "shootout revcomp", ["shootout", "revcomp"])
 
 g["revcomp"] = @benchmarkable perf_revcomp()
 
@@ -119,7 +120,7 @@ g["revcomp"] = @benchmarkable perf_revcomp()
 
 include("spectralnorm.jl")
 
-g = addgroup!(ENSEMBLE, "shootout spectralnorm", ["shootout", "spectralnorm"])
+g = addgroup!(GROUPS, "shootout spectralnorm", ["shootout", "spectralnorm"])
 
 g["spectralnorm"] = @benchmarkable perf_spectralnorm()
 

@@ -18,7 +18,7 @@ for i in 1:length(times)
           using JLD;
           t = $(t);
           trials = $(trials);
-          group = ENSEMBLE[\"$(group)\"];
+          group = GROUPS[\"$(group)\"];
           ntrials(group, 1, 1e-6; verbose = true);
           file = jldopen(\"trials_$(Int(t))_$(i).jld\", \"w\");
           write(file, \"trials\", ntrials(group, trials, t; verbose = true));

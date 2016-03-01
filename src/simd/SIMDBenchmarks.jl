@@ -1,8 +1,8 @@
 module SIMDBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
 using ..RandUtils
+using BenchmarkTools
 
 ###########
 # Methods #
@@ -109,7 +109,7 @@ end
 # Benchmarks #
 ##############
 
-g = addgroup!(ENSEMBLE, "simd", ["array", "inbounds", "mul", "axpy!", "inner", "sum", "reduce"])
+g = addgroup!(GROUPS, "simd", ["array", "inbounds", "mul", "axpy!", "inner", "sum", "reduce"])
 
 for s in (9, 10, 255, 256, 999, 1000), T in (Int32, Int64, Float32, Float64)
     tstr = string(T)

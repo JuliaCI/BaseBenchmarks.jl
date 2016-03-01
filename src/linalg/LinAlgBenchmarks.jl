@@ -1,8 +1,8 @@
 module LinAlgBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
 using ..RandUtils
+using BenchmarkTools
 
 const SIZES = (16, 512)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
@@ -30,7 +30,7 @@ end
 # matrix/vector arithmetic #
 ############################
 
-g = addgroup!(ENSEMBLE, "linalg arithmetic", ["array", "linalg", "arithmetic"])
+g = addgroup!(GROUPS, "linalg arithmetic", ["array", "linalg", "arithmetic"])
 
 for s in SIZES
     v = typename(Vector)
@@ -55,7 +55,7 @@ end
 # factorizations #
 ##################
 
-g = addgroup!(ENSEMBLE, "factorization eig", ["array", "linalg", "factorization", "eig", "eigfact"])
+g = addgroup!(GROUPS, "factorization eig", ["array", "linalg", "factorization", "eig", "eigfact"])
 
 for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
     m = typename(M)
@@ -65,7 +65,7 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     end
 end
 
-g = addgroup!(ENSEMBLE, "factorization svd", ["array", "linalg", "factorization", "svd", "svdfact"])
+g = addgroup!(GROUPS, "factorization svd", ["array", "linalg", "factorization", "svd", "svdfact"])
 
 for M in (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
     m = typename(M)
@@ -75,7 +75,7 @@ for M in (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
     end
 end
 
-g = addgroup!(ENSEMBLE, "factorization lu", ["array", "linalg", "factorization", "lu", "lufact"])
+g = addgroup!(GROUPS, "factorization lu", ["array", "linalg", "factorization", "lu", "lufact"])
 
 for M in (Matrix, Tridiagonal)
     m = typename(M)
@@ -85,7 +85,7 @@ for M in (Matrix, Tridiagonal)
     end
 end
 
-g = addgroup!(ENSEMBLE, "factorization qr", ["array", "linalg", "factorization", "qr", "qrfact"])
+g = addgroup!(GROUPS, "factorization qr", ["array", "linalg", "factorization", "qr", "qrfact"])
 
 for s in SIZES
     m = typename(Matrix)
@@ -93,7 +93,7 @@ for s in SIZES
     g["qrfact", m, s] = @benchmarkable qrfact(randmat($s))
 end
 
-g = addgroup!(ENSEMBLE, "factorization schur", ["array", "linalg", "factorization", "schur", "schurfact"])
+g = addgroup!(GROUPS, "factorization schur", ["array", "linalg", "factorization", "schur", "schurfact"])
 
 for s in SIZES
     m = typename(Matrix)
@@ -101,7 +101,7 @@ for s in SIZES
     g["schurfact", m, s] = @benchmarkable schurfact(randmat($s))
 end
 
-g = addgroup!(ENSEMBLE, "factorization chol", ["array", "linalg", "factorization", "chol", "cholfact"])
+g = addgroup!(GROUPS, "factorization chol", ["array", "linalg", "factorization", "chol", "cholfact"])
 
 for s in SIZES
     m = typename(Matrix)
@@ -114,7 +114,7 @@ end
 # BLAS #
 ########
 
-g = addgroup!(ENSEMBLE, "blas", ["array", "linalg"])
+g = addgroup!(GROUPS, "blas", ["array", "linalg"])
 
 s = 1024
 C = Complex{Float64}

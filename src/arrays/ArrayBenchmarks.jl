@@ -1,8 +1,8 @@
 module ArrayBenchmarks
 
-using ..BaseBenchmarks
-using ..BenchmarkTools
+using ..BaseBenchmarks: GROUPS
 using ..RandUtils
+using BenchmarkTools
 
 ############
 # indexing #
@@ -18,7 +18,7 @@ arrays = (makearrays(Int32, 3, 5)...,
           makearrays(Float32, 3, 5)...,
           makearrays(Float32, 300, 500)...)
 
-g = addgroup!(ENSEMBLE, "array index sum", ["array", "sum", "index", "simd"])
+g = addgroup!(GROUPS, "array index sum", ["array", "sum", "index", "simd"])
 
 for A in arrays
     T = string(typeof(A))
@@ -42,7 +42,7 @@ include("revloadindex.jl")
 
 n = 10^6
 
-g = addgroup!(ENSEMBLE, "array index load reverse", ["array", "indexing", "load", "reverse"])
+g = addgroup!(GROUPS, "array index load reverse", ["array", "indexing", "load", "reverse"])
 
 g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(samerand($n))
 g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(samerand($n))
@@ -54,7 +54,7 @@ g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(samerand($n), sam
 
 perf_setindex!(A, val, inds) = setindex!(A, val, inds...)
 
-g = addgroup!(ENSEMBLE, "array index setindex!", ["array", "indexing", "setindex!"])
+g = addgroup!(GROUPS, "array index setindex!", ["array", "indexing", "setindex!"])
 
 for s in (1, 2, 3, 4, 5)
     A = Array(Float64, ntuple(one, s))
@@ -74,7 +74,7 @@ end
 
 include("subarray.jl")
 
-g = addgroup!(ENSEMBLE, "array subarray", ["array", "subarray", "lucompletepiv"])
+g = addgroup!(GROUPS, "array subarray", ["array", "subarray", "lucompletepiv"])
 
 for s in (100, 250, 500, 1000)
     g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(samerand($s, $s))
@@ -87,7 +87,7 @@ end
 
 include("cat.jl")
 
-g = addgroup!(ENSEMBLE, "array cat", ["array", "indexing", "cat", "hcat", "vcat", "hvcat", "setindex"])
+g = addgroup!(GROUPS, "array cat", ["array", "indexing", "cat", "hcat", "vcat", "hvcat", "setindex"])
 
 for s in (5, 500)
     A = samerand(s, s)
@@ -112,7 +112,7 @@ function perf_push_multiple!(collection, items)
     return collection
 end
 
-g = addgroup!(ENSEMBLE, "array growth", ["array", "growth", "push!", "append!", "prepend!"])
+g = addgroup!(GROUPS, "array growth", ["array", "growth", "push!", "append!", "prepend!"])
 
 for s in (8, 256, 2048)
     v = samerand(s)
@@ -134,7 +134,7 @@ ls = linspace(0,1,10^7)
 rg = 0.0:(10.0^(-7)):1.0
 arr = collect(ls)
 
-g = addgroup!(ENSEMBLE, "array comprehension", ["array", "comprehension", "iteration",
+g = addgroup!(GROUPS, "array comprehension", ["array", "comprehension", "iteration",
                                                 "indexing", "linspace", "collect", "range"])
 
 for i in (ls, rg, arr)
@@ -167,7 +167,7 @@ n, range = 10^6, -3:3
 a, b = samerand(range, n), samerand(range)
 boolarr, bitarr = Vector{Bool}(n), BitArray(n)
 
-g = addgroup!(ENSEMBLE, "array bool", ["array", "indexing", "load", "bool", "bitarray", "fill!"])
+g = addgroup!(GROUPS, "array bool", ["array", "indexing", "load", "bool", "bitarray", "fill!"])
 
 g["bitarray_bool_load!"] = @benchmarkable perf_bool_load!($bitarr, $a, $b)
 g["boolarray_bool_load!"] = @benchmarkable perf_bool_load!($boolarr, $a, $b)
