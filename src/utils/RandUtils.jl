@@ -1,6 +1,8 @@
 module RandUtils
 
-samerand(args...) = rand(MersenneTwister(1), args...)
+const SEED = MersenneTwister(1)
+
+samerand(args...) = rand(deepcopy(SEED), args...)
 
 randvec(T, n) = samerand(T, n)
 randvec(n) = samerand(n)
