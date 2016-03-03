@@ -7,8 +7,8 @@ module ShootoutBenchmarks
 # See https://github.com/JuliaLang/julia/issues/660 for details.
 
 using ..BaseBenchmarks: GROUPS
-using Compat
 using BenchmarkTools
+using Compat
 
 const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout", "data")
 

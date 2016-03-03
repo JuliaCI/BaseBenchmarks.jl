@@ -1,8 +1,8 @@
 module IOBenchmarks
 
 using ..BaseBenchmarks: GROUPS
-using Compat
 using BenchmarkTools
+using Compat
 
 #################
 # read (#12364) #

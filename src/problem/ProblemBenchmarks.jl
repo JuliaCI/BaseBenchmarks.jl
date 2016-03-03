@@ -11,6 +11,7 @@ module ProblemBenchmarks
 using ..BaseBenchmarks: GROUPS
 using ..RandUtils
 using BenchmarkTools
+using Compat
 
 const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
 
