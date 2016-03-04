@@ -9,7 +9,7 @@ const REALS = (INTS..., FLOATS...)
 const COMPS = map(R -> Complex{R}, REALS)
 const NUMS = (REALS..., COMPS...)
 
-const SCALAR_TIME = 0.1
+const SCALAR_TIME = 1
 const SCALAR_GC = true
 
 ##############

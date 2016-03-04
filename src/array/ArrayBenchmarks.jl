@@ -16,23 +16,24 @@ include("sumindex.jl")
 arrays = (makearrays(Int32, 3, 5)...,
           makearrays(Int32, 300, 500)...,
           makearrays(Float32, 3, 5)...,
-          makearrays(Float32, 300, 500)...)
+          makearrays(Float32, 300, 500)...,
+          trues(3, 5), trues(300, 500))
 
 g = addgroup!(GROUPS, "array index sum", ["array", "sum", "index", "simd"])
 
 for A in arrays
     T = string(typeof(A))
     s = size(A)
-    g["sumelt", T, s] = @benchmarkable perf_sumelt(copy($A))
-    g["sumeach", T, s] = @benchmarkable perf_sumeach(copy($A))
-    g["sumelt", T, s] = @benchmarkable perf_sumelt(copy($A))
-    g["sumeach", T, s] = @benchmarkable perf_sumeach(copy($A))
-    g["sumlinear", T, s] = @benchmarkable perf_sumlinear(copy($A))
-    g["sumcartesian", T, s] = @benchmarkable perf_sumcartesian(copy($A))
-    g["sumcolon", T, s] = @benchmarkable perf_sumcolon(copy($A))
-    g["sumrange", T, s] = @benchmarkable perf_sumrange(copy($A))
-    g["sumlogical", T, s] = @benchmarkable perf_sumlogical(copy($A))
-    g["sumvector", T, s] = @benchmarkable perf_sumvector(copy($A))
+    g["sumelt", T, s] = @benchmarkable perf_sumelt($A)
+    g["sumeach", T, s] = @benchmarkable perf_sumeach($A)
+    g["sumelt", T, s] = @benchmarkable perf_sumelt($A)
+    g["sumeach", T, s] = @benchmarkable perf_sumeach($A)
+    g["sumlinear", T, s] = @benchmarkable perf_sumlinear($A)
+    g["sumcartesian", T, s] = @benchmarkable perf_sumcartesian($A)
+    g["sumcolon", T, s] = @benchmarkable perf_sumcolon($A)
+    g["sumrange", T, s] = @benchmarkable perf_sumrange($A)
+    g["sumlogical", T, s] = @benchmarkable perf_sumlogical($A)
+    g["sumvector", T, s] = @benchmarkable perf_sumvector($A)
 end
 
 # #10301 #
@@ -40,14 +41,13 @@ end
 
 include("revloadindex.jl")
 
-n = 10^6
-
+v = samerand(10^6)
 g = addgroup!(GROUPS, "array index load reverse", ["array", "indexing", "load", "reverse"])
 
-g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(samerand($n))
-g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(samerand($n))
-g["rev_loadmul_slow!"] = @benchmarkable perf_rev_loadmul_slow!(samerand($n), samerand($n))
-g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(samerand($n), samerand($n))
+g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(copy($v))
+g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(copy($v))
+g["rev_loadmul_slow!"] = @benchmarkable perf_rev_loadmul_slow!(copy($v), copy($v))
+g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(copy($v), copy($v))
 
 # #9622 #
 #-------#
@@ -57,7 +57,7 @@ perf_setindex!(A, val, inds) = setindex!(A, val, inds...)
 g = addgroup!(GROUPS, "array index setindex!", ["array", "indexing", "setindex!"])
 
 for s in (1, 2, 3, 4, 5)
-    A = Array(Float64, ntuple(one, s))
+    A = samerand(Float64, ntuple(one, s)...)
     y = one(eltype(A))
     i = length(A)
     g["setindex!", ndims(A)] = @benchmarkable perf_setindex!(copy($A), $y, $i)
@@ -77,8 +77,9 @@ include("subarray.jl")
 g = addgroup!(GROUPS, "array subarray", ["array", "subarray", "lucompletepiv"])
 
 for s in (100, 250, 500, 1000)
-    g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(samerand($s, $s))
-    g["lucompletepivSub!", s] = @benchmarkable perf_lucompletepivCopy!(samerand($s, $s))
+    m = samerand(s, s)
+    g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(copy($m))
+    g["lucompletepivSub!", s] = @benchmarkable perf_lucompletepivCopy!(copy($m))
 end
 
 #################
