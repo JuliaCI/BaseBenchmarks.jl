@@ -1,17 +1,21 @@
 module RandUtils
 
 const SEED = MersenneTwister(1)
-const ALIGN = 64
+const DEFAULT_ELTYPE = typeof(rand())
 
-# ensures the generated array always has the same alignment (at least ALIGN-byte aligned)
-function samerand(args...)
-    v = rand(deepcopy(SEED), args...)
-    if Int(pointer(v)) % ALIGN == 0
-       return v
-    else
-       return samerand(args...)
-    end
+# ensures the generated array is always aligned to the page size
+function alignedalloc{N}(S, dims::NTuple{N,Int})
+    randarr = rand(deepcopy(SEED), S, dims...)
+    alignedarr = Mmap.mmap(Array{eltype(S),N}, dims)
+    copy!(alignedarr, randarr)
+    @assert Int(pointer(alignedarr)) % 64 == 0 # sanity check
+    return alignedarr
 end
+
+samerand() = rand(deepcopy(SEED))
+samerand(S) = rand(deepcopy(SEED), S)
+samerand(dims::Int...) = alignedalloc(DEFAULT_ELTYPE, dims)
+samerand(S, dims::Int...) = alignedalloc(S, dims)
 
 randvec(T, n) = samerand(T, n)
 randvec(n) = samerand(n)
