@@ -42,12 +42,14 @@ end
 include("revloadindex.jl")
 
 v = samerand(10^6)
+n = samerand()
+
 g = addgroup!(GROUPS, "array index load reverse", ["array", "indexing", "load", "reverse"])
 
-g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(copy($v))
-g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(copy($v))
-g["rev_loadmul_slow!"] = @benchmarkable perf_rev_loadmul_slow!(copy($v), copy($v))
-g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(copy($v), copy($v))
+g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(fill!($v, $n))
+g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(fill!($v, $n))
+g["rev_loadmul_slow!"] = @benchmarkable perf_rev_loadmul_slow!(fill!($v, $n), $v)
+g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(fill!($v, $n), $v)
 
 # #9622 #
 #-------#
@@ -60,7 +62,7 @@ for s in (1, 2, 3, 4, 5)
     A = samerand(Float64, ntuple(one, s)...)
     y = one(eltype(A))
     i = length(A)
-    g["setindex!", ndims(A)] = @benchmarkable perf_setindex!(copy($A), $y, $i)
+    g["setindex!", ndims(A)] = @benchmarkable perf_setindex!(fill!($A, $y), $y, $i)
 end
 
 ###############################
@@ -74,12 +76,14 @@ end
 
 include("subarray.jl")
 
+n = samerand()
+
 g = addgroup!(GROUPS, "array subarray", ["array", "subarray", "lucompletepiv"])
 
 for s in (100, 250, 500, 1000)
     m = samerand(s, s)
-    g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(copy($m))
-    g["lucompletepivSub!", s] = @benchmarkable perf_lucompletepivCopy!(copy($m))
+    g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
+    g["lucompletepivSub!", s] = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
 end
 
 #################
