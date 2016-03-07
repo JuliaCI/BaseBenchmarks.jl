@@ -9,10 +9,10 @@ This package is a collection of Julia benchmarks available for CI performance tr
 ```julia
 julia> using BaseBenchmarks
 
-julia> BaseBenchmarks.@execute ("array" || "linalg") && !("simd")
+julia> execute(BaseBenchmarks.GROUPS[@tagged ("array" || "linalg") && !("simd")])
 ```
 
-The syntax for the tag predicate matches [the syntax used by BenchmarkTrackers.jl](https://github.com/JuliaCI/BenchmarkTrackers.jl#running-benchmarks).
+Documentation regarding benchmark execution and result analysis can be found in [BenchmarkTools.jl](https://github.com/JuliaCI/BenchmarkTools.jl).
 
 #### Contributing
 
@@ -20,7 +20,7 @@ Our performance tracker could always benefit from more benchmarks! If you have a
 
 Here are some contribution tips:
 
-- You'll need to use [BenchmarkTrackers.jl](https://github.com/JuliaCI/BenchmarkTrackers.jl) to write the benchmarks (feel free to open a WIP PR if you'd like help with this).
+- You'll need to use [BenchmarkTools.jl](https://github.com/JuliaCI/BenchmarkTools.jl) to write the benchmarks (feel free to open a WIP PR if you'd like help with this).
 - Newly defined functions whose calls are measured should have `perf_` prepended to their name. This makes it easier to find a given benchmark's "entry point" in the code.
 - Try to reuse existing tags when possible. Tags should be lowercase and singular.
 - If your benchmark requires a significant amount of code, wrap it in a module.
