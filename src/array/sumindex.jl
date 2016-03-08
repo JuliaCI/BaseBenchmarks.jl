@@ -3,7 +3,7 @@
 ##########################
 
 function perf_sumelt(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     for a in A
         s += a
     end
@@ -11,7 +11,7 @@ function perf_sumelt(A)
 end
 
 function perf_sumeach(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     for I in eachindex(A)
         val = Base.unsafe_getindex(A, I)
         s += val
@@ -20,7 +20,7 @@ function perf_sumeach(A)
 end
 
 function perf_sumlinear(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     for I in 1:length(A)
         val = Base.unsafe_getindex(A, I)
         s += val
@@ -28,7 +28,7 @@ function perf_sumlinear(A)
     return s
 end
 function perf_sumcartesian(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     for I in CartesianRange(size(A))
         val = Base.unsafe_getindex(A, I)
         s += val
@@ -37,7 +37,7 @@ function perf_sumcartesian(A)
 end
 
 function perf_sumcolon(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     c = Colon()
@@ -49,7 +49,7 @@ function perf_sumcolon(A)
 end
 
 function perf_sumrange(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = 1:nrows
@@ -61,7 +61,7 @@ function perf_sumrange(A)
 end
 
 function perf_sumlogical(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = falses(nrows)
@@ -74,7 +74,7 @@ function perf_sumlogical(A)
 end
 
 function perf_sumvector(A)
-    s = zero(eltype(A)) + zero(eltype(A))
+    s = zero(eltype(A))
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = rand(1:nrows, 5)
