@@ -105,7 +105,7 @@ end
 # BLAS #
 ########
 
-g = addgroup!(GROUPS, "blas", ["array", "linalg"])
+g = addgroup!(GROUPS, "blas")
 
 s = 1024
 C = Complex{Float64}
