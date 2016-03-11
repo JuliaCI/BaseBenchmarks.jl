@@ -26,8 +26,6 @@ for A in arrays
     s = size(A)
     g["sumelt", T, s] = @benchmarkable perf_sumelt($A)
     g["sumeach", T, s] = @benchmarkable perf_sumeach($A)
-    g["sumelt", T, s] = @benchmarkable perf_sumelt($A)
-    g["sumeach", T, s] = @benchmarkable perf_sumeach($A)
     g["sumlinear", T, s] = @benchmarkable perf_sumlinear($A)
     g["sumcartesian", T, s] = @benchmarkable perf_sumcartesian($A)
     g["sumcolon", T, s] = @benchmarkable perf_sumcolon($A)
