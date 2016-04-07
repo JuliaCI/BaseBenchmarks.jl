@@ -1,6 +1,6 @@
 module LinAlgBenchmarks
 
-using ..BaseBenchmarks: GROUPS
+using ..BaseBenchmarks: SUITE
 using ..RandUtils
 using BenchmarkTools
 
@@ -30,7 +30,7 @@ end
 # matrix/vector arithmetic #
 ############################
 
-g = addgroup!(GROUPS, "linalg arithmetic", ["array", "linalg", "arithmetic"])
+g = newgroup!(SUITE, "linalg arithmetic", ["array", "linalg", "arithmetic"])
 
 for s in SIZES
     vstr = typename(Vector)
@@ -58,7 +58,7 @@ end
 # factorizations #
 ##################
 
-g = addgroup!(GROUPS, "factorization", ["array", "linalg", "factorization", "eig", "eigfact",
+g = newgroup!(SUITE, "factorization", ["array", "linalg", "factorization", "eig", "eigfact",
                                         "svd", "svdfact", "lu", "lufact", "qr", "qrfact",
                                         "schur", "schurfact", "chol", "cholfact"])
 
@@ -105,7 +105,7 @@ end
 # BLAS #
 ########
 
-g = addgroup!(GROUPS, "blas")
+g = newgroup!(SUITE, "blas")
 
 s = 1024
 C = Complex{Float64}

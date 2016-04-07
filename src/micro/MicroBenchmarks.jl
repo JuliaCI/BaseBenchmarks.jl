@@ -3,12 +3,12 @@ module MicroBenchmarks
 # This module contains the Julia microbenchmarks shown in the language
 # comparison table at http://julialang.org/.
 
-using ..BaseBenchmarks: GROUPS
+using ..BaseBenchmarks: SUITE
 using BenchmarkTools
 
 include("methods.jl")
 
-g = addgroup!(GROUPS, "micro", ["recursion", "fibonacci", "fib",  "parse", "parseint",
+g = newgroup!(SUITE, "micro", ["recursion", "fibonacci", "fib",  "parse", "parseint",
                                   "mandel", "mandelbrot", "sort", "quicksort", "pi", "π", "sum",
                                   "pisum", "πsum", "rand", "randmatstat", "rand", "randmatmul"])
 

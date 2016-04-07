@@ -8,7 +8,7 @@ module ProblemBenchmarks
 # where much of the code was naively translated to Julia from other languages,
 # and thus is written non-idiomatically.
 
-using ..BaseBenchmarks: GROUPS
+using ..BaseBenchmarks: SUITE
 using ..RandUtils
 using BenchmarkTools
 using Compat
@@ -21,7 +21,7 @@ const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "
 
 include("IMDBGraphs.jl")
 
-g = addgroup!(GROUPS, "problem imdb graphs", ["problem", "example", "kernel", "graph", "centrality", "imdb"])
+g = newgroup!(SUITE, "problem imdb graphs", ["problem", "example", "kernel", "graph", "centrality", "imdb"])
 
 g["imdb_centrality"] = @benchmarkable IMDBGraphs.perf_imdb_centrality(50)
 
@@ -31,8 +31,7 @@ g["imdb_centrality"] = @benchmarkable IMDBGraphs.perf_imdb_centrality(50)
 
 include("MonteCarlo.jl")
 
-g = addgroup!(GROUPS, "problem monte carlo", ["problem", "example", "kernel", "monte carlo",
-                                                "finance", "vectorization", "random", "inplace"])
+g = newgroup!(SUITE, "problem monte carlo", ["problem", "example", "kernel", "monte carlo", "finance", "vectorization", "random", "inplace"])
 
 g["euro_option_devec"] = @benchmarkable MonteCarlo.perf_euro_option_devec(10^4)
 g["euro_option_vec"] = @benchmarkable MonteCarlo.perf_euro_option_vec(10^4)
@@ -43,8 +42,7 @@ g["euro_option_vec"] = @benchmarkable MonteCarlo.perf_euro_option_vec(10^4)
 
 include("Laplacian.jl")
 
-g = addgroup!(GROUPS, "problem laplacian", ["problem", "example", "kernel", "laplacian", "iterative",
-                                              "sparse", "vectorization", "subarray", "array"])
+g = newgroup!(SUITE, "problem laplacian", ["problem", "example", "kernel", "laplacian", "iterative", "sparse", "vectorization", "subarray", "array"])
 
 g["laplace_sparse_matvec"] = @benchmarkable Laplacian.perf_laplace_sparse_matvec(8^5)
 g["laplace_iter_devec"] = @benchmarkable Laplacian.perf_laplace_iter_devec(8^2)
@@ -57,8 +55,7 @@ g["laplace_iter_sub"] = @benchmarkable Laplacian.perf_laplace_iter_sub(8^2)
 
 include("GrigoriadisKhachiyan.jl")
 
-g = addgroup!(GROUPS, "problem grigoriadis khachiyan", ["problem", "example", "kernel",
-                                                          "grigoriadis", "khachiyan", "game"])
+g = newgroup!(SUITE, "problem grigoriadis khachiyan", ["problem", "example", "kernel", "grigoriadis", "khachiyan", "game"])
 
 g["grigoriadis_khachiyan"] = @benchmarkable GrigoriadisKhachiyan.perf_gk(350, [0.1])
 
@@ -68,7 +65,7 @@ g["grigoriadis_khachiyan"] = @benchmarkable GrigoriadisKhachiyan.perf_gk(350, [0
 
 include("GoGame.jl")
 
-g = addgroup!(GROUPS, "problem go game", ["problem", "example", "kernel", "go", "game"])
+g = newgroup!(SUITE, "problem go game", ["problem", "example", "kernel", "go", "game"])
 
 g["grigoriadis_khachiyan"] = @benchmarkable GoGame.perf_go_game(10)
 
@@ -78,7 +75,7 @@ g["grigoriadis_khachiyan"] = @benchmarkable GoGame.perf_go_game(10)
 
 include("JSONParse.jl")
 
-g = addgroup!(GROUPS, "problem json parse", ["problem", "example", "kernel", "json", "parse", "closure"])
+g = newgroup!(SUITE, "problem json parse", ["problem", "example", "kernel", "json", "parse", "closure"])
 
 jstr = readstring(joinpath(PROBLEM_DATA_DIR, "test.json"))
 
@@ -90,7 +87,7 @@ g["parse_json"] = @benchmarkable JSONParse.perf_parse_json($(jstr))
 
 include("Raytracer.jl")
 
-g = addgroup!(GROUPS, "problem raytrace", ["problem", "example", "kernel", "raytrace"])
+g = newgroup!(SUITE, "problem raytrace", ["problem", "example", "kernel", "raytrace"])
 
 g["raytrace"] = @benchmarkable Raytracer.perf_raytrace(5, 256, 4)
 
@@ -100,7 +97,7 @@ g["raytrace"] = @benchmarkable Raytracer.perf_raytrace(5, 256, 4)
 
 include("StockCorr.jl")
 
-g = addgroup!(GROUPS, "problem stockcorr", ["problem", "example", "kernel", "finance", "stockcorr"])
+g = newgroup!(SUITE, "problem stockcorr", ["problem", "example", "kernel", "finance", "stockcorr"])
 
 g["stockcorr"] = @benchmarkable StockCorr.perf_stockcorr()
 
@@ -110,7 +107,7 @@ g["stockcorr"] = @benchmarkable StockCorr.perf_stockcorr()
 
 include("Simplex.jl")
 
-g = addgroup!(GROUPS, "problem simplex", ["problem", "example", "kernel", "simplex"])
+g = newgroup!(SUITE, "problem simplex", ["problem", "example", "kernel", "simplex"])
 
 g["simplex"] = @benchmarkable Simplex.perf_simplex()
 
@@ -120,7 +117,7 @@ g["simplex"] = @benchmarkable Simplex.perf_simplex()
 
 include("Ziggurat.jl")
 
-g = addgroup!(GROUPS, "problem ziggurat", ["problem", "example", "kernel", "ziggurat"])
+g = newgroup!(SUITE, "problem ziggurat", ["problem", "example", "kernel", "ziggurat"])
 
 g["ziggurat"] = @benchmarkable Ziggurat.perf_ziggurat(10^6)
 
@@ -130,7 +127,7 @@ g["ziggurat"] = @benchmarkable Ziggurat.perf_ziggurat(10^6)
 
 include("SeismicSimulation.jl")
 
-g = addgroup!(GROUPS, "problem seismic simulation", ["problem", "example", "kernel", "seismic", "simd"])
+g = newgroup!(SUITE, "problem seismic simulation", ["problem", "example", "kernel", "seismic", "simd"])
 
 for T in (Float32, Float64)
     g["seismic", string(T)] = @benchmarkable SeismicSimulation.perf_seismic_sim($T)
@@ -142,7 +139,7 @@ end
 
 include("SparseFEM.jl")
 
-g = addgroup!(GROUPS, "problem sparse fem", ["problem", "example", "kernel", "sparse", "fem"])
+g = newgroup!(SUITE, "problem sparse fem", ["problem", "example", "kernel", "sparse", "fem"])
 
 g["sparse_fem"] = @benchmarkable SparseFEM.perf_sparse_fem(256)
 
@@ -152,8 +149,7 @@ g["sparse_fem"] = @benchmarkable SparseFEM.perf_sparse_fem(256)
 
 include("SpellCheck.jl")
 
-g = addgroup!(GROUPS, "problem spellcheck", ["problem", "example", "kernel", "spell",
-                                               "check", "spellcheck", "string"])
+g = newgroup!(SUITE, "problem spellcheck", ["problem", "example", "kernel", "spell", "check", "spellcheck", "string"])
 
 g["spellcheck"] = @benchmarkable SpellCheck.perf_spellcheck()
 

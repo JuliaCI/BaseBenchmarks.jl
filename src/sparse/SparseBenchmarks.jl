@@ -1,6 +1,6 @@
 module SparseBenchmarks
 
-using ..BaseBenchmarks: GROUPS
+using ..BaseBenchmarks: SUITE
 using ..RandUtils
 using BenchmarkTools
 
@@ -12,7 +12,7 @@ samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
 ############
 
 # Note that some of the "sparse logical" tests are commented
-# out because they requires resolution of JuliaLang/julia#14717.
+# out because they require resolution of JuliaLang/julia#14717.
 
 # vector #
 #--------#
@@ -27,8 +27,7 @@ else
     splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
 end
 
-g = addgroup!(GROUPS, "sparse vector indexing", ["sparse", "indexing", "array",
-                                                   "getindex", "vector"])
+g = newgroup!(SUITE, "sparse vector indexing", ["sparse", "indexing", "array", "getindex", "vector"])
 
 for (s, v, l) in zip(sizes, spvecs, splogvecs)
     g["array", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(1:s, s)))
@@ -54,8 +53,7 @@ else
     splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
 end
 
-g = addgroup!(GROUPS, "sparse matrix row indexing", ["sparse", "indexing", "array",
-                                                       "getindex", "matrix", "row"])
+g = newgroup!(SUITE, "sparse matrix row indexing", ["sparse", "indexing", "array", "getindex", "matrix", "row"])
 
 for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
     g["array", s, nnz(m), c] = @benchmarkable getindex($m, $v, $c)
@@ -64,8 +62,7 @@ for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, ind
     # g["sparse logical", s, nnz(m), nnz(sl), c] = @benchmarkable getindex($m, $sl, $c)
 end
 
-g = addgroup!(GROUPS, "sparse matrix column indexing", ["sparse", "indexing", "array",
-                                                          "getindex", "matrix", "column"])
+g = newgroup!(SUITE, "sparse matrix column indexing", ["sparse", "indexing", "array", "getindex", "matrix", "column"])
 
 for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
     g["array", s, nnz(m), r] = @benchmarkable getindex($m, $r, $v)
@@ -74,9 +71,7 @@ for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, ind
     # g["sparse logical", s, nnz(m), nnz(sl), r] = @benchmarkable getindex($m, $r, $sl)
 end
 
-g = addgroup!(GROUPS, "sparse matrix row + column indexing", ["sparse", "indexing", "array",
-                                                                "getindex", "matrix", "row",
-                                                                "column"])
+g = newgroup!(SUITE, "sparse matrix row + column indexing", ["sparse", "indexing", "array", "getindex", "matrix", "row", "column"])
 
 for (s, m, v, l, sl, i) in zip(sizes, matrices, vectors, logvecs, splogmats, inds)
     g["array", s, nnz(m)] = @benchmarkable getindex($m, $v, $v)
@@ -95,7 +90,7 @@ small_rct = samesprand(600, 400, 0.01)
 large_sqr = samesprand(20000, 20000, 0.01)
 large_rct = samesprand(20000, 10000, 0.01)
 
-g = addgroup!(GROUPS, "sparse matrix transpose", ["sparse", "array", "ctranspose", "transpose", "matrix"])
+g = newgroup!(SUITE, "sparse matrix transpose", ["sparse", "array", "ctranspose", "transpose", "matrix"])
 
 for m in (small_sqr, small_rct, large_sqr, large_rct)
     cm = m + m*im

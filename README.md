@@ -9,7 +9,9 @@ This package is a collection of Julia benchmarks available for CI performance tr
 ```julia
 julia> using BaseBenchmarks
 
-julia> execute(BaseBenchmarks.GROUPS[@tagged ("array" || "linalg") && !("simd")])
+julia> using BenchmarkTools
+
+julia> run(BaseBenchmarks.SUITE[@tagged ("array" || "linalg") && !("simd")])
 ```
 
 Documentation regarding benchmark execution and result analysis can be found in [BenchmarkTools.jl](https://github.com/JuliaCI/BenchmarkTools.jl).

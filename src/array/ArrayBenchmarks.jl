@@ -1,6 +1,6 @@
 module ArrayBenchmarks
 
-using ..BaseBenchmarks: GROUPS
+using ..BaseBenchmarks: SUITE
 using ..RandUtils
 using BenchmarkTools
 
@@ -19,7 +19,7 @@ arrays = (makearrays(Int32, 3, 5)...,
           makearrays(Float32, 300, 500)...,
           trues(3, 5), trues(300, 500))
 
-g = addgroup!(GROUPS, "array index sum", ["array", "sum", "index", "simd"])
+g = newgroup!(SUITE, "array index sum", ["array", "sum", "index", "simd"])
 
 for A in arrays
     T = string(typeof(A))
@@ -42,7 +42,7 @@ include("revloadindex.jl")
 v = samerand(10^6)
 n = samerand()
 
-g = addgroup!(GROUPS, "array index load reverse", ["array", "indexing", "load", "reverse"])
+g = newgroup!(SUITE, "array index load reverse", ["array", "indexing", "load", "reverse"])
 
 g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(fill!($v, $n))
 g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(fill!($v, $n))
@@ -54,7 +54,7 @@ g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(fill!($v, $n), $v
 
 perf_setindex!(A, val, inds) = setindex!(A, val, inds...)
 
-g = addgroup!(GROUPS, "array index setindex!", ["array", "indexing", "setindex!"])
+g = newgroup!(SUITE, "array index setindex!", ["array", "indexing", "setindex!"])
 
 for s in (1, 2, 3, 4, 5)
     A = samerand(Float64, ntuple(one, s)...)
@@ -76,7 +76,7 @@ include("subarray.jl")
 
 n = samerand()
 
-g = addgroup!(GROUPS, "array subarray", ["array", "subarray", "lucompletepiv"])
+g = newgroup!(SUITE, "array subarray", ["array", "subarray", "lucompletepiv"])
 
 for s in (100, 250, 500, 1000)
     m = samerand(s, s)
@@ -90,7 +90,7 @@ end
 
 include("cat.jl")
 
-g = addgroup!(GROUPS, "array cat", ["array", "indexing", "cat", "hcat", "vcat", "hvcat", "setindex"])
+g = newgroup!(SUITE, "array cat", ["array", "indexing", "cat", "hcat", "vcat", "hvcat", "setindex"])
 
 for s in (5, 500)
     A = samerand(s, s)
@@ -115,14 +115,14 @@ function perf_push_multiple!(collection, items)
     return collection
 end
 
-g = addgroup!(GROUPS, "array growth", ["array", "growth", "push!", "append!", "prepend!"])
+g = newgroup!(SUITE, "array growth", ["array", "growth", "push!", "append!", "prepend!"])
 
 for s in (8, 256, 2048)
     v = samerand(s)
-    g["push_single!", s] = @benchmarkable push!(copy($v), samerand())
-    g["push_multiple!", s] = @benchmarkable perf_push_multiple!(copy($v), $v)
-    g["append!", s] = @benchmarkable append!(copy($v), $v)
-    g["prerend!", s] = @benchmarkable prepend!(copy($v), $v)
+    g["push_single!", s] = @benchmarkable push!(x, samerand()) setup=(x = copy($v))
+    g["push_multiple!", s] = @benchmarkable perf_push_multiple!(x, $v) setup=(x = copy($v))
+    g["append!", s] = @benchmarkable append!(x, $v) setup=(x = copy($v))
+    g["prerend!", s] = @benchmarkable prepend!(x, $v) setup=(x = copy($v))
 end
 
 ##########################
@@ -137,15 +137,14 @@ ls = linspace(0,1,10^7)
 rg = 0.0:(10.0^(-7)):1.0
 arr = collect(ls)
 
-g = addgroup!(GROUPS, "array comprehension", ["array", "comprehension", "iteration",
-                                                "indexing", "linspace", "collect", "range"])
+g = newgroup!(SUITE, "array comprehension", ["array", "comprehension", "iteration", "indexing", "linspace", "collect", "range"])
 
-for i in (ls, rg, arr)
-    T = string(typeof(i))
-    g["collect", T] = @benchmarkable collect($i)
-    g["comprehension_collect", T] = @benchmarkable perf_compr_collect($i)
-    g["comprehension_iteration", T] = @benchmarkable perf_compr_iter($i)
-    g["comprehension_indexing", T] = @benchmarkable perf_compr_index($i)
+for X in (ls, rg, arr)
+    T = string(typeof(X))
+    g["collect", T] = @benchmarkable collect($X)
+    g["comprehension_collect", T] = @benchmarkable perf_compr_collect($X)
+    g["comprehension_iteration", T] = @benchmarkable perf_compr_iter($X)
+    g["comprehension_indexing", T] = @benchmarkable perf_compr_index($X)
 end
 
 ###############################
@@ -170,7 +169,7 @@ n, range = 10^6, -3:3
 a, b = samerand(range, n), samerand(range)
 boolarr, bitarr = Vector{Bool}(n), BitArray(n)
 
-g = addgroup!(GROUPS, "array bool", ["array", "indexing", "load", "bool", "bitarray", "fill!"])
+g = newgroup!(SUITE, "array bool", ["array", "indexing", "load", "bool", "bitarray", "fill!"])
 
 g["bitarray_bool_load!"] = @benchmarkable perf_bool_load!($bitarr, $a, $b)
 g["boolarray_bool_load!"] = @benchmarkable perf_bool_load!($boolarr, $a, $b)

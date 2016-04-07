@@ -1,6 +1,6 @@
 module SortBenchmarks
 
-using ..BaseBenchmarks: GROUPS
+using ..BaseBenchmarks: SUITE
 using ..RandUtils
 using BenchmarkTools
 
@@ -17,18 +17,18 @@ const LISTS = (
 #####################################
 
 for (tag, T) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertionsort", InsertionSort))
-    sortgroup = addgroup!(GROUPS, "sort $tag", ["sort", "sort!", tag])
-    sortpermgroup = addgroup!(GROUPS, "sort sortperm $tag", ["sort", "sort!", "sortperm", "sortperm!", tag])
+    sortgroup = newgroup!(SUITE, "sort $tag", ["sort", "sort!", tag])
+    sortpermgroup = newgroup!(SUITE, "sort sortperm $tag", ["sort", "sort!", "sortperm", "sortperm!", tag])
     for (kind, list) in LISTS
         ix = collect(1:length(list))
         sortgroup["sort", tag, kind] = @benchmarkable sort($list; alg = $T)
         sortgroup["sort reverse", tag, kind] = @benchmarkable sort($list; alg = $T, rev = true)
-        sortgroup["sort!", tag, kind] = @benchmarkable sort!(copy($list); alg = $T)
-        sortgroup["sort! reverse", tag, kind] = @benchmarkable sort!(copy($list); alg = $T, rev = true)
         sortpermgroup["sortperm", tag, kind] = @benchmarkable sortperm($list; alg = $T)
         sortpermgroup["sortperm reverse", tag, kind] = @benchmarkable sortperm($list; alg = $T, rev = true)
-        sortpermgroup["sortperm!", tag, kind] = @benchmarkable sortperm!(copy($ix), $list; alg = $T)
-        sortpermgroup["sortperm! reverse", tag, kind] = @benchmarkable sortperm!(copy($ix), $list; alg = $T, rev = true)
+        sortgroup["sort!", tag, kind] = @benchmarkable sort!(x; alg = $T) setup=(x = copy($list))
+        sortgroup["sort! reverse", tag, kind] = @benchmarkable sort!(x; alg = $T, rev = true) setup=(x = copy($list))
+        sortpermgroup["sortperm!", tag, kind] = @benchmarkable sortperm!(x, $list; alg = $T) setup=(x = copy($ix))
+        sortpermgroup["sortperm! reverse", tag, kind] = @benchmarkable sortperm!(x, $list; alg = $T, rev = true) setup=(x = copy($ix))
     end
 end
 
@@ -36,7 +36,7 @@ end
 # issorted #
 ############
 
-g = addgroup!(GROUPS, "sort issorted", ["sort", "issorted"])
+g = newgroup!(SUITE, "sort issorted", ["sort", "issorted"])
 
 for (kind, list) in LISTS
     g["issorted", kind] = @benchmarkable issorted($list)

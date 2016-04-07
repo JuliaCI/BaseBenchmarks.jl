@@ -1,6 +1,7 @@
 addprocs(1)
 
 using BaseBenchmarks
+using BenchmarkTools
 using Base.Test
 
-@test begin execute(BaseBenchmarks.GROUPS, 1e-4, false; verbose = true); true end
+@test begin @warmup BaseBenchmarks.SUITE end
