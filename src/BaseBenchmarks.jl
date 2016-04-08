@@ -1,5 +1,3 @@
-VERSION >= v"0.4.0-dev+6521" && __precompile__()
-
 module BaseBenchmarks
 
 info("loading BaseBenchmarks.jl (this could take a few seconds)...")
