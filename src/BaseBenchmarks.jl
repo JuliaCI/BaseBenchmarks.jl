@@ -1,8 +1,9 @@
 module BaseBenchmarks
 
-info("loading BaseBenchmarks.jl (this could take a few seconds)...")
+info("loading BaseBenchmarks.jl (this could take a few minutes)...")
 
 using BenchmarkTools
+using JLD
 using Compat
 
 const SUITE = BenchmarkGroup()
@@ -61,6 +62,10 @@ println("done (took $(toq()) seconds)")
 
 print("\tloading TupleBenchmarks.jl..."); tic();
 include("tuple/TupleBenchmarks.jl")
+println("done (took $(toq()) seconds)")
+
+print("\tloading cached parameters..."); tic();
+loadparams!(SUITE, JLD.load(joinpath(Pkg.dir("BaseBenchmarks"), "etc", "parameters.jld"), "params"))
 println("done (took $(toq()) seconds)")
 
 end # module
