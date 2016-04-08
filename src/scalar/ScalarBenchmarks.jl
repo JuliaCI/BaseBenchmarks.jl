@@ -47,10 +47,10 @@ for Ti in NUMS, Tj in NUMS
     g["scalar_sub", tistr, tjstr] = @benchmarkable -($xi, $xj)
     g["scalar_mul", tistr, tjstr] = @benchmarkable *($xi, $xj)
     g["scalar_div", tistr, tjstr] = @benchmarkable /($xi, $xj)
-    g["scalar_fastmath_add", tistr, tjstr] = @benchmarkable @fastmath a * b
-    g["scalar_fastmath_sub", tistr, tjstr] = @benchmarkable @fastmath a / b
-    g["scalar_fastmath_mul", tistr, tjstr] = @benchmarkable @fastmath a + b
-    g["scalar_fastmath_div", tistr, tjstr] = @benchmarkable @fastmath a - b
+    g["scalar_fastmath_add", tistr, tjstr] = @benchmarkable @fastmath $xi * $xj
+    g["scalar_fastmath_sub", tistr, tjstr] = @benchmarkable @fastmath $xi / $xj
+    g["scalar_fastmath_mul", tistr, tjstr] = @benchmarkable @fastmath $xi + $xj
+    g["scalar_fastmath_div", tistr, tjstr] = @benchmarkable @fastmath $xi - $xj
 end
 
 end # module
