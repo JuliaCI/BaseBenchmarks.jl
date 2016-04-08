@@ -9,8 +9,6 @@ using Compat
 
 const SUITE = BenchmarkGroup()
 
-export SUITE
-
 print("\tloading RandUtils.jl..."); tic();
 include("utils/RandUtils.jl")
 println("done (took $(toq()) seconds)")
