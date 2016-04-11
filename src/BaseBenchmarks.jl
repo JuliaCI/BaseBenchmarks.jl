@@ -65,7 +65,7 @@ include("tuple/TupleBenchmarks.jl")
 println("done (took $(toq()) seconds)")
 
 print("\tloading cached parameters..."); tic();
-loadparams!(SUITE, JLD.load(joinpath(Pkg.dir("BaseBenchmarks"), "etc", "parameters.jld"), "params"))
+loadevals!(SUITE, JLD.load(joinpath(Pkg.dir("BaseBenchmarks"), "etc", "evals.jld"), "SUITE"))
 println("done (took $(toq()) seconds)")
 
 end # module
