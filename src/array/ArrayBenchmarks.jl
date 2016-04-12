@@ -13,25 +13,21 @@ using BenchmarkTools
 
 include("sumindex.jl")
 
-arrays = (makearrays(Int32, 3, 5)...,
-          makearrays(Int32, 300, 500)...,
-          makearrays(Float32, 3, 5)...,
-          makearrays(Float32, 300, 500)...,
-          trues(3, 5), trues(300, 500))
+s = 500
+arrays = (makearrays(Int32, s, s)..., makearrays(Float32, s, s)..., trues(s, s))
 
 g = newgroup!(SUITE, "array index sum", ["array", "sum", "index", "simd"])
 
 for A in arrays
     T = string(typeof(A))
-    s = size(A)
-    g["sumelt", T, s] = @benchmarkable perf_sumelt($A)
-    g["sumeach", T, s] = @benchmarkable perf_sumeach($A)
-    g["sumlinear", T, s] = @benchmarkable perf_sumlinear($A)
-    g["sumcartesian", T, s] = @benchmarkable perf_sumcartesian($A)
-    g["sumcolon", T, s] = @benchmarkable perf_sumcolon($A)
-    g["sumrange", T, s] = @benchmarkable perf_sumrange($A)
-    g["sumlogical", T, s] = @benchmarkable perf_sumlogical($A)
-    g["sumvector", T, s] = @benchmarkable perf_sumvector($A)
+    g["sumelt", T] = @benchmarkable perf_sumelt($A)
+    g["sumeach", T] = @benchmarkable perf_sumeach($A)
+    g["sumlinear", T] = @benchmarkable perf_sumlinear($A)
+    g["sumcartesian", T] = @benchmarkable perf_sumcartesian($A)
+    g["sumcolon", T] = @benchmarkable perf_sumcolon($A)
+    g["sumrange", T] = @benchmarkable perf_sumrange($A)
+    g["sumlogical", T] = @benchmarkable perf_sumlogical($A)
+    g["sumvector", T] = @benchmarkable perf_sumvector($A)
 end
 
 # #10301 #
