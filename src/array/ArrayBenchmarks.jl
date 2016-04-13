@@ -18,16 +18,17 @@ arrays = (makearrays(Int32, s, s)..., makearrays(Float32, s, s)..., trues(s, s))
 
 g = newgroup!(SUITE, "array index sum", ["array", "sum", "index", "simd"])
 
+tol = 0.2
 for A in arrays
     T = string(typeof(A))
-    g["sumelt", T] = @benchmarkable perf_sumelt($A)
-    g["sumeach", T] = @benchmarkable perf_sumeach($A)
-    g["sumlinear", T] = @benchmarkable perf_sumlinear($A)
-    g["sumcartesian", T] = @benchmarkable perf_sumcartesian($A)
-    g["sumcolon", T] = @benchmarkable perf_sumcolon($A)
-    g["sumrange", T] = @benchmarkable perf_sumrange($A)
-    g["sumlogical", T] = @benchmarkable perf_sumlogical($A)
-    g["sumvector", T] = @benchmarkable perf_sumvector($A)
+    g["sumelt", T] = @benchmarkable perf_sumelt($A) time_tolerance = tol
+    g["sumeach", T] = @benchmarkable perf_sumeach($A) time_tolerance = tol
+    g["sumlinear", T] = @benchmarkable perf_sumlinear($A) time_tolerance = tol
+    g["sumcartesian", T] = @benchmarkable perf_sumcartesian($A) time_tolerance = tol
+    g["sumcolon", T] = @benchmarkable perf_sumcolon($A) time_tolerance = tol
+    g["sumrange", T] = @benchmarkable perf_sumrange($A) time_tolerance = tol
+    g["sumlogical", T] = @benchmarkable perf_sumlogical($A) time_tolerance = tol
+    g["sumvector", T] = @benchmarkable perf_sumvector($A) time_tolerance = tol
 end
 
 # #10301 #
