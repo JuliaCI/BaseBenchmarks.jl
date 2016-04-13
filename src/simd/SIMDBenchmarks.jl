@@ -111,7 +111,7 @@ end
 
 g = newgroup!(SUITE, "simd", ["array", "inbounds", "mul", "axpy!", "inner", "sum", "reduce"])
 
-for s in (9, 10, 255, 256, 999, 1000), T in (Int32, Int64, Float32, Float64)
+for s in (4095, 4096), T in (Int32, Int64, Float32, Float64)
     tstr = string(T)
     v = samerand(T, s)
     n = samerand(T)

@@ -6,6 +6,9 @@ using BenchmarkTools
 using JLD
 using Compat
 
+BenchmarkTools.DEFAULT_PARAMETERS.time_tolerance = 0.10
+BenchmarkTools.DEFAULT_PARAMETERS.memory_tolerance = 0.01
+
 const SUITE = BenchmarkGroup()
 
 print("\tloading RandUtils.jl..."); tic();
