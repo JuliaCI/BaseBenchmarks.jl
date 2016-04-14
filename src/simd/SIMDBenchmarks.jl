@@ -48,7 +48,8 @@ end
 
 function perf_two_reductions(X, Y, Z)
     # Use non-zero initial value to make sure reduction values include it.
-    (s,t) = (one(eltype(X)), one(eltype(Y)))
+    s = one(eltype(X))
+    t = one(eltype(Y))
     @simd for i in 1:length(Z)
         @inbounds begin
             s += X[i]
@@ -56,7 +57,7 @@ function perf_two_reductions(X, Y, Z)
             s += Z[i]   # Two reductions go into s
         end
     end
-    return (s,t)
+    return s*t
 end
 
 function perf_conditional_loop!(X, Y, Z)
