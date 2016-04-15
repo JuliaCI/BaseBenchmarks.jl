@@ -1,8 +1,12 @@
 module ParallelBenchmarks
 
-using ..BaseBenchmarks: SUITE
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
 using Compat
+
+const SUITE = BenchmarkGroup()
 
 #################################################
 # Echoing data between processes (Issue #14467) #
@@ -13,7 +17,7 @@ if nprocs() > 1
         workers = procs()
         return workers[findfirst(w -> w != id, workers)]
     end
-    g = newgroup!(SUITE, "parallel io", ["parallel", "identity", "echo", "remotecall_fetch", "remotecall", "io"])
+    g = addgroup!(SUITE, "remotecall", ["io", "remotecall_fetch"])
     for s in (2, 64, 512, 1024, 4096)
         z = zeros(UInt8, s)
         i = otherid(myid())
@@ -30,7 +34,7 @@ end
 #     include("Laplace3D.jl")
 #     include("ThreadedStockCorr.jl")
 #     include("LatticeBoltzmann.jl")
-#     g = newgroup!(SUITE, "parallel multithread", ["parallel", "thread", "multithread", "laplace", "laplacian"])
+#     g = addgroup!(SUITE, "multithread", ["thread", "laplace", "laplacian"])
 #     g["laplace3d"] = @benchmarkable Laplace3D.perf_laplace3d()
 #     g["pstockcorr"] = @benchmarkable ThreadedStockCorr.perf_pstockcorr(10^4)
 #     g["lattice_boltzmann"] = @benchmarkable LatticeBoltzmann.perf_lattice_boltzmann(36)

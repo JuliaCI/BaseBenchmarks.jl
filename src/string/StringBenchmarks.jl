@@ -1,8 +1,12 @@
 module StringBenchmarks
 
-using ..BaseBenchmarks: SUITE
-using ..RandUtils
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
+using Compat
+
+const SUITE = BenchmarkGroup()
 
 ####################
 # replace (#12224) #
@@ -10,9 +14,7 @@ using BenchmarkTools
 
 str = join(samerand('a':'d', 10^4))
 
-g = newgroup!(SUITE, "string", ["replace", "join"])
-
-g["replace"] = @benchmarkable replace($str, "a", "b")
-g["join"] = @benchmarkable join($str, $str)
+SUITE["replace"] = @benchmarkable replace($str, "a", "b")
+SUITE["join"] = @benchmarkable join($str, $str)
 
 end # module

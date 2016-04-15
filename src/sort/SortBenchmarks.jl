@@ -1,9 +1,12 @@
 module SortBenchmarks
 
-using ..BaseBenchmarks: SUITE
-using ..RandUtils
-using BenchmarkTools
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
 
+using .RandUtils
+using BenchmarkTools
+using Compat
+
+const SUITE = BenchmarkGroup()
 const LIST_SIZE = 50000
 const LISTS = (
     ("ascending", collect(1:LIST_SIZE)),
@@ -16,19 +19,18 @@ const LISTS = (
 # QuickSort/MergeSort/InsertionSort #
 #####################################
 
-for (tag, T) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertionsort", InsertionSort))
-    sortgroup = newgroup!(SUITE, "sort $tag", ["sort", "sort!", tag])
-    sortpermgroup = newgroup!(SUITE, "sort sortperm $tag", ["sort", "sort!", "sortperm", "sortperm!", tag])
+for (group, Alg) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("insertionsort", InsertionSort))
+    g = addgroup!(SUITE, group)
     for (kind, list) in LISTS
         ix = collect(1:length(list))
-        sortgroup["sort", tag, kind] = @benchmarkable sort($list; alg = $T)
-        sortgroup["sort reverse", tag, kind] = @benchmarkable sort($list; alg = $T, rev = true)
-        sortpermgroup["sortperm", tag, kind] = @benchmarkable sortperm($list; alg = $T)
-        sortpermgroup["sortperm reverse", tag, kind] = @benchmarkable sortperm($list; alg = $T, rev = true)
-        sortgroup["sort!", tag, kind] = @benchmarkable sort!(x; alg = $T) setup=(x = copy($list))
-        sortgroup["sort! reverse", tag, kind] = @benchmarkable sort!(x; alg = $T, rev = true) setup=(x = copy($list))
-        sortpermgroup["sortperm!", tag, kind] = @benchmarkable sortperm!(x, $list; alg = $T) setup=(x = copy($ix))
-        sortpermgroup["sortperm! reverse", tag, kind] = @benchmarkable sortperm!(x, $list; alg = $T, rev = true) setup=(x = copy($ix))
+        g["sort forwards", kind] = @benchmarkable sort($list; alg = $Alg)
+        g["sort reverse", kind] = @benchmarkable sort($list; alg = $Alg, rev = true)
+        g["sortperm forwards", kind] = @benchmarkable sortperm($list; alg = $Alg)
+        g["sortperm reverse", kind] = @benchmarkable sortperm($list; alg = $Alg, rev = true)
+        g["sort! forwards", kind] = @benchmarkable sort!(x; alg = $Alg) setup=(x = copy($list))
+        g["sort! reverse", kind] = @benchmarkable sort!(x; alg = $Alg, rev = true) setup=(x = copy($list))
+        g["sortperm! forwards", kind] = @benchmarkable sortperm!(x, $list; alg = $Alg) setup=(x = copy($ix))
+        g["sortperm! reverse", kind] = @benchmarkable sortperm!(x, $list; alg = $Alg, rev = true) setup=(x = copy($ix))
     end
 end
 
@@ -36,11 +38,11 @@ end
 # issorted #
 ############
 
-g = newgroup!(SUITE, "sort issorted", ["sort", "issorted"])
+g = addgroup!(SUITE, "issorted")
 
 for (kind, list) in LISTS
-    g["issorted", kind] = @benchmarkable issorted($list)
-    g["issorted reverse", kind] = @benchmarkable issorted($list; rev = true)
+    g["forwards", kind] = @benchmarkable issorted($list)
+    g["reverse", kind] = @benchmarkable issorted($list; rev = true)
 end
 
 end # module

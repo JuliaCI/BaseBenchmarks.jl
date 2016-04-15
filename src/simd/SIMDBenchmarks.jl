@@ -1,8 +1,12 @@
 module SIMDBenchmarks
 
-using ..BaseBenchmarks: SUITE
-using ..RandUtils
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
+using Compat
+
+const SUITE = BenchmarkGroup(["array", "inbounds"])
 
 ###########
 # Methods #
@@ -110,21 +114,19 @@ end
 # Benchmarks #
 ##############
 
-g = newgroup!(SUITE, "simd", ["array", "inbounds", "mul", "axpy!", "inner", "sum", "reduce"])
-
 for s in (4095, 4096), T in (Int32, Int64, Float32, Float64)
     tstr = string(T)
     v = samerand(T, s)
     n = samerand(T)
-    g["axpy!", tstr, s] = @benchmarkable perf_axpy!($n, $v, $v)
-    g["inner", tstr, s] = @benchmarkable perf_inner($v, $v)
-    g["sum_reduce", tstr, s] = @benchmarkable perf_sum_reduce($v)
-    g["manual_example!", tstr, s] = @benchmarkable perf_manual_example!($v, $v, $v)
-    g["two_reductions", tstr, s] = @benchmarkable perf_two_reductions($v, $v, $v)
-    g["conditional_loop!", tstr, s] = @benchmarkable perf_conditional_loop!($v, $v, $v)
-    g["local_arrays", tstr, s] = @benchmarkable perf_local_arrays($v)
+    SUITE["axpy!", tstr, s] = @benchmarkable perf_axpy!($n, $v, $v)
+    SUITE["inner", tstr, s] = @benchmarkable perf_inner($v, $v)
+    SUITE["sum_reduce", tstr, s] = @benchmarkable perf_sum_reduce($v)
+    SUITE["manual_example!", tstr, s] = @benchmarkable perf_manual_example!($v, $v, $v)
+    SUITE["two_reductions", tstr, s] = @benchmarkable perf_two_reductions($v, $v, $v)
+    SUITE["conditional_loop!", tstr, s] = @benchmarkable perf_conditional_loop!($v, $v, $v)
+    SUITE["local_arrays", tstr, s] = @benchmarkable perf_local_arrays($v)
     for F in (MutableFields, ImmutableFields)
-        g["loop_fields!", tstr, string(F), s] = @benchmarkable perf_loop_fields!($(F)($v))
+        SUITE["loop_fields!", tstr, string(F), s] = @benchmarkable perf_loop_fields!($(F)($v))
     end
 end
 

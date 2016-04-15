@@ -1,8 +1,12 @@
 module TupleBenchmarks
 
-using ..BaseBenchmarks: SUITE
-using ..RandUtils
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
+using Compat
+
+const SUITE = BenchmarkGroup()
 
 ###############
 # issue #5274 #
@@ -36,7 +40,7 @@ end
 const TUPLE_SUM_SIZES = (3, 8, 30, 60)
 const TUPLE_SUM_TYPES = (Float32, Float64)
 
-g = newgroup!(SUITE, "tuple indexing", ["tuple", "indexing", "sum"])
+g = addgroup!(SUITE, "index", ["sum"])
 
 for s in TUPLE_SUM_SIZES, T in TUPLE_SUM_TYPES
     tup = tuple(samerand(T, s)...)

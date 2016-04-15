@@ -17,12 +17,15 @@ samerand(S) = rand(deepcopy(SEED), S)
 samerand(dims::Int...) = alignedalloc(DEFAULT_ELTYPE, dims)
 samerand(S, dims::Int...) = alignedalloc(S, dims)
 
+samesprand(args...) = sprand(deepcopy(SEED), args...)
+samesprandbool(args...) = sprandbool(deepcopy(SEED), args...)
+
 randvec(T, n) = samerand(T, n)
 randvec(n) = samerand(n)
 
 randmat(T, n) = samerand(T, n, n)
 randmat(n) = samerand(n, n)
 
-export samerand, randvec, randmat
+export samerand, samesprand, samesprandbool, randvec, randmat
 
 end

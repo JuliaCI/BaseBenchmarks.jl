@@ -1,18 +1,21 @@
 module SparseBenchmarks
 
-using ..BaseBenchmarks: SUITE
-using ..RandUtils
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
+using Compat
 
-samesprand(args...) = sprand(MersenneTwister(1), args...)
-samesprandbool(args...) = sprandbool(MersenneTwister(1), args...)
+const SUITE = BenchmarkGroup(["array"])
 
-############
-# indexing #
-############
+#########
+# index #
+#########
 
-# Note that some of the "sparse logical" tests are commented
+# Note that some of the "logical" tests are commented
 # out because they require resolution of JuliaLang/julia#14717.
+
+g = addgroup!(SUITE, "index")
 
 # vector #
 #--------#
@@ -27,14 +30,12 @@ else
     splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
 end
 
-g = newgroup!(SUITE, "sparse vector indexing", ["sparse", "indexing", "array", "getindex", "vector"])
-
 for (s, v, l) in zip(sizes, spvecs, splogvecs)
-    g["array", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(1:s, s)))
-    g["integer", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(1:s)))
-    g["range", s, nnz(v)] = @benchmarkable getindex($v, $(1:s))
-    g["dense logical", s, nnz(v)] = @benchmarkable getindex($v, $(samerand(Bool, s)))
-    # g["sparse logical", s, nnz(v), nnz(l)] = @benchmarkable getindex($v, $l)
+    g["spvec", "array",   s] = @benchmarkable getindex($v, $(samerand(1:s, s)))
+    g["spvec", "integer", s] = @benchmarkable getindex($v, $(samerand(1:s)))
+    g["spvec", "range",   s] = @benchmarkable getindex($v, $(1:s))
+    g["spvec", "logical", s] = @benchmarkable getindex($v, $(samerand(Bool, s)))
+    # g["spvec", "splogical", s, nnz(v), nnz(l)] = @benchmarkable getindex($v, $l)
 end
 
 # matrix #
@@ -53,32 +54,26 @@ else
     splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
 end
 
-g = newgroup!(SUITE, "sparse matrix row indexing", ["sparse", "indexing", "array", "getindex", "matrix", "row"])
-
 for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
-    g["array", s, nnz(m), c] = @benchmarkable getindex($m, $v, $c)
-    g["range", s, nnz(m), c] = @benchmarkable getindex($m, $(1:s), $c)
-    g["dense logical", s, nnz(m), c] = @benchmarkable getindex($m, $l, $c)
-    # g["sparse logical", s, nnz(m), nnz(sl), c] = @benchmarkable getindex($m, $sl, $c)
+    g["spmat", "col", "array", s] = @benchmarkable getindex($m, $v, $c)
+    g["spmat", "col", "range", s] = @benchmarkable getindex($m, $(1:s), $c)
+    g["spmat", "col", "logical", s] = @benchmarkable getindex($m, $l, $c)
+    # g["spmat", "col", "splogical", s] = @benchmarkable getindex($m, $sl, $c)
 end
-
-g = newgroup!(SUITE, "sparse matrix column indexing", ["sparse", "indexing", "array", "getindex", "matrix", "column"])
 
 for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
-    g["array", s, nnz(m), r] = @benchmarkable getindex($m, $r, $v)
-    g["range", s, nnz(m), r] = @benchmarkable getindex($m, $r, $(1:s))
-    g["dense logical", s, nnz(m), r] = @benchmarkable getindex($m, $r, $l)
-    # g["sparse logical", s, nnz(m), nnz(sl), r] = @benchmarkable getindex($m, $r, $sl)
+    g["spmat", "row", "array", s] = @benchmarkable getindex($m, $r, $v)
+    g["spmat", "row", "range", s] = @benchmarkable getindex($m, $r, $(1:s))
+    g["spmat", "row", "logical", s] = @benchmarkable getindex($m, $r, $l)
+    # g["spmat", "row", "splogical", s] = @benchmarkable getindex($m, $r, $sl)
 end
 
-g = newgroup!(SUITE, "sparse matrix row + column indexing", ["sparse", "indexing", "array", "getindex", "matrix", "row", "column"])
-
 for (s, m, v, l, sl, i) in zip(sizes, matrices, vectors, logvecs, splogmats, inds)
-    g["array", s, nnz(m)] = @benchmarkable getindex($m, $v, $v)
-    g["integer", s, nnz(m), i] = @benchmarkable getindex($m, $i, $i)
-    g["range", s, nnz(m)] = @benchmarkable getindex($m, $(1:s), $(1:s))
-    g["dense logical", s, nnz(m)] = @benchmarkable getindex($m, $l, $l)
-    g["sparse logical", s, nnz(m), nnz(sl)] = @benchmarkable getindex($m, $sl)
+    g["spmat", "array", s] = @benchmarkable getindex($m, $v, $v)
+    g["spmat", "integer", s] = @benchmarkable getindex($m, $i, $i)
+    g["spmat", "range", s] = @benchmarkable getindex($m, $(1:s), $(1:s))
+    g["spmat", "logical", s] = @benchmarkable getindex($m, $l, $l)
+    g["spmat", "splogical", s] = @benchmarkable getindex($m, $sl)
 end
 
 ######################
@@ -90,7 +85,7 @@ small_rct = samesprand(600, 400, 0.01)
 large_sqr = samesprand(20000, 20000, 0.01)
 large_rct = samesprand(20000, 10000, 0.01)
 
-g = newgroup!(SUITE, "sparse matrix transpose", ["sparse", "array", "ctranspose", "transpose", "matrix"])
+g = addgroup!(SUITE, "transpose", ["ctranspose"])
 
 for m in (small_sqr, small_rct, large_sqr, large_rct)
     cm = m + m*im

@@ -1,7 +1,12 @@
 module ScalarBenchmarks
 
-using ..BaseBenchmarks: SUITE
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
+using Compat
+
+const SUITE = BenchmarkGroup()
 
 const INTS = (UInt, Int, BigInt)
 const FLOATS = (Float32, Float64, BigFloat)
@@ -13,8 +18,7 @@ const NUMS = (REALS..., COMPS...)
 # predicates #
 ##############
 
-g = newgroup!(SUITE, "scalar predicate",  ["scalar", "predicate", "isinteger", "isinf",
-                                            "isnan", "iseven", "isodd"])
+g = addgroup!(SUITE, "predicate", ["isinteger", "isinf", "isnan", "iseven", "isodd"])
 
 for T in NUMS
     x = one(T)
@@ -38,7 +42,7 @@ end
 # arithmetic #
 ##############
 
-g = newgroup!(SUITE, "scalar arithmetic",  ["scalar", "arithmetic", "fastmath"])
+g = addgroup!(SUITE, "arithmetic", ["fastmath"])
 
 for Ti in NUMS, Tj in NUMS
     xi, xj = one(Ti), one(Tj)

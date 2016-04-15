@@ -1,8 +1,12 @@
 module LinAlgBenchmarks
 
-using ..BaseBenchmarks: SUITE
-using ..RandUtils
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
+using Compat
+
+const SUITE = BenchmarkGroup(["array"])
 
 const SIZES = (16, 512)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
@@ -30,11 +34,11 @@ end
 # matrix/vector arithmetic #
 ############################
 
-g = newgroup!(SUITE, "linalg arithmetic", ["array", "linalg", "arithmetic"])
+g = addgroup!(SUITE, "arithmetic")
 
 for s in SIZES
-    vstr = typename(Vector)
     v = randvec(s)
+    vstr = typename(Vector)
     g["+", vstr, vstr, s] = @benchmarkable +($v, $v)
     g["-", vstr, vstr, s] = @benchmarkable -($v, $v)
     for M in MATS
@@ -58,9 +62,7 @@ end
 # factorizations #
 ##################
 
-g = newgroup!(SUITE, "factorization", ["array", "linalg", "factorization", "eig", "eigfact",
-                                        "svd", "svdfact", "lu", "lufact", "qr", "qrfact",
-                                        "schur", "schurfact", "chol", "cholfact"])
+g = addgroup!(SUITE, "factorization", ["eig", "svd", "lu", "qr", "schur", "chol"])
 
 for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
     mstr = typename(M)
@@ -105,7 +107,7 @@ end
 # BLAS #
 ########
 
-g = newgroup!(SUITE, "blas")
+g = addgroup!(SUITE, "blas")
 
 s = 1024
 C = Complex{Float64}
@@ -116,41 +118,41 @@ cv = randvec(C, s)
 m = randmat(s)
 cm = randmat(C, s)
 
-g["dot", s]       = @benchmarkable BLAS.dot($s, $v, 1, $v, 1)
-g["dotu", s]      = @benchmarkable BLAS.dotu($s, $cv, 1, $cv, 1)
-g["dotc", s]      = @benchmarkable BLAS.dotc($s, $cv, 1, $cv, 1)
-g["blascopy!", s] = @benchmarkable BLAS.blascopy!($s, $v, 1, $v, 1)
-g["nrm2", s]      = @benchmarkable BLAS.nrm2($s, $v, 1)
-g["asum", s]      = @benchmarkable BLAS.asum($s, $v, 1)
-g["axpy!", s]     = @benchmarkable BLAS.axpy!($n, $v, fill!($v, $n))
-g["scal!", s]     = @benchmarkable BLAS.scal!($s, $n, fill!($v, $n), 1)
-g["scal", s]      = @benchmarkable BLAS.scal($s, $n, $v, 1)
-g["ger!", s]      = @benchmarkable BLAS.ger!($n, $v, $v, fill!($m, $n))
-g["syr!", s]      = @benchmarkable BLAS.syr!('U', 1.0, $v, fill!($m, $n))
-g["syrk!", s]     = @benchmarkable BLAS.syrk!('U', 'N', $n, $m, $n, fill!($m, $n))
-g["syrk", s]      = @benchmarkable BLAS.syrk('U', 'N', $n, $m)
-g["her!", s]      = @benchmarkable BLAS.her!('U', $n, $cv, fill!($cm, $cn))
-g["herk!", s]     = @benchmarkable BLAS.herk!('U', 'N', $n, $cm, $n, fill!($cm, $cn))
-g["herk", s]      = @benchmarkable BLAS.herk('U', 'N', $n, $cm)
-g["gbmv!", s]     = @benchmarkable BLAS.gbmv!('N', $s, 500, 500, $n, $m, $v, $n, fill!($v, $n))
-g["gbmv", s]      = @benchmarkable BLAS.gbmv('N', $s, 500, 500, $n, $m, $v)
-g["sbmv!", s]     = @benchmarkable BLAS.sbmv!('U', $s-1, $n, $m, $v, $n, fill!($v, $n))
-g["sbmv", s]      = @benchmarkable BLAS.sbmv('U', $s-1, $n, $m, $v)
-g["gemm!", s]     = @benchmarkable BLAS.gemm!('N', 'N', $n, $m, $m, $n, fill!($m, $n))
-g["gemm", s]      = @benchmarkable BLAS.gemm('N', 'N', $n, $m, $m)
-g["gemv!", s]     = @benchmarkable BLAS.gemv!('N', $n, $m, $v, $n, fill!($v, $n))
-g["gemv", s]      = @benchmarkable BLAS.gemv('N', $n, $m, $v)
-g["symm!", s]     = @benchmarkable BLAS.symm!('L', 'U', $n, $m, $m, $n, fill!($m, $n))
-g["symm", s]      = @benchmarkable BLAS.symm('L', 'U', $n, $m, $m)
-g["symv!", s]     = @benchmarkable BLAS.symv!('U', $n, $m, $v, $n, fill!($v, $n))
-g["symv", s]      = @benchmarkable BLAS.symv('U', $n, $m, $v)
-g["trmm!", s]     = @benchmarkable BLAS.trmm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
-g["trmm", s]      = @benchmarkable BLAS.trmm('L', 'U', 'N', 'N', $n, $m, $m)
-g["trsm!", s]     = @benchmarkable BLAS.trsm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
-g["trsm", s]      = @benchmarkable BLAS.trsm('L', 'U', 'N', 'N', $n, $m, $m)
-g["trmv!", s]     = @benchmarkable BLAS.trmv!('L', 'N', 'U', $m, fill!($v, $n))
-g["trmv", s]      = @benchmarkable BLAS.trmv('L', 'N', 'U', $m, $v)
-g["trsv!", s]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', $m, fill!($v, $n))
-g["trsv", s]      = @benchmarkable BLAS.trsv('U', 'N', 'N', $m, $v)
+g["dot"]       = @benchmarkable BLAS.dot($s, $v, 1, $v, 1)
+g["dotu"]      = @benchmarkable BLAS.dotu($s, $cv, 1, $cv, 1)
+g["dotc"]      = @benchmarkable BLAS.dotc($s, $cv, 1, $cv, 1)
+g["blascopy!"] = @benchmarkable BLAS.blascopy!($s, $v, 1, $v, 1)
+g["nrm2"]      = @benchmarkable BLAS.nrm2($s, $v, 1)
+g["asum"]      = @benchmarkable BLAS.asum($s, $v, 1)
+g["axpy!"]     = @benchmarkable BLAS.axpy!($n, $v, fill!($v, $n))
+g["scal!"]     = @benchmarkable BLAS.scal!($s, $n, fill!($v, $n), 1)
+g["scal"]      = @benchmarkable BLAS.scal($s, $n, $v, 1)
+g["ger!"]      = @benchmarkable BLAS.ger!($n, $v, $v, fill!($m, $n))
+g["syr!"]      = @benchmarkable BLAS.syr!('U', 1.0, $v, fill!($m, $n))
+g["syrk!"]     = @benchmarkable BLAS.syrk!('U', 'N', $n, $m, $n, fill!($m, $n))
+g["syrk"]      = @benchmarkable BLAS.syrk('U', 'N', $n, $m)
+g["her!"]      = @benchmarkable BLAS.her!('U', $n, $cv, fill!($cm, $cn))
+g["herk!"]     = @benchmarkable BLAS.herk!('U', 'N', $n, $cm, $n, fill!($cm, $cn))
+g["herk"]      = @benchmarkable BLAS.herk('U', 'N', $n, $cm)
+g["gbmv!"]     = @benchmarkable BLAS.gbmv!('N', $s, 500, 500, $n, $m, $v, $n, fill!($v, $n))
+g["gbmv"]      = @benchmarkable BLAS.gbmv('N', $s, 500, 500, $n, $m, $v)
+g["sbmv!"]     = @benchmarkable BLAS.sbmv!('U', $s-1, $n, $m, $v, $n, fill!($v, $n))
+g["sbmv"]      = @benchmarkable BLAS.sbmv('U', $s-1, $n, $m, $v)
+g["gemm!"]     = @benchmarkable BLAS.gemm!('N', 'N', $n, $m, $m, $n, fill!($m, $n))
+g["gemm"]      = @benchmarkable BLAS.gemm('N', 'N', $n, $m, $m)
+g["gemv!"]     = @benchmarkable BLAS.gemv!('N', $n, $m, $v, $n, fill!($v, $n))
+g["gemv"]      = @benchmarkable BLAS.gemv('N', $n, $m, $v)
+g["symm!"]     = @benchmarkable BLAS.symm!('L', 'U', $n, $m, $m, $n, fill!($m, $n))
+g["symm"]      = @benchmarkable BLAS.symm('L', 'U', $n, $m, $m)
+g["symv!"]     = @benchmarkable BLAS.symv!('U', $n, $m, $v, $n, fill!($v, $n))
+g["symv"]      = @benchmarkable BLAS.symv('U', $n, $m, $v)
+g["trmm!"]     = @benchmarkable BLAS.trmm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
+g["trmm"]      = @benchmarkable BLAS.trmm('L', 'U', 'N', 'N', $n, $m, $m)
+g["trsm!"]     = @benchmarkable BLAS.trsm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
+g["trsm"]      = @benchmarkable BLAS.trsm('L', 'U', 'N', 'N', $n, $m, $m)
+g["trmv!"]     = @benchmarkable BLAS.trmv!('L', 'N', 'U', $m, fill!($v, $n))
+g["trmv"]      = @benchmarkable BLAS.trmv('L', 'N', 'U', $m, $v)
+g["trsv!"]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', $m, fill!($v, $n))
+g["trsv"]      = @benchmarkable BLAS.trsv('U', 'N', 'N', $m, $v)
 
 end # module

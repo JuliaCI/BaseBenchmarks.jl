@@ -1,8 +1,12 @@
 module IOBenchmarks
 
-using ..BaseBenchmarks: SUITE
+include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
 using Compat
+
+const SUITE = BenchmarkGroup()
 
 #################
 # read (#12364) #
@@ -17,7 +21,7 @@ function perf_read!(io)
     return x
 end
 
-g = newgroup!(SUITE, "iobuffer read", ["io", "buffer", "stream", "read", "string"])
+g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 
 testbuf = IOBuffer(randstring(10^4))
 
