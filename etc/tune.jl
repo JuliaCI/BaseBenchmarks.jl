@@ -4,7 +4,10 @@ using JLD
 using BaseBenchmarks
 using BenchmarkTools
 
+BaseBenchmarks.loadall!()
+jldpath = joinpath(Pkg.dir("BaseBenchmarks"), "etc", "evals.jld")
+
 # re-tune the entire suite
 @warmup BaseBenchmarks.SUITE
 tune!(BaseBenchmarks.SUITE; seconds = 10, verbose = true)
-JLD.save("evals.jld", "suite", evals(BaseBenchmarks.SUITE))
+JLD.save(jldpath, "suite", evals(BaseBenchmarks.SUITE))
