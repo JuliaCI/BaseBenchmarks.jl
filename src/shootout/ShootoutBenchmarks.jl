@@ -13,7 +13,7 @@ using BenchmarkTools
 using Compat
 
 const SUITE = BenchmarkGroup(["example", "regex", "pi", "π", "tree"])
-const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "data")
+const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout", "data")
 
 ##################################################
 # Allocate and deallocate many many binary trees #

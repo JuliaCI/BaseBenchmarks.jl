@@ -8,7 +8,7 @@ BenchmarkTools.DEFAULT_PARAMETERS.time_tolerance = 0.10
 BenchmarkTools.DEFAULT_PARAMETERS.memory_tolerance = 0.01
 
 const SUITE = BenchmarkGroup()
-# const TUNED_EVALS = JLD.load(joinpath(Pkg.dir("BaseBenchmarks"), "etc", "evals.jld"), "suite")
+const TUNED_EVALS = JLD.load(joinpath(Pkg.dir("BaseBenchmarks"), "etc", "evals.jld"), "suite")
 
 const MODULES = Dict("array" => :ArrayBenchmarks,
                      "io" => :IOBenchmarks,
@@ -32,7 +32,7 @@ function load!(group::BenchmarkGroup, id::AbstractString, tune::Bool = true)
     eval(BaseBenchmarks, :(include($modpath)))
     modsuite = eval(BaseBenchmarks, modsym).SUITE
     group[id] = modsuite
-    #tune && loadevals!(group, TUNED_EVALS[id])
+    tune && loadevals!(modsuite, TUNED_EVALS[id])
     return group
 end
 
@@ -44,7 +44,7 @@ function loadall!(group::BenchmarkGroup, verbose::Bool = true)
         load!(group, id, false)
         verbose && println("done (took $(toq()) seconds)")
     end
-    # loadevals!(group, TUNED_EVALS)
+    loadevals!(group, TUNED_EVALS)
 end
 
 end # module
