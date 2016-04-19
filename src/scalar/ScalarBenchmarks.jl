@@ -24,7 +24,7 @@ for T in NUMS
     x = one(T)
     tstr = string(T)
     g["isequal", tstr]   = @benchmarkable isequal($x, $x)
-    g["isless", tstr]    = @benchmarkable isequal($x, $x)
+    g["isless", tstr]    = @benchmarkable isless($x, $x)
     g["isinteger", tstr] = @benchmarkable isinteger($x)
     g["isinf", tstr]     = @benchmarkable isinf($x)
     g["isfinite", tstr]  = @benchmarkable isfinite($x)
@@ -52,9 +52,9 @@ for Ti in NUMS, Tj in NUMS
     g["scalar_mul", tistr, tjstr] = @benchmarkable *($xi, $xj)
     g["scalar_div", tistr, tjstr] = @benchmarkable /($xi, $xj)
     g["scalar_fastmath_add", tistr, tjstr] = @benchmarkable @fastmath $xi * $xj
-    g["scalar_fastmath_sub", tistr, tjstr] = @benchmarkable @fastmath $xi / $xj
+    g["scalar_fastmath_sub", tistr, tjstr] = @benchmarkable @fastmath $xi - $xj
     g["scalar_fastmath_mul", tistr, tjstr] = @benchmarkable @fastmath $xi + $xj
-    g["scalar_fastmath_div", tistr, tjstr] = @benchmarkable @fastmath $xi - $xj
+    g["scalar_fastmath_div", tistr, tjstr] = @benchmarkable @fastmath $xi / $xj
 end
 
 end # module
