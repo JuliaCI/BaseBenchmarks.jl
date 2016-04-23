@@ -4,7 +4,7 @@ using JLD
 using BaseBenchmarks
 using BenchmarkTools
 
-BaseBenchmarks.loadall!()
+BaseBenchmarks.loadall!(tune = false)
 jldpath = joinpath(Pkg.dir("BaseBenchmarks"), "etc", "evals.jld")
 
 # re-tune the entire suite
