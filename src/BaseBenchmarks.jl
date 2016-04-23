@@ -7,9 +7,8 @@ using Compat
 BenchmarkTools.DEFAULT_PARAMETERS.time_tolerance = 0.10
 BenchmarkTools.DEFAULT_PARAMETERS.memory_tolerance = 0.01
 
+const PARAMS_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "etc", "params.jld")
 const SUITE = BenchmarkGroup()
-const TUNED_EVALS = JLD.load(joinpath(Pkg.dir("BaseBenchmarks"), "etc", "evals.jld"), "suite")
-
 const MODULES = Dict("array" => :ArrayBenchmarks,
                      "io" => :IOBenchmarks,
                      "linalg" => :LinAlgBenchmarks,
@@ -32,7 +31,7 @@ function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     eval(BaseBenchmarks, :(include($modpath)))
     modsuite = eval(BaseBenchmarks, modsym).SUITE
     group[id] = modsuite
-    tune && loadevals!(modsuite, TUNED_EVALS[id])
+    tune && loadparams!(modsuite, JLD.load(PARAMS_PATH, id))
     return group
 end
 
@@ -41,10 +40,17 @@ loadall!(; kwargs...) = loadall!(SUITE; kwargs...)
 function loadall!(group::BenchmarkGroup; verbose::Bool = true, tune::Bool = true)
     for id in keys(MODULES)
         verbose && print("loading group $(repr(id))..."); tic();
-        load!(group, id, false)
+        load!(group, id; tune = false)
         verbose && println("done (took $(toq()) seconds)")
     end
-    tune && loadevals!(group, TUNED_EVALS)
+    if tune
+        jldopen(PARAMS_PATH, "r") do file
+            for (id, suite) in group
+                loadparams!(suite, read(file, id))
+            end
+        end
+    end
+    return group
 end
 
 end # module
