@@ -24,9 +24,9 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "string" => :StringBenchmarks,
                      "tuple" => :TupleBenchmarks)
 
-load!(id::AbstractString) = load!(SUITE, id)
+load!(id::AbstractString; kwargs...) = load!(SUITE, id, tune)
 
-function load!(group::BenchmarkGroup, id::AbstractString, tune::Bool = true)
+function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     modsym = MODULES[id]
     modpath = joinpath(Pkg.dir("BaseBenchmarks"), "src", id, "$(modsym).jl")
     eval(BaseBenchmarks, :(include($modpath)))
@@ -36,15 +36,15 @@ function load!(group::BenchmarkGroup, id::AbstractString, tune::Bool = true)
     return group
 end
 
-loadall!(verbose::Bool = true) = loadall!(SUITE, verbose)
+loadall!(; kwargs...) = loadall!(SUITE; kwargs...)
 
-function loadall!(group::BenchmarkGroup, verbose::Bool = true)
+function loadall!(group::BenchmarkGroup; verbose::Bool = true, tune::Bool = true)
     for id in keys(MODULES)
         verbose && print("loading group $(repr(id))..."); tic();
         load!(group, id, false)
         verbose && println("done (took $(toq()) seconds)")
     end
-    loadevals!(group, TUNED_EVALS)
+    tune && loadevals!(group, TUNED_EVALS)
 end
 
 end # module

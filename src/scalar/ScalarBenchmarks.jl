@@ -24,18 +24,23 @@ for T in NUMS
     x = one(T)
     tstr = string(T)
     g["isequal", tstr]   = @benchmarkable isequal($x, $x)
-    g["isless", tstr]    = @benchmarkable isless($x, $x)
     g["isinteger", tstr] = @benchmarkable isinteger($x)
     g["isinf", tstr]     = @benchmarkable isinf($x)
     g["isfinite", tstr]  = @benchmarkable isfinite($x)
     g["isnan", tstr]     = @benchmarkable isnan($x)
 end
 
+for T in REALS
+    x = one(T)
+    tstr = string(T)
+    g["isless", tstr] = @benchmarkable isless($x, $x)
+end
+
 for T in INTS
     x = one(T)
     tstr = string(T)
     g["iseven", tstr] = @benchmarkable iseven($x)
-    g["isodd", tstr] = @benchmarkable isodd($x)
+    g["isodd", tstr]  = @benchmarkable isodd($x)
 end
 
 ##############
