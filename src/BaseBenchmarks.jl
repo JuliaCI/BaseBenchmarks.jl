@@ -23,7 +23,7 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "string" => :StringBenchmarks,
                      "tuple" => :TupleBenchmarks)
 
-load!(id::AbstractString; kwargs...) = load!(SUITE, id, tune)
+load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 
 function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     modsym = MODULES[id]
