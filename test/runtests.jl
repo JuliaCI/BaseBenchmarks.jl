@@ -6,4 +6,4 @@ using Base.Test
 
 BaseBenchmarks.loadall!()
 
-@test begin @warmup BaseBenchmarks.SUITE end
+@test begin warmup(BaseBenchmarks.SUITE) end

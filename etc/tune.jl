@@ -6,7 +6,7 @@ using BenchmarkTools
 
 # re-tune the entire suite
 BaseBenchmarks.loadall!(tune = false)
-@warmup BaseBenchmarks.SUITE
+warmup(BaseBenchmarks.SUITE)
 tune!(BaseBenchmarks.SUITE; seconds = 10, verbose = true)
 
 jldopen(BaseBenchmarks.PARAMS_PATH, "w") do file
