@@ -31,7 +31,7 @@ function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     eval(BaseBenchmarks, :(include($modpath)))
     modsuite = eval(BaseBenchmarks, modsym).SUITE
     group[id] = modsuite
-    tune && loadparams!(modsuite, JLD.load(PARAMS_PATH, id))
+    tune && loadparams!(modsuite, JLD.load(PARAMS_PATH, id), :evals, :samples)
     return group
 end
 
