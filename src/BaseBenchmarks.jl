@@ -46,7 +46,7 @@ function loadall!(group::BenchmarkGroup; verbose::Bool = true, tune::Bool = true
     if tune
         jldopen(PARAMS_PATH, "r") do file
             for (id, suite) in group
-                loadparams!(suite, read(file, id))
+                loadparams!(suite, read(file, id), :evals)
             end
         end
     end
