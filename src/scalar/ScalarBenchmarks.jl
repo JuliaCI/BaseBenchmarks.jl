@@ -47,19 +47,25 @@ end
 # arithmetic #
 ##############
 
-g = addgroup!(SUITE, "arithmetic", ["fastmath"])
+arith = addgroup!(SUITE, "arithmetic")
+fstmth = addgroup!(SUITE, "fastmath", ["arithmetic"])
 
-for Ti in NUMS, Tj in NUMS
-    xi, xj = one(Ti), one(Tj)
-    tistr, tjstr = string(Ti), string(Tj)
-    g["scalar_add", tistr, tjstr] = @benchmarkable +($xi, $xj)
-    g["scalar_sub", tistr, tjstr] = @benchmarkable -($xi, $xj)
-    g["scalar_mul", tistr, tjstr] = @benchmarkable *($xi, $xj)
-    g["scalar_div", tistr, tjstr] = @benchmarkable /($xi, $xj)
-    g["scalar_fastmath_add", tistr, tjstr] = @benchmarkable @fastmath $xi * $xj
-    g["scalar_fastmath_sub", tistr, tjstr] = @benchmarkable @fastmath $xi - $xj
-    g["scalar_fastmath_mul", tistr, tjstr] = @benchmarkable @fastmath $xi + $xj
-    g["scalar_fastmath_div", tistr, tjstr] = @benchmarkable @fastmath $xi / $xj
+for X in NUMS
+    x = one(X)
+    xstr = string(X)
+    fstmth["add", xstr] = @benchmarkable @fastmath $x * $(copy(x))
+    fstmth["sub", xstr] = @benchmarkable @fastmath $x - $(copy(x))
+    fstmth["mul", xstr] = @benchmarkable @fastmath $x + $(copy(x))
+    fstmth["div", xstr] = @benchmarkable @fastmath $x / $(copy(x))
+    for Y in NUMS
+        y = one(Y)
+        ystr = string(Y)
+        arith["add", xstr, ystr] = @benchmarkable +($x, $y)
+        arith["sub", xstr, ystr] = @benchmarkable -($x, $y)
+        arith["mul", xstr, ystr] = @benchmarkable *($x, $y)
+        arith["div", xstr, ystr] = @benchmarkable /($x, $y)
+    end
 end
+
 
 end # module
