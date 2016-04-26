@@ -60,10 +60,12 @@ for X in NUMS
     for Y in NUMS
         y = one(Y)
         ystr = string(Y)
-        arith["add", xstr, ystr] = @benchmarkable +($x, $y)
-        arith["sub", xstr, ystr] = @benchmarkable -($x, $y)
-        arith["mul", xstr, ystr] = @benchmarkable *($x, $y)
-        arith["div", xstr, ystr] = @benchmarkable /($x, $y)
+        # mixed type scalar benchmarks are ridiculously noisy
+        tol = X == Y ? BenchmarkTools.DEFAULT_PARAMETERS.time_tolerance : 0.5
+        arith["add", xstr, ystr] = @benchmarkable +($x, $y) time_tolerance = tol
+        arith["sub", xstr, ystr] = @benchmarkable -($x, $y) time_tolerance = tol
+        arith["mul", xstr, ystr] = @benchmarkable *($x, $y) time_tolerance = tol
+        arith["div", xstr, ystr] = @benchmarkable /($x, $y) time_tolerance = tol
     end
 end
 
