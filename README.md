@@ -43,7 +43,7 @@ loading group "sort"...done (took 3.308745574 seconds)
 loading group "shootout"...done (took 0.72022176 seconds)
 ```
 
-Now that the benchmarks are loaded, you can run them just like any other `BenchmarkGroup`:
+Now that the benchmarks are loaded, you can run them just like any other `BenchmarkTools.BenchmarkGroup`:
 
 ```julia
 # run benchmarks matching a tag query
@@ -59,7 +59,7 @@ julia> run(BaseBenchmarks.SUITE["scalar"]["fastmath"]["add", "Complex{Float64}"]
 julia> run(BaseBenchmarks.SUITE[["scalar", "fastmath", ("add", "Complex{Float64}")]]);
 ```
 
-`BaseBenchmarks.SUITE` is a normal `BenchmarkTools.BenchmarkGroup`, so it supports everything that type supports (like regression classification and filtering, leaf iteration, mapping etc.). See the [`BenchmarkTools`]((https://github.com/JuliaCI/BenchmarkTools.jl)) repository for documentation of these features.
+See the [`BenchmarkTools`]((https://github.com/JuliaCI/BenchmarkTools.jl)) repository for documentation of `BenchmarkTools.BenchmarkGroup` features (e.g. regression classification and filtering, parameter tuning, leaf iteration, higher order mapping/filtering, etc.).
 
 #### Contributing
 
