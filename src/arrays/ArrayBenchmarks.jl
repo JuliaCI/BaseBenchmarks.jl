@@ -18,6 +18,7 @@ include("sumindex.jl")
         int_arrs = (makearrays(Int32, 3, 5)..., makearrays(Int32, 300, 500)...)
         float_arrs = (makearrays(Float32, 3, 5)..., makearrays(Float32, 300, 500)...)
         arrays = (int_arrs..., float_arrs...)
+        bigrngs = (1:10^8, 10^8:-1:1, 1.0:1e8, linspace(1,2,10^7))
     end
     @benchmarks begin
         [(:sumelt, string(typeof(A)), size(A)) => perf_sumelt(A) for A in arrays]
@@ -28,6 +29,7 @@ include("sumindex.jl")
         [(:sumrange, string(typeof(A)), size(A)) => perf_sumrange(A) for A in arrays]
         [(:sumlogical, string(typeof(A)), size(A)) => perf_sumlogical(A) for A in arrays]
         [(:sumvector, string(typeof(A)), size(A)) => perf_sumvector(A) for A in arrays]
+        [(:sumrangebc, string(typeof(A)), size(A)) => perf_sumrangebc(A) for A in bigrngs]
     end
     @tags "array" "sum" "indexing" "simd"
 end

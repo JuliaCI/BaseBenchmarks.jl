@@ -60,6 +60,14 @@ function perf_sumrange(A)
     return s
 end
 
+function perf_sumrangebc{T}(r::Range{T})
+    s = zero(T)
+    for i = 1:length(r)
+        s += r[i] # bounds-checking is deliberately on, don't use `for a in r`
+    end
+    s
+end
+
 function perf_sumlogical(A)
     s = zero(eltype(A)) + zero(eltype(A))
     nrows = size(A, 1)
