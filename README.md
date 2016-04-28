@@ -55,7 +55,8 @@ julia> run(BaseBenchmarks.SUITE["linalg"]["arithmetic"]);
 # run a single benchmark
 julia> run(BaseBenchmarks.SUITE["scalar"]["fastmath"]["add", "Complex{Float64}"])
 
-# equivalent to the above, makes it easy to copy and paste IDs from benchmark reports
+# equivalent to the above, but this form makes it
+# easy to copy and paste IDs from benchmark reports
 julia> run(BaseBenchmarks.SUITE[["scalar", "fastmath", ("add", "Complex{Float64}")]]);
 ```
 
@@ -75,4 +76,4 @@ Here are some contribution tips and guidelines:
 
 #### Which version of BaseBenchmarks is being used in CI?
 
-New benchmarks added to BaseBenchmarks won't be present on our CI cluster right away, as their execution parameters must be [tuned and cached](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md#caching-parameters) on @nanosoldier (our benchmark cluster) before they are suitable for running. This process is performed periodically or upon request, after which the `master` branch is merged into the [`nanosoldier`](https://github.com/JuliaCI/BaseBenchmarks.jl/tree/nanosoldier) branch. The @nanosoldier pulls down the `nanosoldier` branch before running every benchmark job, so whatever is currently on the [`nanosoldier`](https://github.com/JuliaCI/BaseBenchmarks.jl/tree/nanosoldier) branch is what's being used in CI.
+New benchmarks added to BaseBenchmarks won't be present via CI right away, as their execution parameters must be [tuned and cached](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md#caching-parameters) on [Nanosoldier](https://github.com/JuliaCI/Nanosoldier.jl) (our benchmark cluster) before they are suitable for running. This process is performed periodically and upon request, after which the `master` branch is merged into the [`nanosoldier`](https://github.com/JuliaCI/BaseBenchmarks.jl/tree/nanosoldier) branch. Nanosoldier pulls down the `nanosoldier` branch before running every benchmark job, so whatever's currently on the `nanosoldier` branch is what's being used in CI.
