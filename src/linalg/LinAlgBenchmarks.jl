@@ -39,23 +39,27 @@ g = addgroup!(SUITE, "arithmetic")
 for s in SIZES
     v = randvec(s)
     vstr = typename(Vector)
-    g["+", vstr, vstr, s] = @benchmarkable +($v, $v) time_tolerance=0.20
-    g["-", vstr, vstr, s] = @benchmarkable -($v, $v) time_tolerance=0.20
+    g["-", vstr, vstr, s] = @benchmarkable -($v, $v)
+    g["+", vstr, vstr, s] = @benchmarkable +($v, $v)
     for M in MATS
         mstr = typename(M)
         m = linalgmat(M, s)
-        g["*", mstr, vstr, s]  = @benchmarkable *($m, $v) time_tolerance=0.20
-        g["\\", mstr, vstr, s] = @benchmarkable \($m, $v) time_tolerance=0.20
-        g["+", mstr, mstr, s]  = @benchmarkable +($m, $m) time_tolerance=0.20
-        g["-", mstr, mstr, s]  = @benchmarkable -($m, $m) time_tolerance=0.20
-        g["*", mstr, mstr, s]  = @benchmarkable *($m, $m) time_tolerance=0.20
+        g["*", mstr, vstr, s]  = @benchmarkable *($m, $v)
+        g["\\", mstr, vstr, s] = @benchmarkable \($m, $v)
+        g["+", mstr, mstr, s]  = @benchmarkable +($m, $m)
+        g["-", mstr, mstr, s]  = @benchmarkable -($m, $m)
+        g["*", mstr, mstr, s]  = @benchmarkable *($m, $m)
     end
     for M in DIVMATS
         mstr = typename(M)
         m = linalgmat(M, s)
-        g["/", mstr, mstr, s]  = @benchmarkable /($m, $m) time_tolerance=0.20
-        g["\\", mstr, mstr, s] = @benchmarkable \($m, $m) time_tolerance=0.20
+        g["/", mstr, mstr, s]  = @benchmarkable /($m, $m)
+        g["\\", mstr, mstr, s] = @benchmarkable \($m, $m)
     end
+end
+
+for b in values(g)
+    b.params.time_tolerance = 0.20
 end
 
 ##################

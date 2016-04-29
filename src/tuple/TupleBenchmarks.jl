@@ -46,7 +46,7 @@ for s in TUPLE_SUM_SIZES, T in TUPLE_SUM_TYPES
     tup = tuple(samerand(T, s)...)
     tupwrap = TupleWrapper(tup)
     g["sumelt", "NTuple", s, T] = @benchmarkable sum_tuple($tup)
-    g["sumelt", "TupleWrapper", s, T] = @benchmarkable sum_tuple($tupwrap)
+    g["sumelt", "TupleWrapper", s, T] = @benchmarkable sum_tuple($tupwrap) time_tolerance=0.20
 end
 
 end # module
