@@ -53,10 +53,10 @@ fstmth = addgroup!(SUITE, "fastmath", ["arithmetic"])
 for X in NUMS
     x = one(X)
     xstr = string(X)
-    fstmth["add", xstr] = @benchmarkable @fastmath $x * $(copy(x)) time_tolerance=0.2
-    fstmth["sub", xstr] = @benchmarkable @fastmath $x - $(copy(x)) time_tolerance=0.2
-    fstmth["mul", xstr] = @benchmarkable @fastmath $x + $(copy(x)) time_tolerance=0.2
-    fstmth["div", xstr] = @benchmarkable @fastmath $x / $(copy(x)) time_tolerance=0.2
+    fstmth["add", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.2
+    fstmth["sub", xstr] = @benchmarkable @fastmath($x - $(copy(x))) time_tolerance=0.2
+    fstmth["mul", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.2
+    fstmth["div", xstr] = @benchmarkable @fastmath($x / $(copy(x))) time_tolerance=0.2
     for Y in NUMS
         y = one(Y)
         ystr = string(Y)
