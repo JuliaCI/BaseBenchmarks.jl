@@ -25,7 +25,7 @@ g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 
 testbuf = IOBuffer(randstring(10^4))
 
-g["read"] = @benchmarkable perf_read!($testbuf)
+g["read"]       = @benchmarkable perf_read!($testbuf)
 g["readstring"] = @benchmarkable readstring($testbuf)
 
 end # module

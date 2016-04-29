@@ -24,14 +24,14 @@ g = addgroup!(SUITE, "index", ["sum", "simd"])
 
 for A in arrays
     T = string(typeof(A))
-    g["sumelt", T] = @benchmarkable perf_sumelt($A)
-    g["sumeach", T] = @benchmarkable perf_sumeach($A)
-    g["sumlinear", T] = @benchmarkable perf_sumlinear($A)
+    g["sumelt", T]       = @benchmarkable perf_sumelt($A)
+    g["sumeach", T]      = @benchmarkable perf_sumeach($A)
+    g["sumlinear", T]    = @benchmarkable perf_sumlinear($A)
     g["sumcartesian", T] = @benchmarkable perf_sumcartesian($A)
-    g["sumcolon", T] = @benchmarkable perf_sumcolon($A)
-    g["sumrange", T] = @benchmarkable perf_sumrange($A)
-    g["sumlogical", T] = @benchmarkable perf_sumlogical($A)
-    g["sumvector", T] = @benchmarkable perf_sumvector($A)
+    g["sumcolon", T]     = @benchmarkable perf_sumcolon($A) time_tolerance=0.15
+    g["sumrange", T]     = @benchmarkable perf_sumrange($A)
+    g["sumlogical", T]   = @benchmarkable perf_sumlogical($A)
+    g["sumvector", T]    = @benchmarkable perf_sumvector($A)
 end
 
 # #10301 #
@@ -44,8 +44,8 @@ n = samerand()
 
 g = addgroup!(SUITE, "reverse", ["index", "fill!"])
 
-g["rev_load_slow!"] = @benchmarkable perf_rev_load_slow!(fill!($v, $n))
-g["rev_load_fast!"] = @benchmarkable perf_rev_load_fast!(fill!($v, $n))
+g["rev_load_slow!"]    = @benchmarkable perf_rev_load_slow!(fill!($v, $n))
+g["rev_load_fast!"]    = @benchmarkable perf_rev_load_fast!(fill!($v, $n))
 g["rev_loadmul_slow!"] = @benchmarkable perf_rev_loadmul_slow!(fill!($v, $n), $v)
 g["rev_loadmul_fast!"] = @benchmarkable perf_rev_loadmul_fast!(fill!($v, $n), $v)
 
@@ -81,7 +81,7 @@ g = addgroup!(SUITE, "subarray", ["lucompletepiv"])
 for s in (100, 250, 500, 1000)
     m = samerand(s, s)
     g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
-    g["lucompletepivSub!", s] = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
+    g["lucompletepivSub!", s]  = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
 end
 
 #################
@@ -94,13 +94,13 @@ g = addgroup!(SUITE, "cat", ["index"])
 
 for s in (5, 500)
     A = samerand(s, s)
-    g["hvcat", s] = @benchmarkable perf_hvcat($A, $A)
-    g["hcat", s] = @benchmarkable perf_hcat($A, $A)
-    g["vcat", s] = @benchmarkable perf_vcat($A, $A)
-    g["catnd", s] = @benchmarkable perf_catnd($s)
+    g["hvcat", s]        = @benchmarkable perf_hvcat($A, $A)
+    g["hcat", s]         = @benchmarkable perf_hcat($A, $A)
+    g["vcat", s]         = @benchmarkable perf_vcat($A, $A)
+    g["catnd", s]        = @benchmarkable perf_catnd($s)
     g["hvcat_setind", s] = @benchmarkable perf_hvcat_setind($A, $A)
-    g["hcat_setind", s] = @benchmarkable perf_hcat_setind($A, $A)
-    g["vcat_setind", s] = @benchmarkable perf_vcat_setind($A, $A)
+    g["hcat_setind", s]  = @benchmarkable perf_hcat_setind($A, $A)
+    g["vcat_setind", s]  = @benchmarkable perf_vcat_setind($A, $A)
     g["catnd_setind", s] = @benchmarkable perf_catnd_setind($s)
 end
 
@@ -119,10 +119,10 @@ g = addgroup!(SUITE, "growth", ["push!", "append!", "prepend!"])
 
 for s in (8, 256, 2048)
     v = samerand(s)
-    g["push_single!", s] = @benchmarkable push!(x, samerand()) setup=(x = copy($v))
+    g["push_single!", s]   = @benchmarkable push!(x, samerand())       setup=(x = copy($v))
     g["push_multiple!", s] = @benchmarkable perf_push_multiple!(x, $v) setup=(x = copy($v))
-    g["append!", s] = @benchmarkable append!(x, $v) setup=(x = copy($v))
-    g["prerend!", s] = @benchmarkable prepend!(x, $v) setup=(x = copy($v))
+    g["append!", s]        = @benchmarkable append!(x, $v)             setup=(x = copy($v))
+    g["prerend!", s]       = @benchmarkable prepend!(x, $v)            setup=(x = copy($v))
 end
 
 ##########################
@@ -142,9 +142,9 @@ g = addgroup!(SUITE, "comprehension", ["iteration", "index", "linspace", "collec
 for X in (ls, rg, arr)
     T = string(typeof(X))
     g["collect", T] = @benchmarkable collect($X)
-    g["comprehension_collect", T] = @benchmarkable perf_compr_collect($X)
+    g["comprehension_collect", T]   = @benchmarkable perf_compr_collect($X)
     g["comprehension_iteration", T] = @benchmarkable perf_compr_iter($X)
-    g["comprehension_indexing", T] = @benchmarkable perf_compr_index($X)
+    g["comprehension_indexing", T]  = @benchmarkable perf_compr_index($X)
 end
 
 ###############################
@@ -171,11 +171,11 @@ boolarr, bitarr = Vector{Bool}(n), BitArray(n)
 
 g = addgroup!(SUITE, "bool", ["index", "bitarray", "fill!"])
 
-g["bitarray_bool_load!"] = @benchmarkable perf_bool_load!($bitarr, $a, $b)
+g["bitarray_bool_load!"]  = @benchmarkable perf_bool_load!($bitarr, $a, $b)
 g["boolarray_bool_load!"] = @benchmarkable perf_bool_load!($boolarr, $a, $b)
-g["bitarray_true_load!"] = @benchmarkable perf_true_load!($bitarr)
+g["bitarray_true_load!"]  = @benchmarkable perf_true_load!($bitarr)
 g["boolarray_true_load!"] = @benchmarkable perf_true_load!($boolarr)
-g["bitarray_true_fill!"] = @benchmarkable fill!($bitarr, true)
+g["bitarray_true_fill!"]  = @benchmarkable fill!($bitarr, true)
 g["boolarray_true_fill!"] = @benchmarkable fill!($boolarr, true)
 
 end # module

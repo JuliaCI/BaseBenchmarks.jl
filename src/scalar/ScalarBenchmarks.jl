@@ -53,19 +53,17 @@ fstmth = addgroup!(SUITE, "fastmath", ["arithmetic"])
 for X in NUMS
     x = one(X)
     xstr = string(X)
-    fstmth["add", xstr] = @benchmarkable @fastmath $x * $(copy(x))
-    fstmth["sub", xstr] = @benchmarkable @fastmath $x - $(copy(x))
-    fstmth["mul", xstr] = @benchmarkable @fastmath $x + $(copy(x))
-    fstmth["div", xstr] = @benchmarkable @fastmath $x / $(copy(x))
+    fstmth["add", xstr] = @benchmarkable @fastmath $x * $(copy(x)) time_tolerance=0.2
+    fstmth["sub", xstr] = @benchmarkable @fastmath $x - $(copy(x)) time_tolerance=0.2
+    fstmth["mul", xstr] = @benchmarkable @fastmath $x + $(copy(x)) time_tolerance=0.2
+    fstmth["div", xstr] = @benchmarkable @fastmath $x / $(copy(x)) time_tolerance=0.2
     for Y in NUMS
         y = one(Y)
         ystr = string(Y)
-        # mixed type scalar benchmarks are ridiculously noisy
-        tol = X == Y ? BenchmarkTools.DEFAULT_PARAMETERS.time_tolerance : 0.5
-        arith["add", xstr, ystr] = @benchmarkable +($x, $y) time_tolerance = tol
-        arith["sub", xstr, ystr] = @benchmarkable -($x, $y) time_tolerance = tol
-        arith["mul", xstr, ystr] = @benchmarkable *($x, $y) time_tolerance = tol
-        arith["div", xstr, ystr] = @benchmarkable /($x, $y) time_tolerance = tol
+        arith["add", xstr, ystr] = @benchmarkable +($x, $y) time_tolerance=0.2
+        arith["sub", xstr, ystr] = @benchmarkable -($x, $y) time_tolerance=0.2
+        arith["mul", xstr, ystr] = @benchmarkable *($x, $y) time_tolerance=0.2
+        arith["div", xstr, ystr] = @benchmarkable /($x, $y) time_tolerance=0.2
     end
 end
 

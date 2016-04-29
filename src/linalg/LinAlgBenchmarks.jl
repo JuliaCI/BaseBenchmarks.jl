@@ -39,22 +39,22 @@ g = addgroup!(SUITE, "arithmetic")
 for s in SIZES
     v = randvec(s)
     vstr = typename(Vector)
-    g["+", vstr, vstr, s] = @benchmarkable +($v, $v)
-    g["-", vstr, vstr, s] = @benchmarkable -($v, $v)
+    g["+", vstr, vstr, s] = @benchmarkable +($v, $v) time_tolerance=0.20
+    g["-", vstr, vstr, s] = @benchmarkable -($v, $v) time_tolerance=0.20
     for M in MATS
         mstr = typename(M)
         m = linalgmat(M, s)
-        g["*", mstr, vstr, s] = @benchmarkable *($m, $v)
-        g["\\", mstr, vstr, s] = @benchmarkable \($m, $v)
-        g["+", mstr, mstr, s] = @benchmarkable +($m, $m)
-        g["-", mstr, mstr, s] = @benchmarkable -($m, $m)
-        g["*", mstr, mstr, s] = @benchmarkable *($m, $m)
+        g["*", mstr, vstr, s]  = @benchmarkable *($m, $v) time_tolerance=0.20
+        g["\\", mstr, vstr, s] = @benchmarkable \($m, $v) time_tolerance=0.20
+        g["+", mstr, mstr, s]  = @benchmarkable +($m, $m) time_tolerance=0.20
+        g["-", mstr, mstr, s]  = @benchmarkable -($m, $m) time_tolerance=0.20
+        g["*", mstr, mstr, s]  = @benchmarkable *($m, $m) time_tolerance=0.20
     end
     for M in DIVMATS
         mstr = typename(M)
         m = linalgmat(M, s)
-        g["/", mstr, mstr, s] = @benchmarkable /($m, $m)
-        g["\\", mstr, mstr, s] = @benchmarkable \($m, $m)
+        g["/", mstr, mstr, s]  = @benchmarkable /($m, $m) time_tolerance=0.20
+        g["\\", mstr, mstr, s] = @benchmarkable \($m, $m) time_tolerance=0.20
     end
 end
 
@@ -68,7 +68,7 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["eig", mstr, s] = @benchmarkable eig($m)
+        g["eig", mstr, s]     = @benchmarkable eig($m)
         g["eigfact", mstr, s] = @benchmarkable eigfact($m)
     end
 end
@@ -77,7 +77,7 @@ for M in (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["svd", mstr, s] = @benchmarkable svd($m)
+        g["svd", mstr, s]     = @benchmarkable svd($m)
         g["svdfact", mstr, s] = @benchmarkable svdfact($m)
     end
 end
@@ -86,7 +86,7 @@ for M in (Matrix, Tridiagonal)
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["lu", mstr, s] = @benchmarkable lu($m)
+        g["lu", mstr, s]     = @benchmarkable lu($m)
         g["lufact", mstr, s] = @benchmarkable lufact($m)
     end
 end
@@ -95,12 +95,12 @@ for s in SIZES
     mstr = typename(Matrix)
     m = randmat(s)
     arr = randmat(s)'*randmat(s)
-    g["chol", mstr, s] = @benchmarkable chol($arr)
-    g["cholfact", mstr, s] = @benchmarkable cholfact($arr)
-    g["schur", mstr, s] = @benchmarkable schur($m)
+    g["chol", mstr, s]      = @benchmarkable chol($arr)
+    g["cholfact", mstr, s]  = @benchmarkable cholfact($arr)
+    g["schur", mstr, s]     = @benchmarkable schur($m)
     g["schurfact", mstr, s] = @benchmarkable schurfact($m)
-    g["qr", mstr, s] = @benchmarkable qr($m)
-    g["qrfact", mstr, s] = @benchmarkable qrfact($m)
+    g["qr", mstr, s]        = @benchmarkable qr($m)
+    g["qrfact", mstr, s]    = @benchmarkable qrfact($m)
 end
 
 ########
@@ -144,15 +144,15 @@ g["gemv!"]     = @benchmarkable BLAS.gemv!('N', $n, $m, $v, $n, fill!($v, $n))
 g["gemv"]      = @benchmarkable BLAS.gemv('N', $n, $m, $v)
 g["symm!"]     = @benchmarkable BLAS.symm!('L', 'U', $n, $m, $m, $n, fill!($m, $n))
 g["symm"]      = @benchmarkable BLAS.symm('L', 'U', $n, $m, $m)
-g["symv!"]     = @benchmarkable BLAS.symv!('U', $n, $m, $v, $n, fill!($v, $n))
-g["symv"]      = @benchmarkable BLAS.symv('U', $n, $m, $v)
+g["symv!"]     = @benchmarkable BLAS.symv!('U', $n, $m, $v, $n, fill!($v, $n)) time_tolerance=0.15
+g["symv"]      = @benchmarkable BLAS.symv('U', $n, $m, $v) time_tolerance=0.15
 g["trmm!"]     = @benchmarkable BLAS.trmm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
 g["trmm"]      = @benchmarkable BLAS.trmm('L', 'U', 'N', 'N', $n, $m, $m)
 g["trsm!"]     = @benchmarkable BLAS.trsm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
 g["trsm"]      = @benchmarkable BLAS.trsm('L', 'U', 'N', 'N', $n, $m, $m)
 g["trmv!"]     = @benchmarkable BLAS.trmv!('L', 'N', 'U', $m, fill!($v, $n))
 g["trmv"]      = @benchmarkable BLAS.trmv('L', 'N', 'U', $m, $v)
-g["trsv!"]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', $m, fill!($v, $n))
-g["trsv"]      = @benchmarkable BLAS.trsv('U', 'N', 'N', $m, $v)
+g["trsv!"]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', $m, fill!($v, $n)) time_tolerance=0.20
+g["trsv"]      = @benchmarkable BLAS.trsv('U', 'N', 'N', $m, $v) time_tolerance=0.20
 
 end # module
