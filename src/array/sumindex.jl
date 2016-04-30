@@ -10,6 +10,16 @@ function perf_sumelt(A)
     return s
 end
 
+# bounds-checking is deliberately on,
+# doesn't use `for a in r`
+function perf_sumelt_boundscheck(A)
+    s = zero(eltype(A))
+    for i = 1:length(A)
+        s += A[i]
+    end
+    return s
+end
+
 function perf_sumeach(A)
     s = zero(eltype(A))
     for I in eachindex(A)
