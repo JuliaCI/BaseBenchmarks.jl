@@ -130,4 +130,8 @@ for s in (4095, 4096), T in (Int32, Int64, Float32, Float64)
     end
 end
 
+for b in values(SUITE)
+    b.params.time_tolerance = 0.20
+end
+
 end # module

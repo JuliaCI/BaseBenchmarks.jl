@@ -59,7 +59,7 @@ for s in SIZES
 end
 
 for b in values(g)
-    b.params.time_tolerance = 0.20
+    b.params.time_tolerance = 0.30
 end
 
 ##################
@@ -72,8 +72,8 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["eig", mstr, s]     = @benchmarkable eig($m)
-        g["eigfact", mstr, s] = @benchmarkable eigfact($m)
+        g["eig", mstr, s]     = @benchmarkable eig($m) time_tolerance=0.20
+        g["eigfact", mstr, s] = @benchmarkable eigfact($m) time_tolerance=0.20
     end
 end
 
