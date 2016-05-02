@@ -42,7 +42,7 @@ g = addgroup!(SUITE, "issorted")
 
 for (kind, list) in LISTS
     g["forwards", kind] = @benchmarkable issorted($list)
-    g["reverse", kind] = @benchmarkable issorted($list; rev = true)
+    g["reverse", kind] = @benchmarkable issorted($list; rev = true) time_tolerance=0.30
 end
 
 end # module

@@ -25,9 +25,9 @@ ranges_iter = map(x -> (x, repr(x)), ranges)
 g = addgroup!(SUITE, "index", ["sum", "simd"])
 
 for (A, str) in (arrays_iter..., ranges_iter...)
-    g["sumelt", str]             = @benchmarkable perf_sumelt($A)
+    g["sumelt", str]             = @benchmarkable perf_sumelt($A) time_tolerance=0.40
     g["sumelt_boundscheck", str] = @benchmarkable perf_sumelt_boundscheck($A)
-    g["sumeach", str]            = @benchmarkable perf_sumeach($A)
+    g["sumeach", str]            = @benchmarkable perf_sumeach($A) time_tolerance=0.40
     g["sumlinear", str]          = @benchmarkable perf_sumlinear($A)
     g["sumcartesian", str]       = @benchmarkable perf_sumcartesian($A)
     g["sumcolon", str]           = @benchmarkable perf_sumcolon($A)
@@ -146,7 +146,7 @@ for X in (ls, rg, arr)
     g["collect", T] = @benchmarkable collect($X)
     g["comprehension_collect", T]   = @benchmarkable perf_compr_collect($X)
     g["comprehension_iteration", T] = @benchmarkable perf_compr_iter($X)
-    g["comprehension_indexing", T]  = @benchmarkable perf_compr_index($X)
+    g["comprehension_indexing", T]  = @benchmarkable perf_compr_index($X) time_tolerance=0.30
 end
 
 ###############################

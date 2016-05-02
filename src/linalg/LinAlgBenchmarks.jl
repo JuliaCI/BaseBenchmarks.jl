@@ -59,7 +59,7 @@ for s in SIZES
 end
 
 for b in values(g)
-    b.params.time_tolerance = 0.20
+    b.params.time_tolerance = 0.30
 end
 
 ##################
@@ -72,8 +72,8 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["eig", mstr, s]     = @benchmarkable eig($m)
-        g["eigfact", mstr, s] = @benchmarkable eigfact($m)
+        g["eig", mstr, s]     = @benchmarkable eig($m) time_tolerance=0.20
+        g["eigfact", mstr, s] = @benchmarkable eigfact($m) time_tolerance=0.20
     end
 end
 
@@ -148,8 +148,8 @@ g["gemv!"]     = @benchmarkable BLAS.gemv!('N', $n, $m, $v, $n, fill!($v, $n))
 g["gemv"]      = @benchmarkable BLAS.gemv('N', $n, $m, $v)
 g["symm!"]     = @benchmarkable BLAS.symm!('L', 'U', $n, $m, $m, $n, fill!($m, $n))
 g["symm"]      = @benchmarkable BLAS.symm('L', 'U', $n, $m, $m)
-g["symv!"]     = @benchmarkable BLAS.symv!('U', $n, $m, $v, $n, fill!($v, $n)) time_tolerance=0.15
-g["symv"]      = @benchmarkable BLAS.symv('U', $n, $m, $v) time_tolerance=0.15
+g["symv!"]     = @benchmarkable BLAS.symv!('U', $n, $m, $v, $n, fill!($v, $n))
+g["symv"]      = @benchmarkable BLAS.symv('U', $n, $m, $v)
 g["trmm!"]     = @benchmarkable BLAS.trmm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))
 g["trmm"]      = @benchmarkable BLAS.trmm('L', 'U', 'N', 'N', $n, $m, $m)
 g["trsm!"]     = @benchmarkable BLAS.trsm!('L', 'U', 'N', 'N', $n, $m, fill!($m, $n))

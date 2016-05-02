@@ -43,6 +43,10 @@ for T in INTS
     g["isodd", tstr]  = @benchmarkable isodd($x)
 end
 
+for b in values(g)
+    b.params.time_tolerance = 0.25
+end
+
 ##############
 # arithmetic #
 ##############
@@ -56,7 +60,7 @@ for X in NUMS
     fstmth["add", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.20
     fstmth["sub", xstr] = @benchmarkable @fastmath($x - $(copy(x))) time_tolerance=0.20
     fstmth["mul", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.20
-    fstmth["div", xstr] = @benchmarkable @fastmath($x / $(copy(x))) time_tolerance=0.20
+    fstmth["div", xstr] = @benchmarkable @fastmath($x / $(copy(x))) time_tolerance=0.30
     for Y in NUMS
         y = one(Y)
         ystr = string(Y)
