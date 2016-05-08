@@ -45,9 +45,8 @@ g = addgroup!(SUITE, "index", ["sum"])
 for s in TUPLE_SUM_SIZES, T in TUPLE_SUM_TYPES
     tup = tuple(samerand(T, s)...)
     tupwrap = TupleWrapper(tup)
-    tol = s < 30 ? 0.40 : 0.20
-    g["sumelt", "NTuple", s, T] = @benchmarkable sum_tuple($tup) time_tolerance=tol
-    g["sumelt", "TupleWrapper", s, T] = @benchmarkable sum_tuple($tupwrap) time_tolerance=tol
+    g["sumelt", "NTuple", s, T] = @benchmarkable sum_tuple($tup) time_tolerance=0.40
+    g["sumelt", "TupleWrapper", s, T] = @benchmarkable sum_tuple($tupwrap) time_tolerance=0.40
 end
 
 end # module

@@ -72,8 +72,8 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["eig", mstr, s]     = @benchmarkable eig($m) time_tolerance=0.25
-        g["eigfact", mstr, s] = @benchmarkable eigfact($m) time_tolerance=0.25
+        g["eig", mstr, s]     = @benchmarkable eig($m)
+        g["eigfact", mstr, s] = @benchmarkable eigfact($m)
     end
 end
 
@@ -105,6 +105,10 @@ for s in SIZES
     g["schurfact", mstr, s] = @benchmarkable schurfact($m)
     g["qr", mstr, s]        = @benchmarkable qr($m)
     g["qrfact", mstr, s]    = @benchmarkable qrfact($m)
+end
+
+for b in values(g)
+    b.params.time_tolerance = 0.25
 end
 
 ########
