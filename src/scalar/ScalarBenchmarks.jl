@@ -13,6 +13,7 @@ const FLOATS = (Float32, Float64, BigFloat)
 const REALS = (INTS..., FLOATS...)
 const COMPS = map(R -> Complex{R}, REALS)
 const NUMS = (REALS..., COMPS...)
+const BIGNUMS = (BigInt, BigFloat, Complex{BigInt}, Complex{BigFloat})
 
 ##############
 # predicates #
@@ -57,6 +58,7 @@ fstmth = addgroup!(SUITE, "fastmath", ["arithmetic"])
 for X in NUMS
     x = one(X)
     xstr = string(X)
+    isbignum = in(X, BIGNUMS)
     fstmth["add", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.40
     fstmth["sub", xstr] = @benchmarkable @fastmath($x - $(copy(x))) time_tolerance=0.40
     fstmth["mul", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.40
@@ -64,7 +66,7 @@ for X in NUMS
     for Y in NUMS
         y = one(Y)
         ystr = string(Y)
-        tol = X == Y ? 0.25 : 0.50
+        tol = (X != Y || isbignum) ? 0.50 : 0.25
         arith["add", xstr, ystr] = @benchmarkable +($x, $y) time_tolerance=tol
         arith["sub", xstr, ystr] = @benchmarkable -($x, $y) time_tolerance=tol
         arith["mul", xstr, ystr] = @benchmarkable *($x, $y) time_tolerance=tol
