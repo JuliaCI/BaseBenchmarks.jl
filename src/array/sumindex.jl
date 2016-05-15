@@ -95,6 +95,26 @@ function perf_sumvector(A)
     return s
 end
 
+function perf_sub2ind(sz, irange, jrange, krange)
+    s = 0
+    for k in krange, j in jrange, i in irange
+        ind = sub2ind(sz, i, j, k)
+        s += ind
+    end
+    s
+end
+
+function perf_ind2sub(sz, lrange)
+    si = sj = sk = 0
+    for l in lrange
+        i, j, k = ind2sub(sz, l)
+        si += i
+        sj += j
+        sk += k
+    end
+    si, sj, sk
+end
+
 ##########################
 # supporting definitions #
 ##########################

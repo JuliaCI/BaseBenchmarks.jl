@@ -35,6 +35,8 @@ for (A, str) in (arrays_iter..., ranges_iter...)
     g["sumlogical", str]         = @benchmarkable perf_sumlogical($A)
     g["sumvector", str]          = @benchmarkable perf_sumvector($A)
 end
+g["sub2ind"] = @benchmarkable perf_sub2ind((1000,1000,1000), 1:1000, 1:1000, 1:1000)
+g["ind2sub"] = @benchmarkable perf_ind2sub((100,100,10), 1:10^5)
 
 for b in values(g)
     b.params.time_tolerance = 0.40
