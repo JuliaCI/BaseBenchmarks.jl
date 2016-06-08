@@ -23,7 +23,7 @@ julia> BaseBenchmarks.SUITE
 julia> BaseBenchmarks.load!("linalg")
   1-element BenchmarkTools.BenchmarkGroup:
     tags: []
-    "linalg" => 3-element BenchmarkGroup(["array"])    
+    "linalg" => 3-element BenchmarkGroup(["array"])
 
 # Load all the benchmarks into BaseBenchmarks.SUITE. Once again, you can pass in a different
 # BenchmarkGroup as the first argument to load the benchmarks there instead.
@@ -61,6 +61,76 @@ julia> run(BaseBenchmarks.SUITE[["scalar", "fastmath", ("add", "Complex{Float64}
 ```
 
 See the [`BenchmarkTools`]((https://github.com/JuliaCI/BenchmarkTools.jl)) repository for documentation of `BenchmarkTools.BenchmarkGroup` features (e.g. regression classification and filtering, parameter tuning, leaf iteration, higher order mapping/filtering, etc.).
+
+#### Recipe for testing a julia PR locally
+
+You can use the Nanosoldier framework to test the performance of your
+PR, using `@nanosoldier runbenchmarks("array", vs = ":master")` or similar.
+However, if you'd like to test your PR locally first, the
+following procedure can be used:
+
+- Build master
+- Run benchmarks & save results
+- Build PR
+- Run benchmarks & save results
+- Load and compare the results, looking for regressions
+- Profile any regressions to find opportunities for performance improvements
+
+Here's how you run benchmarks & save results:
+```jl
+using BenchmarkTools, BaseBenchmarks, JLD
+BaseBenchmarks.loadall!()
+results = run(BaseBenchmarks.SUITE)
+save(filename, "results", results)
+```
+The `filename` should end in `".jld"`.
+
+To load and compare results, use something like this:
+```jl
+using BenchmarkTools, BaseBenchmarks, JLD
+master = load(filename_master, "results")
+pr = load(filename_pr, "results")
+df = regressions(judge(median(pr), median(master)))
+for p in df
+    @show p
+end
+```
+This will show the tests that resulted in regressions; you can examine
+those benchmarks in detail and try to fix the regressions.
+
+To profile a benchmark on your currently-built branch, you'll need to
+understand how to read the tags. The "top level" tags are printed
+aligned with a "p = " starting at left margin; from there, look for
+any `BenchmarkGroup` lines for additional nesting. Within those,
+you'll find single strings or tuples that specify parameters. For
+example, here we'll "highlight" the key tags of the output using
+all-caps (in reality it is lowercase):
+
+```
+p = Pair{Any,Any}("PROBLEM",3-element BenchmarkTools.BenchmarkGroup:
+  tags: ["example", "kernel"]
+  "LAPLACIAN" => 1-element BenchmarkTools.BenchmarkGroup:
+  tags: ["iterative", "sparse", "vectorization", "subarray", "array"]
+  "LAPLACE_ITER_VEC" => BenchmarkTools.TrialJudgement:
+  time:   +42.61% => regression (15.00% tolerance)
+  memory: +0.93% => invariant (1.00% tolerance)
+```
+
+Note the indicated regression on `"laplace_iter_vec"`.  To re-run this
+benchmark, use the following procedure:
+
+```jl
+using BenchmarkTools, BaseBenchmarks
+BaseBenchmarks.loadall!()
+run(BaseBenchmarks.SUITE[["problem","laplacian","laplace_iter_vec"]])
+```
+
+where those tags come from the all-caps highlighted output above.
+
+Once you've run it once, stick a `@profile` in front of the `run`
+command and execute it again. Then you can use `Profile.print()` or
+`ProfileView.view()` to analyze the bottlenecks that led to that
+regression.
 
 #### Contributing
 
