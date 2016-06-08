@@ -74,4 +74,35 @@ for X in NUMS
     end
 end
 
+#############
+# iteration #
+#############
+
+function perf_iterate_indexed(n, v)
+    s = 0
+    for i = 1:n
+        for j = 1:1
+            @inbounds k = v[j]
+            s += k
+        end
+    end
+    s
+end
+
+function perf_iterate_in(n, v)
+    s = 0
+    for i = 1:n
+        for k in v
+            s += k
+        end
+    end
+    s
+end
+
+g = addgroup!(SUITE, "iteration", ["indexed", "in"])
+
+g["indexed"]   = @benchmarkable perf_iterate_indexed(10^5, 3)
+g["in"]   = @benchmarkable perf_iterate_in(10^5, 3)
+
+
 end # module
