@@ -4,7 +4,7 @@
 
 This package is a collection of Julia benchmarks using to track the performance of [the Julia language](https://github.com/JuliaLang/julia).
 
-BaseBenchmarks is written using the [BenchmarkTools](https://github.com/JuliaCI/BenchmarkTools.jl) package.
+BaseBenchmarks is written using the [BenchmarkTools](https://github.com/JuliaCI/BenchmarkTools.jl) package. I highly suggest at least skimming the [BenchmarkTools manual](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md) before using BaseBenchmarks locally.
 
 #### Loading and running benchmarks
 
@@ -18,15 +18,17 @@ julia> BaseBenchmarks.SUITE
 0-element BenchmarkTools.BenchmarkGroup:
   tags: []
 
-# Load the "linalg" group into BaseBenchmarks.SUITE. You can optionally pass in a different
-# BenchmarkGroup as the first argument to load "linalg" into it.
+# Here's an example of how to load the "linalg" group into BaseBenchmarks.SUITE. You can
+# optionally pass in a different BenchmarkGroup as the first argument to load "linalg"
+# into it.
 julia> BaseBenchmarks.load!("linalg")
   1-element BenchmarkTools.BenchmarkGroup:
     tags: []
     "linalg" => 3-element BenchmarkGroup(["array"])
 
-# Load all the benchmarks into BaseBenchmarks.SUITE. Once again, you can pass in a different
-# BenchmarkGroup as the first argument to load the benchmarks there instead.
+# Here's an example of how to load all the benchmarks into BaseBenchmarks.SUITE. Once again,
+# you can pass in a different BenchmarkGroup as the first argument to load the benchmarks
+# there instead.
 julia> BaseBenchmarks.loadall!();
 loading group "string"...done (took 0.379868963 seconds)
 loading group "linalg"...done (took 5.4598628 seconds)
@@ -47,90 +49,99 @@ Now that the benchmarks are loaded, you can run them just like any other `Benchm
 
 ```julia
 # run benchmarks matching a tag query
-julia> run(BaseBenchmarks.SUITE[@tagged ("array" || "linalg") && !("simd")]);
+run(BaseBenchmarks.SUITE[@tagged ("array" || "linalg") && !("simd")]);
 
 # run a specific benchmark group
-julia> run(BaseBenchmarks.SUITE["linalg"]["arithmetic"]);
+run(BaseBenchmarks.SUITE["linalg"]["arithmetic"]);
 
 # run a single benchmark
-julia> run(BaseBenchmarks.SUITE["scalar"]["fastmath"]["add", "Complex{Float64}"])
+run(BaseBenchmarks.SUITE["scalar"]["fastmath"]["add", "Complex{Float64}"])
 
 # equivalent to the above, but this form makes it
 # easy to copy and paste IDs from benchmark reports
-julia> run(BaseBenchmarks.SUITE[["scalar", "fastmath", ("add", "Complex{Float64}")]]);
+run(BaseBenchmarks.SUITE[["scalar", "fastmath", ("add", "Complex{Float64}")]]);
 ```
 
 See the [`BenchmarkTools`]((https://github.com/JuliaCI/BenchmarkTools.jl)) repository for documentation of `BenchmarkTools.BenchmarkGroup` features (e.g. regression classification and filtering, parameter tuning, leaf iteration, higher order mapping/filtering, etc.).
 
-#### Recipe for testing a julia PR locally
+#### Recipe for testing a Julia PR locally
 
-You can use the Nanosoldier framework to test the performance of your
-PR, using `@nanosoldier runbenchmarks("array", vs = ":master")` or similar.
-However, if you'd like to test your PR locally first, the
-following procedure can be used:
+If you're a collaborator, [you can trigger Julia's @nanosoldier
+bot](https://github.com/JuliaCI/Nanosoldier.jl) to automatically test the performance of
+your PR vs. Julia's master branch. However, this bot's purpose isn't to have the final
+say on performance matters, but rather to identify areas which require local performance
+testing. Here's a procedure for testing your Julia PR locally:
 
-- Build master
-- Run benchmarks & save results
-- Build PR
-- Run benchmarks & save results
-- Load and compare the results, looking for regressions
-- Profile any regressions to find opportunities for performance improvements
+1. Run benchmarks and save results using master Julia build
+2. Run benchmarks and save results using PR Julia build
+3. Load and compare the results, looking for regressions
+4. Profile any regressions to find opportunities for performance improvements
 
-Here's how you run benchmarks & save results:
-```jl
+For steps 1 and 2, first build Julia on the appropriate branch. Then, you can run the
+following code to execute all benchmarks and save the results (replacing `filename` with
+an actual unique file name):
+
+```julia
 using BenchmarkTools, BaseBenchmarks, JLD
-BaseBenchmarks.loadall!()
-results = run(BaseBenchmarks.SUITE)
-save(filename, "results", results)
+BaseBenchmarks.loadall!() # load all benchmarks
+results = run(BaseBenchmarks.SUITE; verbose = true) # run all benchmarks
+JLD.save("filename.jld", "results", results) # save results to JLD file
 ```
-The `filename` should end in `".jld"`.
 
-To load and compare results, use something like this:
-```jl
+Next, you can load the results and check for regressions (once again replacing the JLD file
+names used here with the actual file names):
+
+```julia
 using BenchmarkTools, BaseBenchmarks, JLD
-master = load(filename_master, "results")
-pr = load(filename_pr, "results")
-df = regressions(judge(median(pr), median(master)))
-for p in df
-    @show p
-end
-```
-This will show the tests that resulted in regressions; you can examine
-those benchmarks in detail and try to fix the regressions.
-
-To profile a benchmark on your currently-built branch, you'll need to
-understand how to read the tags. The "top level" tags are printed
-aligned with a "p = " starting at left margin; from there, look for
-any `BenchmarkGroup` lines for additional nesting. Within those,
-you'll find single strings or tuples that specify parameters. For
-example, here we'll "highlight" the key tags of the output using
-all-caps (in reality it is lowercase):
-
-```
-p = Pair{Any,Any}("PROBLEM",3-element BenchmarkTools.BenchmarkGroup:
-  tags: ["example", "kernel"]
-  "LAPLACIAN" => 1-element BenchmarkTools.BenchmarkGroup:
-  tags: ["iterative", "sparse", "vectorization", "subarray", "array"]
-  "LAPLACE_ITER_VEC" => BenchmarkTools.TrialJudgement:
-  time:   +42.61% => regression (15.00% tolerance)
-  memory: +0.93% => invariant (1.00% tolerance)
+master = load("master.jld", "results")
+pr = load("pr.jld", "results")
+regs = regressions(judge(minimum(pr), minimum(master))) # a BenchmarkGroup containing the regressions
+pairs = leaves(regs) # an array of (ID, `TrialJudgement`) pairs
 ```
 
-Note the indicated regression on `"laplace_iter_vec"`.  To re-run this
-benchmark, use the following procedure:
+This will show which tests resulted in regressions and to what magnitude. Here's an
+example showing what `pairs` might look like:
 
-```jl
-using BenchmarkTools, BaseBenchmarks
-BaseBenchmarks.loadall!()
-run(BaseBenchmarks.SUITE[["problem","laplacian","laplace_iter_vec"]])
+```julia
+2-element Array{Any,1}:
+ (Any["string","join"],BenchmarkTools.TrialJudgement:
+  time:   +41.13% => regression (1.00% tolerance)
+  memory: +0.00% => invariant (1.00% tolerance))
+ (Any["io","read","readstring"],BenchmarkTools.TrialJudgement:
+  time:   +13.85% => regression (3.00% tolerance)
+  memory: +0.00% => invariant (1.00% tolerance))
 ```
 
-where those tags come from the all-caps highlighted output above.
+Each pair above is structured as `(benchmark ID, TrialJudgement for benchmark)`. You can
+now examine these benchmarks in detail and try to fix the regressions. Let's use the
+`["io","read","readstring"]` ID shown above as an example.
 
-Once you've run it once, stick a `@profile` in front of the `run`
-command and execute it again. Then you can use `Profile.print()` or
-`ProfileView.view()` to analyze the bottlenecks that led to that
-regression.
+To examine this benchmark on your currently-built branch, first make sure you've loaded
+the benchmark's parent group (the first element in the ID, `"io"`):
+
+```julia
+julia> using BenchmarkTools, BaseBenchmarks
+
+julia> showall(BaseBenchmarks.load!("io"))
+1-element BenchmarkTools.BenchmarkGroup:
+  tags: []
+  "io" => 1-element BenchmarkTools.BenchmarkGroup:
+	  tags: []
+	  "read" => 2-element BenchmarkTools.BenchmarkGroup:
+		  tags: ["buffer", "stream", "string"]
+		  "readstring" => BenchmarkTools.Benchmark...
+		  "read" => BenchmarkTools.Benchmark...
+```
+
+You can now run the benchmark by calling
+`run(BaseBenchmarks.SUITE[["io","read","readstring"]])`, or profile it using `@profile`:
+
+```julia
+@profile run(BaseBenchmarks.SUITE[["io","read","readstring"]])
+```
+
+After profiling the benchmark, you can use `Profile.print()` or `ProfileView.view()` to
+analyze the bottlenecks that led to that regression.
 
 #### Contributing
 
