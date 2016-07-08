@@ -56,6 +56,11 @@ for s in SIZES
         g["/", mstr, mstr, s]  = @benchmarkable /($m, $m)
         g["\\", mstr, mstr, s] = @benchmarkable \($m, $m)
     end
+    # Issue #14722
+    C = zeros(Float32, s, s)
+    A = randmat(s)
+    B = randmat(s)
+    g["A_mul_B!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
 end
 
 for b in values(g)
