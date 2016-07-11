@@ -147,8 +147,6 @@ end
 
 ArrayStrides1(A::Array) = ArrayStrides1(A, size(A,1))
 
-Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(similar(A.data, T, dims))
-
 @inline Base.setindex!(A::ArrayLSLS, v, I::Int...) = A.data[I...] = v
 
 @inline Base.unsafe_setindex!(A::ArrayLSLS, v, I::Int...) = Base.unsafe_setindex!(A.data, v, I...)
@@ -156,6 +154,19 @@ Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(s
 Base.first(A::ArrayLSLS) = first(A.data)
 
 Base.size(A::MyArray) = size(A.data)
+# To ensure that ArrayLS and ArrayLSLS really are LinearSlow even
+# after inlining, let's make the size differ from the parent array
+# (ref https://github.com/JuliaLang/julia/pull/17355#issuecomment-231748251)
+@inline Base.size{T}(A::ArrayLS{T,1})   = (sz = size(A.data); (sz[1]-1,))
+@inline Base.size{T}(A::ArrayLSLS{T,1}) = (sz = size(A.data); (sz[1]-1,))
+@inline Base.size{T}(A::ArrayLS{T,2})   = (sz = size(A.data); (sz[1]-1,sz[2]-1))
+@inline Base.size{T}(A::ArrayLSLS{T,2}) = (sz = size(A.data); (sz[1]-1,sz[2]-1))
+@inline Base.size(A::ArrayLS)   = map(n->n-1, size(A.data))
+@inline Base.size(A::ArrayLSLS) = map(n->n-1, size(A.data))
+
+@inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Int})     = ArrayLSLS(similar(A.data, T, (dims[1]+1,)))
+@inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Int,Int}) = ArrayLSLS(similar(A.data, T, (dims[1]+1,dims[2]+1)))
+@inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(similar(A.data, T, map(n->n+1, dims)))
 
 @inline Base.getindex(A::ArrayLF, i::Int) = getindex(A.data, i)
 @inline Base.getindex(A::ArrayLF, i::Int, i2::Int) = getindex(A.data, i, i2)
@@ -181,8 +192,10 @@ end
 
 function makearrays{T}(::Type{T}, r::Integer, c::Integer)
     A = samerand(T, r, c)
-    AS = ArrayLS(A)
-    ASS = ArrayLSLS(A)
+    B = similar(A, r+1, c+1)
+    B[1:r, 1:c] = A
+    AS = ArrayLS(B)
+    ASS = ArrayLSLS(B)
     AF = ArrayLF(A)
     Astrd = ArrayStrides(A)
     Astrd1 = ArrayStrides1(A)
