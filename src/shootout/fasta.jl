@@ -20,12 +20,14 @@ const IA  =   3877.0
 const IC  =  29573.0
 
 function gen_random()
-    global rng_state::Float64 = ((rng_state::Float64 * IA + IC) % IM) / IM
+    global rng_state = ((rng_state::Float64 * IA + IC) % IM) / IM
 end
+
 function repeat_fasta(src, n)
     k = length(src)
     return string(src, src, src[1:n % k])
 end
+
 function choose_char(cs)
     k = length(cs)
     r = gen_random()
@@ -38,6 +40,7 @@ function choose_char(cs)
     end
     b
 end
+
 function random_fasta(symb, pr, n)
     cs = cumsum(pr)
     line = Array(UInt8, line_width)

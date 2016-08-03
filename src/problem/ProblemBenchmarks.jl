@@ -14,6 +14,8 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
+import Compat: UTF8String, view
+
 const SUITE = BenchmarkGroup(["example", "kernel"])
 const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
 

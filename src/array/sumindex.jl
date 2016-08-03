@@ -200,6 +200,6 @@ function makearrays{T}(::Type{T}, r::Integer, c::Integer)
     Astrd = ArrayStrides(A)
     Astrd1 = ArrayStrides1(A)
     B = samerand(T, r+1, c+2)
-    Asub = sub(B, 1:r, 2:c+1)
+    Asub = view(B, 1:r, 2:c+1)
     return (A, AF, AS, ASS, Asub)
 end

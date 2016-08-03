@@ -1,5 +1,9 @@
 module Raytracer
 
+using Compat
+
+import Compat: UTF8String, view
+
 # This is a translation from Java/C++ of the raytracer located at
 #   http://www.ffconsultancy.com/languages/tracerayr/
 # This code was discussed at
@@ -14,11 +18,11 @@ immutable Vec
     z::Float64
 end
 
-Base.(:+)(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
-Base.(:-)(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
-Base.(:*)(a::Float64, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
-Base.(:*)(a::Int, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
-Base.(:*)(a::Vec, b::Float64) = *(b,a)
+@compat(Base.:+)(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
+@compat(Base.:-)(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
+@compat(Base.:*)(a::Float64, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
+@compat(Base.:*)(a::Int, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
+@compat(Base.:*)(a::Vec, b::Float64) = *(b,a)
 Base.dot(a::Vec, b::Vec) = (a.x*b.x + a.y*b.y + a.z*b.z)
 
 unitize(a::Vec) = (1. / sqrt(dot(a, a)) * a)

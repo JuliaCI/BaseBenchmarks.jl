@@ -3,6 +3,8 @@ module IMDBGraphs
 using ..ProblemBenchmarks: PROBLEM_DATA_DIR
 using Compat
 
+import Compat: UTF8String, view
+
 type IMDBNode
     name::UTF8String # actor//film name
     neighbors::Set{IMDBNode} # adjacent nodes
