@@ -46,7 +46,7 @@ function perf_revcomp()
             if isempty(line)
     #            print_buff(buff)
                 return
-            elseif line[1] == '>'
+            elseif line[1] == UInt8('>')
     #            print_buff(buff)
                 buff = UInt8[]
     #            write(line)
@@ -57,4 +57,3 @@ function perf_revcomp()
         end
     end
 end
-

@@ -1,5 +1,9 @@
 module RandUtils
 
+using Compat
+
+import Compat: UTF8String, view
+
 const SEED = MersenneTwister(1)
 const DEFAULT_ELTYPE = typeof(rand())
 

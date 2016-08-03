@@ -6,6 +6,8 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
+import Compat: UTF8String, view
+
 const SUITE = BenchmarkGroup(["array"])
 
 const SIZES = (2^8, 2^10)
