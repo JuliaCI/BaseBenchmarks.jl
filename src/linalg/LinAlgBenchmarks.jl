@@ -105,7 +105,7 @@ end
 for s in SIZES
     mstr = typename(Matrix)
     m = randmat(s)
-    arr = randmat(s)'*randmat(s)
+    arr = m' * m
     g["chol", mstr, s]      = @benchmarkable chol($arr)
     g["cholfact", mstr, s]  = @benchmarkable cholfact($arr)
     g["schur", mstr, s]     = @benchmarkable schur($m)
