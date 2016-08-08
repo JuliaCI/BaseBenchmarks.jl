@@ -167,7 +167,11 @@ g["trsm!"]     = @benchmarkable BLAS.trsm!('L', 'U', 'N', 'N', $n, $m, fill!($m,
 g["trsm"]      = @benchmarkable BLAS.trsm('L', 'U', 'N', 'N', $n, $m, $m)
 g["trmv!"]     = @benchmarkable BLAS.trmv!('L', 'N', 'U', $m, fill!($v, $n))
 g["trmv"]      = @benchmarkable BLAS.trmv('L', 'N', 'U', $m, $v)
-g["trsv!"]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', $m, fill!($v, $n)) time_tolerance=0.20
-g["trsv"]      = @benchmarkable BLAS.trsv('U', 'N', 'N', $m, $v) time_tolerance=0.20
+g["trsv!"]     = @benchmarkable BLAS.trsv!('U', 'N', 'N', $m, fill!($v, $n))
+g["trsv"]      = @benchmarkable BLAS.trsv('U', 'N', 'N', $m, $v)
+
+for b in values(g)
+    b.params.time_tolerance = 0.40
+end
 
 end # module

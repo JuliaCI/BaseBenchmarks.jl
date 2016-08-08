@@ -87,7 +87,7 @@ SUITE["regex_dna"] = @benchmarkable perf_regex_dna()
 #######################################################
 
 include("revcomp.jl")
-SUITE["revcomp"] = @benchmarkable perf_revcomp()
+SUITE["revcomp"] = @benchmarkable perf_revcomp() time_tolerance=0.25
 
 #####################################
 # Eigenvalue using the power method #

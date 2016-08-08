@@ -26,28 +26,27 @@ g = addgroup!(SUITE, "predicate", ["isinteger", "isinf", "isnan", "iseven", "iso
 for T in NUMS
     x = one(T)
     tstr = string(T)
-    g["isequal", tstr]   = @benchmarkable isequal($x, $x)
-    g["isinteger", tstr] = @benchmarkable isinteger($x)
-    g["isinf", tstr]     = @benchmarkable isinf($x)
-    g["isfinite", tstr]  = @benchmarkable isfinite($x)
-    g["isnan", tstr]     = @benchmarkable isnan($x)
+    tol = in(T, BIGNUMS) ? 0.40 : 0.25
+    g["isequal", tstr]   = @benchmarkable isequal($x, $x) time_tolerance=tol
+    g["isinteger", tstr] = @benchmarkable isinteger($x) time_tolerance=tol
+    g["isinf", tstr]     = @benchmarkable isinf($x) time_tolerance=tol
+    g["isfinite", tstr]  = @benchmarkable isfinite($x) time_tolerance=tol
+    g["isnan", tstr]     = @benchmarkable isnan($x) time_tolerance=tol
 end
 
 for T in REALS
     x = one(T)
     tstr = string(T)
-    g["isless", tstr] = @benchmarkable isless($x, $x)
+    tol = in(T, BIGNUMS) ? 0.40 : 0.25
+    g["isless", tstr] = @benchmarkable isless($x, $x) time_tolerance=tol
 end
 
 for T in INTS
     x = one(T)
     tstr = string(T)
-    g["iseven", tstr] = @benchmarkable iseven($x)
-    g["isodd", tstr]  = @benchmarkable isodd($x)
-end
-
-for b in values(g)
-    b.params.time_tolerance = 0.25
+    tol = in(T, BIGNUMS) ? 0.40 : 0.25
+    g["iseven", tstr] = @benchmarkable iseven($x) time_tolerance=tol
+    g["isodd", tstr]  = @benchmarkable isodd($x) time_tolerance=tol
 end
 
 ##############
@@ -103,8 +102,8 @@ end
 
 g = addgroup!(SUITE, "iteration", ["indexed", "in"])
 
-g["indexed"]   = @benchmarkable perf_iterate_indexed(10^5, 3)
-g["in"]   = @benchmarkable perf_iterate_in(10^5, 3)
+g["indexed"] = @benchmarkable perf_iterate_indexed(10^5, 3) time_tolerance=0.25
+g["in"]      = @benchmarkable perf_iterate_in(10^5, 3) time_tolerance=0.25
 
 
 end # module
