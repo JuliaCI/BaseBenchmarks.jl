@@ -17,6 +17,6 @@ const SUITE = BenchmarkGroup()
 str = join(samerand('a':'d', 10^4))
 
 SUITE["replace"] = @benchmarkable replace($str, "a", "b")
-SUITE["join"] = @benchmarkable join($str, $str)
+SUITE["join"] = @benchmarkable join($str, $str) time_tolerance = 0.40
 
 end # module
