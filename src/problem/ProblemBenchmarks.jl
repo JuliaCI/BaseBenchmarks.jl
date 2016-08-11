@@ -8,7 +8,7 @@ module ProblemBenchmarks
 # where much of the code was naively translated to Julia from other languages,
 # and thus is written non-idiomatically.
 
-include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
@@ -17,7 +17,7 @@ using Compat
 import Compat: UTF8String, view
 
 const SUITE = BenchmarkGroup(["example", "kernel"])
-const PROBLEM_DATA_DIR = joinpath(Pkg.dir("BaseBenchmarks"), "src", "problem", "data")
+const PROBLEM_DATA_DIR = joinpath(dirname(@__FILE__), "data")
 
 #######################################
 # IMDB Actor Centrality (Issue #1163) #

@@ -1,6 +1,6 @@
 module SortBenchmarks
 
-include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools

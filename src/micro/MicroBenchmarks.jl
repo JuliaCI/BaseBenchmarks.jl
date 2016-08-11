@@ -3,7 +3,7 @@ module MicroBenchmarks
 # This module contains the Julia microbenchmarks shown in the language
 # comparison table at http://julialang.org/.
 
-include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 include("methods.jl")
 
 using .RandUtils
