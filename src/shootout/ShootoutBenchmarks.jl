@@ -6,7 +6,7 @@ module ShootoutBenchmarks
 #
 # See https://github.com/JuliaLang/julia/issues/660 for details.
 
-include(joinpath(Pkg.dir("BaseBenchmarks"), "src", "utils", "RandUtils.jl"))
+include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
@@ -15,7 +15,7 @@ using Compat
 import Compat: UTF8String, view
 
 const SUITE = BenchmarkGroup(["example", "regex", "pi", "π", "tree"])
-const SHOOTOUT_DATA_PATH = joinpath(Pkg.dir("BaseBenchmarks"), "src", "shootout", "data")
+const SHOOTOUT_DATA_PATH = joinpath(dirname(@__FILE__), "data")
 
 ##################################################
 # Allocate and deallocate many many binary trees #
