@@ -1,5 +1,7 @@
 module MonteCarlo
 
+using Compat
+
 # European Option Calculation from
 # https://groups.google.com/forum/?hl=en&fromgroups=#!topic/julia-dev/ImhGsqX_IHc
 
@@ -21,7 +23,7 @@ function perf_euro_option_devec(npaths)
         end
     end
 
-    return mean(exp(-r*T) * max(K .- S, 0))
+    return @compat mean(exp(-r*T) .* max.(K .- S, 0))
 end
 
 function perf_euro_option_vec(npaths)
@@ -41,7 +43,7 @@ function perf_euro_option_vec(npaths)
         S[:] .*= map!(exp, tmp)
     end
 
-    return mean(exp(-r*T) * max(K .- S, 0))
+    return @compat mean(exp(-r*T) .* max.(K .- S, 0))
 end
 
 end # module

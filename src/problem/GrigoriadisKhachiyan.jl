@@ -1,6 +1,7 @@
 module GrigoriadisKhachiyan
 
 using ..RandUtils
+using Compat
 
 # Code from Dilys Thomas <dilys@cs.stanford.edu>
 
@@ -61,10 +62,10 @@ function perf_gk(n, myeps)
                 U[i] += A[i,k]
             end
 
-            s = sum(p[1:n] .* exp((eps/2)*A[1:n,k]))
+            s = @compat sum(p[1:n] .* exp.((eps/2) .* A[1:n,k]))
 
             for i=1:n
-                p[i]=(p[i]*exp((eps/2)*A[i,k])) / s
+                p[i] = (p[i]*exp((eps/2)*A[i,k])) / s
             end
 
             u = U ./ t
@@ -87,7 +88,7 @@ function perf_gk(n, myeps)
         etx=sum(x)
         AX = A*X
         Ax = A*x
-        error=abs(AX)-abs(U)
+        error = @compat abs.(AX) .- abs.(U)
         Axepse = 0
 
         for i=1:n
