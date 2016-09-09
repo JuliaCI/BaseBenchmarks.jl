@@ -1,10 +1,11 @@
+#
 
 function perf_lucompletepivCopy!(A)
     n = size(A, 1)
     rowpiv=zeros(Int, n-1)
     colpiv=zeros(Int, n-1)
     for k = 1:n-1
-        As = abs(A[k:n, k:n])
+        As = @compat abs.(A[k:n, k:n])
         μ, λ = ind2sub(size(As), indmax(As))
         μ += k-1; λ += k-1
         rowpiv[k] = μ
@@ -25,7 +26,7 @@ function perf_lucompletepivSub!(A)
     rowpiv=zeros(Int, n-1)
     colpiv=zeros(Int, n-1)
     for k = 1:n-1
-        As = abs(view(A, k:n, k:n))
+        As = @compat abs.(view(A, k:n, k:n))
         μ, λ = ind2sub(size(As), indmax(As))
         μ += k-1; λ += k-1
         rowpiv[k] = μ
