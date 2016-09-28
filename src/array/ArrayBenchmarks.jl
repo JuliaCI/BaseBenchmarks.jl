@@ -47,7 +47,7 @@ g["sum", "3darray"] = @benchmarkable sum($A3d)
 g["sum", "3dsubarray"] = @benchmarkable sum($S3d)
 
 for b in values(g)
-    b.params.time_tolerance = 0.40
+    b.params.time_tolerance = 0.50
 end
 
 # #10301 #

@@ -71,11 +71,15 @@ for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, ind
 end
 
 for (s, m, v, l, sl, i) in zip(sizes, matrices, vectors, logvecs, splogmats, inds)
-    g["spmat", "array", s] = @benchmarkable getindex($m, $v, $v) time_tolerance=0.25
-    g["spmat", "integer", s] = @benchmarkable getindex($m, $i, $i) time_tolerance=0.25
-    g["spmat", "range", s] = @benchmarkable getindex($m, $(1:s), $(1:s)) time_tolerance=0.25
-    g["spmat", "logical", s] = @benchmarkable getindex($m, $l, $l) time_tolerance=0.25
-    g["spmat", "splogical", s] = @benchmarkable getindex($m, $sl) time_tolerance=0.25
+    g["spmat", "array", s] = @benchmarkable getindex($m, $v, $v)
+    g["spmat", "integer", s] = @benchmarkable getindex($m, $i, $i)
+    g["spmat", "range", s] = @benchmarkable getindex($m, $(1:s), $(1:s))
+    g["spmat", "logical", s] = @benchmarkable getindex($m, $l, $l)
+    g["spmat", "splogical", s] = @benchmarkable getindex($m, $sl)
+end
+
+for b in values(g)
+    b.params.time_tolerance = 0.3
 end
 
 ######################
