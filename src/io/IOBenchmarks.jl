@@ -25,7 +25,7 @@ end
 
 g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 
-testbuf = IOBuffer(randstring(10^4))
+testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
 
 g["read"]       = @benchmarkable perf_read!($testbuf)
 g["readstring"] = @benchmarkable readstring($testbuf)
@@ -42,13 +42,13 @@ function serialized_buf(x)
     return io
 end
 
-teststrings = [randstring(32) for i=1:10^3]
+teststrings = [randstring(RandUtils.SEED, 32) for i=1:10^3]
 teststrings_buf = serialized_buf(teststrings)
 
 g["serialize", "Vector{String}"] = @benchmarkable serialize(io, $teststrings) setup=(io=IOBuffer())
 g["deserialize", "Vector{String}"] = @benchmarkable deserialize($teststrings_buf) setup=(seek($teststrings_buf, 0))
 
-testdata = rand(1000,1000)
+testdata = rand(RandUtils.SEED,1000,1000)
 testdata_buf = serialized_buf(testdata)
 
 g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, $testdata) setup=(io=IOBuffer())
