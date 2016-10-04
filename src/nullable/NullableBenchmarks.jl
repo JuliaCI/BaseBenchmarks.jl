@@ -35,17 +35,17 @@ g = addgroup!(SUITE, "nullablearray")
 
 immutable NullableArray{T, N} <: AbstractArray{Nullable{T}, N}
     values::Array{T, N}
-    isnull::Array{Bool, N}
+    hasvalue::Array{Bool, N}
 end
 
 @inline function Base.getindex{T, N}(X::NullableArray{T, N}, I::Int...)
     if isbits(T)
-        Nullable{T}(X.values[I...], X.isnull[I...])
+        ifelse(X.hasvalue[I...], Nullable{T}(X.values[I...]), Nullable{T}())
     else
-        if X.isnull[I...]
-            Nullable{T}()
-        else
+        if X.hasvalue[I...]
             Nullable{T}(X.values[I...])
+        else
+            Nullable{T}()
         end
     end
 end
@@ -125,9 +125,9 @@ function perf_any(X::AbstractArray{Nullable{Bool}})
 end
 
 # Ensure no short-circuit happens
-X = NullableArray(fill(true, VEC_LENGTH), fill(false, VEC_LENGTH))
+X = NullableArray(fill(true, VEC_LENGTH), fill(true, VEC_LENGTH))
 # 10% of missing values
-Y = NullableArray(fill(false, VEC_LENGTH), Array(samerand(VEC_LENGTH) .> .9))
+Y = NullableArray(fill(false, VEC_LENGTH), Array(samerand(VEC_LENGTH) .> .1))
 
 g["perf_all", "NullableArray"] = @benchmarkable perf_all($X)
 g["perf_any", "NullableArray"] = @benchmarkable perf_any($Y)
