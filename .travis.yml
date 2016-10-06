@@ -10,4 +10,4 @@ notifications:
   email: false
 script:
     - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-    - julia -e 'Pkg.clone("https://github.com/JuliaCI/BenchmarkTools.jl"); Pkg.clone(pwd()); Pkg.build("BaseBenchmarks"); Pkg.test("BaseBenchmarks")'
+    - julia -e 'Pkg.clone(pwd()); Pkg.build("BaseBenchmarks"); Pkg.test("BaseBenchmarks")'
