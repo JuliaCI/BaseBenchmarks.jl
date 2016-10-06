@@ -58,4 +58,14 @@ g["dotop", "Float64", size(r), 2] = @benchmarkable perf_op_bcast!($r, $z, 17.3)
 
 ###########################################################################
 
+g = addgroup!(SUITE, "sparse", ["broadcast", "array"])
+
+s = samesprand(10^7, 1e-3, randn)
+perf_sparse_op(s) = sqrt.(abs.(s .* 2))
+perf_sparse_op(s,t) = f.(s,t)
+g["sparse", size(s), 1] = @benchmarkable perf_sparse_op($s)
+g["sparse", size(s), 2] = @benchmarkable perf_sparse_op($s, $s)
+
+###########################################################################
+
 end # module
