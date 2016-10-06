@@ -14,6 +14,7 @@ BenchmarkTools.DEFAULT_PARAMETERS.memory_tolerance = 0.01
 const PARAMS_PATH = joinpath(dirname(@__FILE__), "..", "etc", "params.jld")
 const SUITE = BenchmarkGroup()
 const MODULES = Dict("array" => :ArrayBenchmarks,
+                     "broadcast" => :BroadcastBenchmarks,
                      "io" => :IOBenchmarks,
                      "linalg" => :LinAlgBenchmarks,
                      "micro" => :MicroBenchmarks,
@@ -36,7 +37,9 @@ function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     eval(BaseBenchmarks, :(include($modpath)))
     modsuite = eval(BaseBenchmarks, modsym).SUITE
     group[id] = modsuite
-    tune && loadparams!(modsuite, JLD.load(PARAMS_PATH, id), :evals)
+    tune && jldopen(PARAMS_PATH, "r") do file
+        JLD.exists(file, id) && loadparams!(modsuite, JLD.load(file, id), :evals)
+    end
     return group
 end
 
