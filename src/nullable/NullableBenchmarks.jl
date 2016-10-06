@@ -27,6 +27,10 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat)
     end
 end
 
+for b in values(g)
+    b.params.time_tolerance = 0.3
+end
+
 ####################
 # nullable array   #
 ####################
@@ -134,5 +138,9 @@ g["perf_any", "NullableArray"] = @benchmarkable perf_any($Y)
 
 g["perf_all", "Array"] = @benchmarkable perf_all($(collect(X)))
 g["perf_any", "Array"] = @benchmarkable perf_any($(collect(Y)))
+
+for b in values(g)
+    b.params.time_tolerance = 0.45
+end
 
 end # module

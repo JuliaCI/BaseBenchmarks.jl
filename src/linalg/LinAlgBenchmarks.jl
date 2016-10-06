@@ -66,7 +66,7 @@ for s in SIZES
 end
 
 for b in values(g)
-    b.params.time_tolerance = 0.30
+    b.params.time_tolerance = 0.45
 end
 
 ##################
@@ -115,7 +115,7 @@ for s in SIZES
 end
 
 for b in values(g)
-    b.params.time_tolerance = 0.25
+    b.params.time_tolerance = 0.45
 end
 
 ########

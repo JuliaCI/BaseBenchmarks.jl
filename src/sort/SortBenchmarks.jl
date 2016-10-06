@@ -34,6 +34,9 @@ for (group, Alg) in (("quicksort", QuickSort), ("mergesort", MergeSort), ("inser
         g["sortperm! forwards", kind] = @benchmarkable sortperm!(x, $list; alg = $Alg) setup=(x = copy($ix))
         g["sortperm! reverse", kind] = @benchmarkable sortperm!(x, $list; alg = $Alg, rev = true) setup=(x = copy($ix))
     end
+    for b in values(g)
+        b.params.time_tolerance = 0.30
+    end
 end
 
 ############
@@ -44,7 +47,11 @@ g = addgroup!(SUITE, "issorted")
 
 for (kind, list) in LISTS
     g["forwards", kind] = @benchmarkable issorted($list)
-    g["reverse", kind] = @benchmarkable issorted($list; rev = true) time_tolerance=0.30
+    g["reverse", kind] = @benchmarkable issorted($list; rev = true)
+end
+
+for b in values(g)
+    b.params.time_tolerance = 0.30
 end
 
 end # module
