@@ -40,10 +40,10 @@ X = randmat(10^3)
 R = Array(Float64, length(x),length(y))
 r = similar(z)
 
-g["fusion", "Float64", size(r), 1] = @benchmarkable perf_bcast!($r, $z)
-g["fusion", "Float64", size(R), 2] = @benchmarkable perf_bcast!($R, $x, $y)
-g["fusion", "Float64", size(R), 3] = @benchmarkable perf_bcast!($R, $X, $x, $y)
-g["fusion", "Float64", size(r), 2] = @benchmarkable perf_bcast!($r, $z, 17.3)
+g["Float64", size(r), 1] = @benchmarkable perf_bcast!($r, $z)
+g["Float64", size(R), 2] = @benchmarkable perf_bcast!($R, $x, $y)
+g["Float64", size(R), 3] = @benchmarkable perf_bcast!($R, $X, $x, $y)
+g["Float64", size(r), 2] = @benchmarkable perf_bcast!($r, $z, 17.3)
 
 ###########################################################################
 
@@ -70,10 +70,10 @@ else
 end
 S = samesprand(10^3, 10^3, 1e-3, randn)
 
-g["sparse", size(s), 1] = @benchmarkable perf_sparse_op($s)
-g["sparse", size(s), 2] = @benchmarkable perf_sparse_op($s, $s)
-g["sparse", size(S), 1] = @benchmarkable perf_sparse_op($S)
-g["sparse", size(S), 2] = @benchmarkable perf_sparse_op($S, $S)
+g[size(s), 1] = @benchmarkable perf_sparse_op($s)
+g[size(s), 2] = @benchmarkable perf_sparse_op($s, $s)
+g[size(S), 1] = @benchmarkable perf_sparse_op($S)
+g[size(S), 2] = @benchmarkable perf_sparse_op($S, $S)
 
 ###########################################################################
 
