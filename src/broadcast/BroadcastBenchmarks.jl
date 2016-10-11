@@ -52,9 +52,9 @@ g = addgroup!(SUITE, "dotop", ["broadcast!", "array"])
 perf_op_bcast!(r, x) = @dotcompat r .= 3 .* x .- 4 .* x.^2 .+ x .* x .- x .^ 3
 perf_op_bcast!(R, x, y) = @dotcompat R .= 3 .* x .- 4 .* y.^2 .+ x .* y .- x .^ 3
 
-g["dotop", "Float64", size(r), 1] = @benchmarkable perf_op_bcast!($r, $z)
-g["dotop", "Float64", size(R), 2] = @benchmarkable perf_op_bcast!($R, $x, $y)
-g["dotop", "Float64", size(r), 2] = @benchmarkable perf_op_bcast!($r, $z, 17.3)
+g["Float64", size(r), 1] = @benchmarkable perf_op_bcast!($r, $z)
+g["Float64", size(R), 2] = @benchmarkable perf_op_bcast!($R, $x, $y)
+g["Float64", size(r), 2] = @benchmarkable perf_op_bcast!($r, $z, 17.3)
 
 ###########################################################################
 
