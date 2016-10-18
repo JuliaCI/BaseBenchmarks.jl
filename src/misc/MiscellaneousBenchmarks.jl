@@ -47,8 +47,8 @@ g["Complex{Float64}"] = @benchmarkable perf_afoldl(1000000, $(zeros(Complex{Floa
 # repeat function (issue #15553)
 
 g = addgroup!(SUITE, "repeat", ["array"])
-g[2000, 84, 1] = @benchmarkable repeat($(collect(1:2000)), inner=84, outer=1)
-g[2000, 1, 84] = @benchmarkable repeat($(collect(1:2000)), inner=1, outer=84)
+g[2000, 84, 1] = @benchmarkable repeat($(collect(1:2000)), inner=$[84], outer=$[1])
+g[2000, 1, 84] = @benchmarkable repeat($(collect(1:2000)), inner=$[1], outer=$[84])
 
 ###########################################################################
 # bitshift operators (from #18135)
