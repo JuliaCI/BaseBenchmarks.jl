@@ -10,6 +10,25 @@ import Compat: UTF8String, view
 
 const SUITE = BenchmarkGroup()
 
+#############################################################################
+# basic array-math reduction-like functions
+
+afloat = samerand(10^3)
+aint = samerand(Int, 10^3)
+acomplex = samerand(Complex{Float64}, 10^3)
+g = addgroup!(SUITE, "reductions", ["sum", "array", "reduce"])
+norm1(x) = norm(x, 1)
+norminf(x) = norm(x, Inf)
+perf_reduce(x) = reduce((x,y) -> x + 2y, real(zero(eltype(x))), x)
+perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, real(zero(eltype(x))), x)
+for a in (afloat, aint)
+    for fun in (sum, sumabs, sumabs2, norm, norm1, norminf, mean, var, maxabs, perf_reduce, perf_mapreduce)
+        g[string(fun), string(eltype(a))] = @benchmarkable $fun($a)
+    end
+end
+
+#############################################################################
+
 ############
 # indexing #
 ############
