@@ -38,7 +38,7 @@ function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     modsuite = eval(BaseBenchmarks, modsym).SUITE
     group[id] = modsuite
     tune && jldopen(PARAMS_PATH, "r") do file
-        JLD.exists(file, id) && loadparams!(modsuite, JLD.load(file, id), :evals)
+        JLD.exists(file, id) && loadparams!(modsuite, read(file, id), :evals)
     end
     return group
 end
