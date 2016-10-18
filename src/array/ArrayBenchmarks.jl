@@ -13,9 +13,9 @@ const SUITE = BenchmarkGroup()
 #############################################################################
 # basic array-math reduction-like functions
 
-afloat = samerand(10^6)
-aint = samerand(Int, 10^6)
-acomplex = samerand(Complex{Float64}, 10^6)
+afloat = samerand(10^3)
+aint = samerand(Int, 10^3)
+acomplex = samerand(Complex{Float64}, 10^3)
 g = addgroup!(SUITE, "reductions", ["sum", "array", "reduce"])
 norm1(x) = norm(x, 1)
 norminf(x) = norm(x, Inf)
