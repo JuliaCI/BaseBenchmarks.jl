@@ -194,4 +194,26 @@ g["boolarray_true_load!"] = @benchmarkable perf_true_load!($boolarr)
 g["bitarray_true_fill!"]  = @benchmarkable fill!($bitarr, true)
 g["boolarray_true_fill!"] = @benchmarkable fill!($boolarr, true)
 
+
+####################################
+# Float to Int conversion (#18954) #
+####################################
+
+function perf_convert!(a, x)
+    for i=1:length(x)
+        a[i] = x[i]
+    end
+    return a
+end
+
+x_int = rand(1:1000000,2000,2000)
+x_float = 1.0 * x_int
+x_complex = x_float .+ 0.0im
+
+g = addgroup!(SUITE, "convert", ["Int"])
+g["Int", "Float64"] = @benchmarkable  perf_convert!(x_int, x_float)
+g["Float64", "Int"] = @benchmarkable  perf_convert!(x_float, x_int)
+g["Complex{Float64}", "Int"] = @benchmarkable  perf_convert!(x_complex, x_int)
+g["Int", "Complex{Float64}"] = @benchmarkable  perf_convert!(x_int, x_complex)
+
 end # module
