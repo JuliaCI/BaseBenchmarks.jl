@@ -6,4 +6,8 @@ using Base.Test
 
 BaseBenchmarks.loadall!()
 
-@test begin warmup(BaseBenchmarks.SUITE); true end
+@test begin
+    run(BaseBenchmarks.SUITE, verbose = true, samples = 1,
+        evals = 2, gctrial = false, gcsample = false);
+    true
+end
