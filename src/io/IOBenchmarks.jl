@@ -46,12 +46,12 @@ teststrings = [randstring(RandUtils.SEED, 32) for i=1:10^3]
 teststrings_buf = serialized_buf(teststrings)
 
 g["serialize", "Vector{String}"] = @benchmarkable serialize(io, $teststrings) setup=(io=IOBuffer())
-g["deserialize", "Vector{String}"] = @benchmarkable deserialize($teststrings_buf) setup=(seek($teststrings_buf, 0))
+g["deserialize", "Vector{String}"] = @benchmarkable (seek($teststrings_buf, 0); deserialize($teststrings_buf))
 
 testdata = rand(RandUtils.SEED,1000,1000)
 testdata_buf = serialized_buf(testdata)
 
 g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, $testdata) setup=(io=IOBuffer())
-g["deserialize", "Matrix{Float64}"] = @benchmarkable deserialize($testdata_buf) setup=(seek($testdata_buf, 0))
+g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek($testdata_buf, 0); deserialize($testdata_buf))
 
 end # module
