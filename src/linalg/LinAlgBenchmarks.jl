@@ -64,7 +64,7 @@ for s in SIZES
     B = randmat(s)
     g["A_mul_B!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
 
-    for T in [Int, Float64]
+    for T in [Int32, Int64, Float32, Float64]
         arr = rand(T, s)
         g["cumsum!", T, s] = @benchmarkable cumsum!($arr, $arr)
     end
