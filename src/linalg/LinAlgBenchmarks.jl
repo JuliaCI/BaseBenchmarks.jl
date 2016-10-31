@@ -63,8 +63,13 @@ for s in SIZES
     A = randmat(s)
     B = randmat(s)
     g["A_mul_B!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
-end
 
+    for T in [Int, Float64]
+        arr = rand(T, s)
+        g["cumsum!", T, s] = @benchmarkable cumsum!($arr, $arr)
+    end
+
+end
 for b in values(g)
     b.params.time_tolerance = 0.45
 end
