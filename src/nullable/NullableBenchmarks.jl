@@ -14,21 +14,19 @@ const SUITE = BenchmarkGroup()
 g = addgroup!(SUITE, "basic")
 
 for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat)
+    tol = (T == BigInt || T == BigFloat) ? 0.6 : 0.3
+
     x = Nullable(one(T))
-    g["get1", string(x)] = @benchmarkable get($x)
+    g["get1", string(x)] = @benchmarkable get($x) time_tolerance=tol
 
     for x in (Nullable(one(T)), Nullable{T}())
-        g["isnull", string(x)] = @benchmarkable isnull($x)
-        g["get2", string(x)] = @benchmarkable get($x, $(zero(T)))
+        g["isnull", string(x)] = @benchmarkable isnull($x) time_tolerance=tol
+        g["get2", string(x)] = @benchmarkable get($x, $(zero(T))) time_tolerance=tol
 
-        for y in (Nullable(one(T)), Nullable(zero(T)), Nullable{T}())
-            g["isequal", string(x), string(y)] = @benchmarkable isequal($x, $y)
+        for y in (Nullable(one(T)), Nullable(zero(T)), Nullable{T}()) time_tolerance=tol
+            g["isequal", string(x), string(y)] = @benchmarkable isequal($x, $y) time_tolerance=tol
         end
     end
-end
-
-for b in values(g)
-    b.params.time_tolerance = 0.3
 end
 
 ####################
@@ -140,7 +138,7 @@ g["perf_all", "Array"] = @benchmarkable perf_all($(collect(X)))
 g["perf_any", "Array"] = @benchmarkable perf_any($(collect(Y)))
 
 for b in values(g)
-    b.params.time_tolerance = 0.45
+    b.params.time_tolerance = 0.50
 end
 
 end # module
