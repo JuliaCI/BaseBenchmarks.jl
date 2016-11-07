@@ -102,4 +102,8 @@ for m in (small_sqr, small_rct, large_sqr, large_rct)
     g["ctranspose!", s] = @benchmarkable ctranspose!($(cm.'), $cm)
 end
 
+for b in values(g)
+    b.params.time_tolerance = 0.3
+end
+
 end # module
