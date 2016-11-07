@@ -15,6 +15,7 @@ const PARAMS_PATH = joinpath(dirname(@__FILE__), "..", "etc", "params.jld")
 const SUITE = BenchmarkGroup()
 const MODULES = Dict("array" => :ArrayBenchmarks,
                      "broadcast" => :BroadcastBenchmarks,
+                     "dates" => :DatesBenchmarks,
                      "io" => :IOBenchmarks,
                      "linalg" => :LinAlgBenchmarks,
                      "micro" => :MicroBenchmarks,
