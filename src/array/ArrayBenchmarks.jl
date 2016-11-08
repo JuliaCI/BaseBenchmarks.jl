@@ -235,4 +235,19 @@ g["Float64", "Int"] = @benchmarkable  perf_convert!($x_float, $x_int)
 g["Complex{Float64}", "Int"] = @benchmarkable  perf_convert!($x_complex, $x_int)
 g["Int", "Complex{Float64}"] = @benchmarkable  perf_convert!($x_int, $x_complex)
 
+
+##########################################
+# High dimensional array indexing #18774 #
+##########################################
+include("indexing.jl")
+
+g = addgroup!(SUITE, "High Dimensional Indexing", ["6d"])
+dims = (10, 10, 10, 10, 10, 2)  # trailing dimension must be 2
+u_i = rand(dims...)
+u_ip1 = zeros(dims...)
+
+g["High Dimensional Indexing", "6d"] = @benchmarkable perf_hdindexing($u_i, $u_ip1)
+
+e
+
 end # module
