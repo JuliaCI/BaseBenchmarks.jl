@@ -59,6 +59,9 @@ g["lastdayofweek","DateTime"]     = @benchmarkable Dates.lastdayofweek($_datetim
 g["dayofyear","Date"]             = @benchmarkable Dates.dayofyear($_date)
 g["dayofyear","DateTime"]         = @benchmarkable Dates.dayofyear($_datetime)
 
+for b in values(g)
+    b.params.time_tolerance = 0.25
+end
 
 g = addgroup!(SUITE, "arithmetic")
 
