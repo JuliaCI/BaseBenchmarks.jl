@@ -1,5 +1,7 @@
 module GoGame
 
+using Compat
+
 # Benchmark implementing the board logic for the game of go and
 # exercising it by playing random games. Derived from
 # http://www.lysator.liu.se/~gunnar/gtp/brown-1.0.tar.gz
@@ -36,9 +38,9 @@ type XorRNG
 end
 
 function xor_randn!(rand::XorRNG, n::UInt32)
-    rand.state $= rand.state << 13
-    rand.state $= rand.state >> 17
-    rand.state $= rand.state << 5
+    rand.state = xor(rand.state, rand.state << 13)
+    rand.state = xor(rand.state, rand.state >> 17)
+    rand.state = xor(rand.state, rand.state << 5)
     return rand.state % n
 end
 
@@ -324,7 +326,7 @@ function compute_final_status!(board::Board)
                 # Set the final status of the pos vertex to either black
                 # or white territory.
                 if board.final_status[i, j] == UNKNOWN
-                    if (board.final_status[ai, aj] == ALIVE) $ (board[ai, aj] == WHITE)
+                    if xor(board.final_status[ai, aj] == ALIVE, board[ai, aj] == WHITE)
                         board.final_status[i, j] = BLACK_TERRITORY
                     else
                         board.final_status[i, j] = WHITE_TERRITORY
@@ -388,7 +390,7 @@ function compute_score(board::Board)
             score -= 1.0
         elseif status == WHITE_TERRITORY
             score += 1.0
-        elseif (status == ALIVE) $ (board[i, j] == WHITE)
+        elseif xor(status == ALIVE, board[i, j] == WHITE)
             score -= 1.0
         else
             score += 1.0
