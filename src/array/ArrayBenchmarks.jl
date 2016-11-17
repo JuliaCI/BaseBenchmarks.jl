@@ -75,7 +75,11 @@ end
 include("generate_kernel.jl")
 
 nmax = 6  # maximum dimensionality is nmax + 1
-fname = "hdindexing.jl"
+# get path to current directory and append file name to it
+file_rev = reverse(@__FILE__)
+idx = findfirst(file_rev, '/')
+dirpath = reverse(file_rev[idx:end])
+fname = dirpath*"hdindexing.jl"
 make_stencil(fname, nmax)  # generate source file
 include("hdindexing.jl")
 

@@ -86,7 +86,7 @@ end
 
 
 function getStencil(maxdim::Integer, stencil, dim::Integer, src_eq::Integer, 
-                    second_line_indent::ASCIIString="")
+                    second_line_indent::String="")
 
 # Generates a string that multiplies the given stencil coefficients by
 #   the corresponding values from an array called u_i.
@@ -274,7 +274,7 @@ function getKernelEpilogue()
   return str
 end
 
-function indentString(indent::Integer, str::ASCIIString)
+function indentString(indent::Integer, str::String)
 # indent all lines of a string a certain number of spaces
   indent_str = " "^indent
   newline_indent = "\n"*indent_str
