@@ -69,6 +69,34 @@ for b in values(g)
     b.params.time_tolerance = 0.50
 end
 
+
+# #18774 #
+#--------#
+include("generate_kernel.jl")
+
+nmax = 6  # maximum dimensionality is nmax + 1
+# get path to current directory and append file name to it
+fname = joinpath(dirname(@__FILE__), "hdindexing.jl")
+make_stencil(fname, nmax)  # generate source file
+include("hdindexing.jl")
+
+npts_dir = [10000, 80, 20, 12, 9, 6]  # number of points in each direction
+for i=1:nmax
+  dims_vec = zeros(Int, i+1)
+  fill!(dims_vec, npts_dir[i])
+  dims_vec[end] = 2  # last dimension must be 2
+  u_i = samerand(dims_vec...)
+  u_ip1 = zeros(dims_vec...)
+
+  str = string(i+1, "d")
+
+  # perf_hdindexing is defined in the generated source file hdindexing.jl
+  g[str] = @benchmarkable perf_hdindexing5($u_i, $u_ip1)
+end
+
+
+
+
 # #10301 #
 #--------#
 
