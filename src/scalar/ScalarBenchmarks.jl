@@ -106,4 +106,38 @@ g["indexed"] = @benchmarkable perf_iterate_indexed(10^5, 3) time_tolerance=0.25
 g["in"]      = @benchmarkable perf_iterate_in(10^5, 3) time_tolerance=0.25
 
 
+g = addgroup!(SUITE, "floatexp")
+
+g["ldexp","norm -> norm",       "Float64"] = @benchmarkable ldexp(1.7,  10)
+g["ldexp","norm -> norm",       "Float32"] = @benchmarkable ldexp(1.7f0,10)
+g["ldexp","norm -> subnorm",    "Float64"] = @benchmarkable ldexp(1.7,  -1028)
+g["ldexp","norm -> subnorm",    "Float32"] = @benchmarkable ldexp(1.7f0,-128)
+g["ldexp","norm -> inf",        "Float64"] = @benchmarkable ldexp(1.7,  1028)
+g["ldexp","norm -> inf",        "Float32"] = @benchmarkable ldexp(1.7f0,128)
+g["ldexp","subnorm -> norm",    "Float64"] = @benchmarkable ldexp(1.7e-310, 100)
+g["ldexp","subnorm -> norm",    "Float32"] = @benchmarkable ldexp(1.7f-40,  100)
+g["ldexp","subnorm -> subnorm", "Float64"] = @benchmarkable ldexp(1.7e-310,-3)
+g["ldexp","subnorm -> subnorm", "Float32"] = @benchmarkable ldexp(1.7f-40, -3)
+g["ldexp","inf -> inf",        "Float64"] = @benchmarkable ldexp(Inf,  10)
+g["ldexp","inf -> inf",        "Float32"] = @benchmarkable ldexp(Inf32,10)
+
+g["frexp","norm",    "Float64"] = @benchmarkable frexp(1.7)
+g["frexp","norm",    "Float32"] = @benchmarkable frexp(1.7f0)
+g["frexp","subnorm", "Float64"] = @benchmarkable frexp(1.7e-310)
+g["frexp","subnorm", "Float32"] = @benchmarkable frexp(1.7f-40)
+g["frexp","inf", "Float64"] = @benchmarkable frexp(Inf)
+g["frexp","inf", "Float32"] = @benchmarkable frexp(Inf32)
+
+g["exponent","norm",    "Float64"] = @benchmarkable exponent(1.7)
+g["exponent","norm",    "Float32"] = @benchmarkable exponent(1.7f0)
+g["exponent","subnorm", "Float64"] = @benchmarkable exponent(1.7e-310)
+g["exponent","subnorm", "Float32"] = @benchmarkable exponent(1.7f-40)
+
+g["significand","norm",    "Float64"] = @benchmarkable significand(1.7)
+g["significand","norm",    "Float32"] = @benchmarkable significand(1.7f0)
+g["significand","subnorm", "Float64"] = @benchmarkable significand(1.7e-310)
+g["significand","subnorm", "Float32"] = @benchmarkable significand(1.7f-40)
+
+
+
 end # module
