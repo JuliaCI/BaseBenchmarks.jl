@@ -12,14 +12,14 @@ const SUITE = BenchmarkGroup()
 if VERSION < v"0.5.0-dev+5575" #17510
     macro dotcompat(ex)
         if Meta.isexpr(ex, :comparison, 3) && ex.args[2] == :.=
-            :(copy!($(ex.args[1]), $(ex.args[3])))
+            :(copy!($(esc(ex.args[1])), $(esc(ex.args[3]))))
         else
-            ex
+            esc(ex)
         end
     end
 else
     macro dotcompat(ex)
-        ex
+        esc(ex)
     end
 end
 
