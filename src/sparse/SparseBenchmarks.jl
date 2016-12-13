@@ -106,4 +106,18 @@ for b in values(g)
     b.params.time_tolerance = 0.3
 end
 
+##############
+# arithmetic #
+##############
+
+g = addgroup!(SUITE, "arithmetic")
+
+# unary minus, julialang repo issue #19503 / fix #19530
+g["unary minus", size(small_sqr)] = @benchmarkable -$small_sqr
+g["unary minus", size(large_sqr)] = @benchmarkable -$large_sqr
+
+for b in values(g)
+    b.params.time_tolerance = 0.3
+end
+
 end # module
