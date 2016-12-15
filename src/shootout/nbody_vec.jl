@@ -6,6 +6,21 @@
 
 module NBodyVec
 
+# work around lack of Compat support for .= (Compat.jl issue #285)
+if VERSION < v"0.5.0-dev+5575" #17510
+    macro dotcompat(ex)
+        if Meta.isexpr(ex, :comparison, 3) && ex.args[2] == :.=
+            :(copy!($(esc(ex.args[1])), $(esc(ex.args[3]))))
+        else
+            esc(ex)
+        end
+    end
+else
+    macro dotcompat(ex)
+        esc(ex)
+    end
+end
+
 # Constants
 const solar_mass = 4 * pi * pi
 const days_per_year = 365.24
@@ -18,43 +33,45 @@ type Body
 end
 
 function offset_momentum(b::Body, p)
-    b.v -= p / solar_mass
+    b.v .-= p ./ solar_mass
 end
 
 function init_sun(bodies)
     local p::Array{Float64,1} = [0.0, 0.0, 0.0]
     for b in bodies
-        p += b.v * b.mass
+        p .+= b.v .* b.mass
     end
     offset_momentum(bodies[1], p)
 end
 
 function advance(bodies, dt)
+    delta = [0.,0.,0.]
     for i = 1:length(bodies)
         for j = i+1:length(bodies)
-            delta = bodies[i].pos - bodies[j].pos
-            dsq = sum(delta .^ 2)
+            @dotcompat delta .= bodies[i].pos .- bodies[j].pos
+            dsq = sumabs2(delta)
             distance = sqrt(dsq)
             mag = dt / (dsq * distance)
 
-            bodies[i].v -= delta * (bodies[j].mass * mag)
-            bodies[j].v += delta * (bodies[i].mass * mag)
+            bodies[i].v .-= delta .* (bodies[j].mass * mag)
+            bodies[j].v .+= delta .* (bodies[i].mass * mag)
         end
     end
 
     for b in bodies
-        b.pos += dt * b.v
+        b.pos .+= dt .* b.v
     end
 end
 
 function energy(bodies)
     local e::Float64 = 0.0
+    delta = [0., 0., 0.]
     for i = 1:length(bodies)
         e += 0.5 * bodies[i].mass *
-             sum(bodies[i].v .^ 2)
+             sumabs2(bodies[i].v)
         for j = i+1:length(bodies)
-            delta = bodies[i].pos - bodies[j].pos
-            distance = sqrt(sum(delta .^ 2))
+            @dotcompat delta .= bodies[i].pos .- bodies[j].pos
+            distance = sqrt(sumabs2(delta))
             e -= (bodies[i].mass * bodies[j].mass) / distance
         end
     end
