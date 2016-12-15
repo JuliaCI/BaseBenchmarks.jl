@@ -17,9 +17,8 @@ function perf_euro_option_devec(npaths)
     t2 = sigma*sqrt(dt)
 
     for i=1:steps
-        tmp = scale!(t2, randn(npaths))
         for j=1:npaths
-            S[j] *= exp(t1 + tmp[j])
+            S[j] *= exp(t1 + t2 * randn())
         end
     end
 
@@ -36,11 +35,10 @@ function perf_euro_option_vec(npaths)
     S = fill(100.0, npaths)
     t1 = (r - 0.5*sigma^2)*dt
     t2 = sigma*sqrt(dt)
+    R = @compat Array{Float64}(npaths)
 
     for i=1:steps
-        tmp = scale!(t2, randn(npaths))
-        tmp[:] .+= t1
-        S[:] .*= map!(exp, tmp)
+        S .*= @compat exp.(t2 .* randn!(R) .+ t1)
     end
 
     return @compat mean(exp(-r*T) .* max.(K .- S, 0))
