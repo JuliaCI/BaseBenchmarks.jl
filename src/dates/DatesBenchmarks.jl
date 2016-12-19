@@ -98,7 +98,14 @@ _custom_date_fmt = "yyyymmdd"
 _custom_datetime_str = "20160219 123456.78"
 _custom_datetime_fmt = "yyyymmdd HHMMSS.sss"
 
+# Note: Also benchmarks the time it takes to create the custom format
 g["Date","DateFormat"] = @benchmarkable Date($_custom_date_str, $_custom_date_fmt)
 g["DateTime","DateFormat"] = @benchmarkable DateTime($_custom_datetime_str, $_custom_datetime_fmt)
+
+g["DateTime","ISODateTimeFormat"] = @benchmarkable DateTime($_datetime_str, $(Dates.ISODateTimeFormat))
+g["Date","ISODateFormat"] = @benchmarkable Date($_date_str, $(Dates.ISODateFormat))
+g["DateTime","RFC1123Format","Titlecase"] = @benchmarkable DateTime("Sat, 12 Nov 2016 07:45:36", $(Dates.RFC1123Format))
+g["DateTime","RFC1123Format","Lowercase"] = @benchmarkable DateTime("sat, 12 Nov 2016 07:45:36", $(Dates.RFC1123Format))
+g["DateTime","RFC1123Format","Mixedcase"] = @benchmarkable DateTime("sAt, 12 Nov 2016 07:45:36", $(Dates.RFC1123Format))
 
 end
