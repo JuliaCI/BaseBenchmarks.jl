@@ -49,7 +49,7 @@ function advance(bodies, dt)
     for i = 1:length(bodies)
         for j = i+1:length(bodies)
             @dotcompat delta .= bodies[i].pos .- bodies[j].pos
-            dsq = sumabs2(delta)
+            dsq = sum(abs2, delta)
             distance = sqrt(dsq)
             mag = dt / (dsq * distance)
 
@@ -68,10 +68,10 @@ function energy(bodies)
     delta = [0., 0., 0.]
     for i = 1:length(bodies)
         e += 0.5 * bodies[i].mass *
-             sumabs2(bodies[i].v)
+             sum(abs2, bodies[i].v)
         for j = i+1:length(bodies)
             @dotcompat delta .= bodies[i].pos .- bodies[j].pos
-            distance = sqrt(sumabs2(delta))
+            distance = sqrt(sum(abs2, delta))
             e -= (bodies[i].mass * bodies[j].mass) / distance
         end
     end
