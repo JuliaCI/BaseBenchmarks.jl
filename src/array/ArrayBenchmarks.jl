@@ -56,11 +56,18 @@ for (A, str) in (arrays_iter..., ranges_iter...)
     g["sumeach", str]            = @benchmarkable perf_sumeach($A)
     g["sumlinear", str]          = @benchmarkable perf_sumlinear($A)
     g["sumcartesian", str]       = @benchmarkable perf_sumcartesian($A)
+    g["sumeach_view", str]       = @benchmarkable perf_sumeach_view($A)
+    g["sumlinear_view", str]     = @benchmarkable perf_sumlinear_view($A)
+    g["sumcartesian_view", str]  = @benchmarkable perf_sumcartesian_view($A)
     if ndims(A) <= 2
         g["sumcolon", str]       = @benchmarkable perf_sumcolon($A)
         g["sumrange", str]       = @benchmarkable perf_sumrange($A)
         g["sumlogical", str]     = @benchmarkable perf_sumlogical($A)
         g["sumvector", str]      = @benchmarkable perf_sumvector($A)
+        g["sumcolon_view", str]  = @benchmarkable perf_sumcolon_view($A)
+        g["sumrange_view", str]  = @benchmarkable perf_sumrange_view($A)
+        g["sumlogical_view", str]= @benchmarkable perf_sumlogical_view($A)
+        g["sumvector_view", str] = @benchmarkable perf_sumvector_view($A)
     end
 end
 g["sub2ind"] = @benchmarkable perf_sub2ind((1000,1000,1000), 1:1000, 1:1000, 1:1000)
