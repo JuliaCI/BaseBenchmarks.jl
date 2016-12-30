@@ -42,7 +42,7 @@ function perf_revcomp()
     open(infile, "r") do input
         buff = UInt8[]
         while true
-            line = readline(input).data
+            line = Vector{UInt8}(readline(input))
             if isempty(line)
     #            print_buff(buff)
                 return
