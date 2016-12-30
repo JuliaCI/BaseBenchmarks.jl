@@ -268,6 +268,15 @@ if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     @inline Base.unsafe_getindex(A::SubArray, I...) = @inbounds return A[I...]
     @inline Base.unsafe_getindex(A::BitArray, I1::BitArray, I2::Int) = Base.unsafe_getindex(A, Base.to_index(I1), I2)
 end
+# Add support for views with CartesianIndex in a comparable method to how indexing works
+if v"0.5-" < VERSION < v"0.6-"
+    @eval Base.@propagate_inbounds Base.view(A::AbstractArray, I::Union{AbstractArray,Colon,Real,CartesianIndex}...) =
+        view(A, Base.IteratorsMD.flatten(I)...)
+elseif v"0.4-" < VERSION < v"0.5-"
+    @generated function Base.slice(A::AbstractArray, I::Union{AbstractVector,Colon,Int,CartesianIndex}...)
+        :($(Expr(:meta, :inline)); slice(A, $(Base.cartindex_exprs(I, :I)...)))
+    end
+end
 
 function makearrays{T}(::Type{T}, r::Integer, c::Integer)
     A = samerand(T, r, c)
