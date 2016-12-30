@@ -105,6 +105,9 @@ g = addgroup!(SUITE, "iteration", ["indexed", "in"])
 g["indexed"] = @benchmarkable perf_iterate_indexed(10^5, 3) time_tolerance=0.25
 g["in"]      = @benchmarkable perf_iterate_in(10^5, 3) time_tolerance=0.25
 
+#######
+# exp #
+#######
 
 g = addgroup!(SUITE, "floatexp")
 
@@ -138,6 +141,8 @@ g["significand","norm",    "Float32"] = @benchmarkable significand(1.7f0)
 g["significand","subnorm", "Float64"] = @benchmarkable significand(1.7e-310)
 g["significand","subnorm", "Float32"] = @benchmarkable significand(1.7f-40)
 
-
+for b in values(g)
+    b.params.time_tolerance = 0.40
+end
 
 end # module
