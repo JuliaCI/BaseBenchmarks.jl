@@ -1,9 +1,8 @@
 module BroadcastBenchmarks
 
 include(joinpath("..", "utils", "RandUtils.jl"))
-include(joinpath("..", "utils", "CompatUtils.jl"))
 
-using .RandUtils, .CompatUtils
+using .RandUtils
 using BenchmarkTools
 using Compat
 
@@ -15,9 +14,9 @@ g = addgroup!(SUITE, "fusion", ["broadcast!", "array"])
 
 f(x,y) = 3x - 4y^2
 h(x) = 6x + 2x^2 - 5
-perf_bcast!(r, x) = @dotcompat r .= @compat h.(f.(x, h.(x)))
-perf_bcast!(R, x, y) = @dotcompat R .= @compat h.(f.(x, h.(y)))
-perf_bcast!(R, x, y, z) = @dotcompat R .= @compat f.(X, f.(x, y))
+perf_bcast!(r, x) = @compat r .= @compat h.(f.(x, h.(x)))
+perf_bcast!(R, x, y) = @compat R .= @compat h.(f.(x, h.(y)))
+perf_bcast!(R, x, y, z) = @compat R .= @compat f.(X, f.(x, y))
 
 x = randvec(10^3)
 y = randvec(10^3)'
@@ -35,8 +34,8 @@ g["Float64", size(r), 2] = @benchmarkable perf_bcast!($r, $z, 17.3)
 
 g = addgroup!(SUITE, "dotop", ["broadcast!", "array"])
 
-perf_op_bcast!(r, x) = @dotcompat r .= 3 .* x .- 4 .* x.^2 .+ x .* x .- x .^ 3
-perf_op_bcast!(R, x, y) = @dotcompat R .= 3 .* x .- 4 .* y.^2 .+ x .* y .- x .^ 3
+perf_op_bcast!(r, x) = @compat r .= 3 .* x .- 4 .* x.^2 .+ x .* x .- x .^ 3
+perf_op_bcast!(R, x, y) = @compat R .= 3 .* x .- 4 .* y.^2 .+ x .* y .- x .^ 3
 
 g["Float64", size(r), 1] = @benchmarkable perf_op_bcast!($r, $z)
 g["Float64", size(R), 2] = @benchmarkable perf_op_bcast!($R, $x, $y)

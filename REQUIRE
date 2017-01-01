@@ -1,4 +1,4 @@
 julia 0.4
 BenchmarkTools 0.0.5 0.0.6-
-Compat 0.9.4
+Compat 0.10.0
 JLD
