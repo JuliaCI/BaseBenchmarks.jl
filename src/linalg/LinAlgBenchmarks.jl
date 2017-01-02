@@ -14,7 +14,7 @@ const SIZES = (2^8, 2^10)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
 const DIVMATS = filter(x -> !(in(x, (Bidiagonal, Tridiagonal, SymTridiagonal))), MATS)
 
-typename{T}(::Type{T}) = string(T.name)
+typename{T}(::Type{T}) = string(isa(T,DataType) ? T.name : Base.unwrap_unionall(T).name)
 typename{M<:Matrix}(::Type{M}) = "Matrix"
 typename{V<:Vector}(::Type{V}) = "Vector"
 
