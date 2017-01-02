@@ -6,6 +6,8 @@
 
 module NBodyVec
 
+using Compat
+
 # Constants
 const solar_mass = 4 * pi * pi
 const days_per_year = 365.24
