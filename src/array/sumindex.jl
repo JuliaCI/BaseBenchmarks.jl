@@ -95,6 +95,82 @@ function perf_sumvector(A)
     return s
 end
 
+## Views
+function perf_sumeach_view(A)
+    s = zero(eltype(A))
+    @inbounds @simd for I in eachindex(A)
+        val = view(A, I)
+        s += val[]
+    end
+    return s
+end
+
+function perf_sumlinear_view(A)
+    s = zero(eltype(A))
+    @inbounds @simd for I in 1:length(A)
+        val = view(A, I)
+        s += val[]
+    end
+    return s
+end
+function perf_sumcartesian_view(A)
+    s = zero(eltype(A))
+    @inbounds @simd for I in CartesianRange(size(A))
+        val = view(A, I)
+        s += val[]
+    end
+    return s
+end
+
+function perf_sumcolon_view(A)
+    s = zero(eltype(A))
+    nrows = size(A, 1)
+    ncols = size(A, 2)
+    c = Colon()
+    @inbounds for i = 1:ncols
+        val = view(A, c, i)
+        s += first(val)
+    end
+    return s
+end
+
+function perf_sumrange_view(A)
+    s = zero(eltype(A))
+    nrows = size(A, 1)
+    ncols = size(A, 2)
+    r = 1:nrows
+    @inbounds for i = 1:ncols
+        val = view(A, r, i)
+        s += first(val)
+    end
+    return s
+end
+
+function perf_sumlogical_view(A)
+    s = zero(eltype(A))
+    nrows = size(A, 1)
+    ncols = size(A, 2)
+    r = falses(nrows)
+    r[1:4:end] = true
+    @inbounds for i = 1:ncols
+        val = view(A, r, i)
+        s += first(val)
+    end
+    return s
+end
+
+function perf_sumvector_view(A)
+    s = zero(eltype(A))
+    nrows = size(A, 1)
+    ncols = size(A, 2)
+    r = rand(1:nrows, 5)
+    @inbounds for i = 1:ncols
+        val = view(A, r, i)
+        s += first(val)
+    end
+    return s
+end
+
 function perf_sub2ind(sz, irange, jrange, krange)
     s = 0
     for k in krange, j in jrange, i in irange
@@ -169,10 +245,13 @@ Base.size(A::MyArray) = size(A.data)
 @inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(similar(A.data, T, map(n->n+1, dims)))
 
 @inline Base.getindex(A::ArrayLF, i::Int) = getindex(A.data, i)
-@inline Base.getindex(A::ArrayLF, i::Int, i2::Int) = getindex(A.data, i, i2)
-@inline Base.getindex(A::Union{ArrayLS, ArrayLSLS}, i::Int, j::Int) = getindex(A.data, i, j)
+@inline Base.getindex{T}(A::ArrayLS{T,2}, i::Int, j::Int) = getindex(A.data, i, j)
+@inline Base.getindex{T}(A::ArrayLS{T,3}, i::Int, j::Int, k::Int) = getindex(A.data, i, j, k)
+@inline Base.getindex{T}(A::ArrayLSLS{T,2}, i::Int, j::Int) = getindex(A.data, i, j)
 @inline Base.unsafe_getindex(A::ArrayLF, indx::Int) = Base.unsafe_getindex(A.data, indx)
-@inline Base.unsafe_getindex(A::Union{ArrayLS, ArrayLSLS}, i::Int, j::Int) = Base.unsafe_getindex(A.data, i, j)
+@inline Base.unsafe_getindex{T}(A::ArrayLS{T,2}, i::Int, j::Int) = Base.unsafe_getindex(A.data, i, j)
+@inline Base.unsafe_getindex{T}(A::ArrayLS{T,3}, i::Int, j::Int, k::Int) = Base.unsafe_getindex(A.data, i, j, k)
+@inline Base.unsafe_getindex{T}(A::ArrayLSLS{T,2}, i::Int, j::Int) = Base.unsafe_getindex(A.data, i, j)
 
 @inline Base.getindex{T}(A::ArrayStrides{T,2}, i::Real, j::Real) = getindex(A.data, 1+A.strides[1]*(i-1)+A.strides[2]*(j-1))
 @inline Base.getindex(A::ArrayStrides1, i::Real, j::Real) = getindex(A.data, i + A.stride1*(j-1))
@@ -189,6 +268,15 @@ if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     @inline Base.unsafe_getindex(A::SubArray, I...) = @inbounds return A[I...]
     @inline Base.unsafe_getindex(A::BitArray, I1::BitArray, I2::Int) = Base.unsafe_getindex(A, Base.to_index(I1), I2)
 end
+# Add support for views with CartesianIndex in a comparable method to how indexing works
+if v"0.5-" < VERSION < v"0.6-"
+    @eval Base.@propagate_inbounds Base.view(A::AbstractArray, I::Union{AbstractArray,Colon,Real,CartesianIndex}...) =
+        view(A, Base.IteratorsMD.flatten(I)...)
+elseif v"0.4-" < VERSION < v"0.5-"
+    @generated function Base.slice(A::AbstractArray, I::Union{AbstractVector,Colon,Int,CartesianIndex}...)
+        :($(Expr(:meta, :inline)); slice(A, $(Base.cartindex_exprs(I, :I)...)))
+    end
+end
 
 function makearrays{T}(::Type{T}, r::Integer, c::Integer)
     A = samerand(T, r, c)
@@ -200,6 +288,15 @@ function makearrays{T}(::Type{T}, r::Integer, c::Integer)
     Astrd = ArrayStrides(A)
     Astrd1 = ArrayStrides1(A)
     B = samerand(T, r+1, c+2)
+    # And views thereof
     Asub = view(B, 1:r, 2:c+1)
-    return (A, AF, AS, ASS, Asub)
+    Asub2 = view(A, :, :)
+    Asub3 = view(AS, :, :)
+    C = samerand(T, 4, r, c)
+    Asub4 = view(C, 1, :, :)
+    Asub5 = view(ArrayLS(C), 1, :, :)
+    Asub6 = view(view(C, :, :, :), :, 2:c+1)
+    Asub7 = view(view(ArrayLS(C), :, :, :), :, 2:c+1)
+
+    return (A, AF, AS, ASS, Asub, Asub2, Asub3, Asub4, Asub5, Asub6, Asub7)
 end
