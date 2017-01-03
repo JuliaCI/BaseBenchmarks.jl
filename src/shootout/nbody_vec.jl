@@ -6,8 +6,7 @@
 
 module NBodyVec
 
-include(joinpath("..", "utils", "CompatUtils.jl"))
-using .CompatUtils
+using Compat
 
 # Constants
 const solar_mass = 4 * pi * pi
@@ -36,7 +35,7 @@ function advance(bodies, dt)
     delta = [0.,0.,0.]
     for i = 1:length(bodies)
         for j = i+1:length(bodies)
-            @dotcompat delta .= bodies[i].pos .- bodies[j].pos
+            @compat delta .= bodies[i].pos .- bodies[j].pos
             dsq = sum(abs2, delta)
             distance = sqrt(dsq)
             mag = dt / (dsq * distance)
@@ -58,7 +57,7 @@ function energy(bodies)
         e += 0.5 * bodies[i].mass *
              sum(abs2, bodies[i].v)
         for j = i+1:length(bodies)
-            @dotcompat delta .= bodies[i].pos .- bodies[j].pos
+            @compat delta .= bodies[i].pos .- bodies[j].pos
             distance = sqrt(sum(abs2, delta))
             e -= (bodies[i].mass * bodies[j].mass) / distance
         end
