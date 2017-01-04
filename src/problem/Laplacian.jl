@@ -13,7 +13,7 @@ import Compat: UTF8String, view
 # creates a sparse matrix from its diagonals and generates
 # 1D derivatives via finite difference on a staggered grid
 function ddx_spdiags(m)
-    B = ones(m)*[-1 1]
+    B = ones(m)*[-1, 1]'
     d = [0, 1]
     n = m + 1
     p = length(d)
