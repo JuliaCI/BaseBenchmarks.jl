@@ -141,6 +141,22 @@ g["significand","norm",    "Float32"] = @benchmarkable significand(1.7f0)
 g["significand","subnorm", "Float64"] = @benchmarkable significand(1.7e-310)
 g["significand","subnorm", "Float32"] = @benchmarkable significand(1.7f-40)
 
+g["exp","normal path, k = 2",              "Float 64"] = @benchmarkable exp(1.5)
+g["exp","fast path, k = 1",                "Float 64"] = @benchmarkable exp(0.5)
+g["exp","no agument reduction, k = 9",     "Float 64"] = @benchmarkable exp(0.1)
+g["exp","small argument path",             "Float 64"] = @benchmarkable exp(2.0^-30)
+g["exp","normal path -> small, k = -1045", "Float 64"] = @benchmarkable exp(-724.0)
+g["exp","overflow",                        "Float 64"] = @benchmarkable exp(900.0)
+g["exp","underflow",                       "Float 64"] = @benchmarkable exp(-900.0)
+ 
+g["exp","normal path, k = 2",              "Float 32"] = @benchmarkable exp(1f5)
+g["exp","fast path, k = 1",                "Float 32"] = @benchmarkable exp(0f5)
+g["exp","no agument reduction, k = 9",     "Float 32"] = @benchmarkable exp(0f1)
+g["exp","small argument path",             "Float 32"] = @benchmarkable exp(2f0^-15)
+g["exp","normal path -> small, k = -1045", "Float 32"] = @benchmarkable exp(-724f0)
+g["exp","overflow",                        "Float 32"] = @benchmarkable exp(150f0)
+g["exp","underflow",                       "Float 32"] = @benchmarkable exp(-150f0)
+
 for b in values(g)
     b.params.time_tolerance = 0.40
 end
