@@ -5,7 +5,7 @@
 # Based on the Javascript program
 
 function perf_fannkuch(n)
-    p = Array(Int32,n)
+    p = Vector{Int32}(n)
     for i = 1:n
         p[i] = i
     end

@@ -92,8 +92,8 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
     end
 
     # 10% of missing values
-    X = NullableArray(Array{T}(samerand(S, VEC_LENGTH)), Array(samerand(VEC_LENGTH) .> .9))
-    Y = NullableArray(Array{T}(samerand(S, VEC_LENGTH)), Array(samerand(VEC_LENGTH) .> .9))
+    X = NullableArray(Vector{T}(samerand(S, VEC_LENGTH)), Vector{Bool}(samerand(VEC_LENGTH) .> .9))
+    Y = NullableArray(Vector{T}(samerand(S, VEC_LENGTH)), Vector{Bool}(samerand(VEC_LENGTH) .> .9))
 
     for (A, X, Y) in (("NullableArray", X, Y), ("Array", collect(X), collect(Y)))
         g["perf_sum", A, string(T)] = @benchmarkable perf_sum($X)
@@ -129,7 +129,7 @@ end
 # Ensure no short-circuit happens
 X = NullableArray(fill(true, VEC_LENGTH), fill(true, VEC_LENGTH))
 # 10% of missing values
-Y = NullableArray(fill(false, VEC_LENGTH), Array(samerand(VEC_LENGTH) .> .1))
+Y = NullableArray(fill(false, VEC_LENGTH), Vector{Bool}(samerand(VEC_LENGTH) .> .1))
 
 g["perf_all", "NullableArray"] = @benchmarkable perf_all($X)
 g["perf_any", "NullableArray"] = @benchmarkable perf_any($Y)

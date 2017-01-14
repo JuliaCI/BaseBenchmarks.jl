@@ -43,7 +43,7 @@ end
 
 function random_fasta(symb, pr, n)
     cs = cumsum(pr)
-    line = Array(UInt8, line_width)
+    line = Vector{UInt8}(line_width)
     k = n
     while k > 0
         m = min(k, line_width)
