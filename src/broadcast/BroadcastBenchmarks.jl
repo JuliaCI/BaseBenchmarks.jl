@@ -22,7 +22,7 @@ x = randvec(10^3)
 y = randvec(10^3)'
 z = randvec(10^6)
 X = randmat(10^3)
-R = Array(Float64, length(x),length(y))
+R = Matrix{Float64}(length(x), length(y))
 r = similar(z)
 
 g["Float64", size(r), 1] = @benchmarkable perf_bcast!($r, $z)
