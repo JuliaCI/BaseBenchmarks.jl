@@ -32,6 +32,24 @@ function linalgmat(::Type{Hermitian}, s)
     return Hermitian(A + A')
 end
 
+function linalgmat{M}(::Type{M}, s, f::Function)
+    A = linalgmat(M, s)
+    for i in 1:s
+        A[i,i] = f(A[i,i])
+    end
+    return A
+end
+linalgmat{T}(::Type{T}, s, identity) = linalgmat(T, s)
+
+linalgmat(::Type{UnitUpperTriangular}, s) = linalgmat(UpperTriangular, s, x -> 1)
+
+# Non-positive-definite upper-triangular matrix
+type NPDUpperTriangular
+end
+linalgmat(::Type{NPDUpperTriangular}, s) = linalgmat(UpperTriangular, s, x -> randn()*x)
+typename(::Type{NPDUpperTriangular}) = "NPDUpperTriangular"
+
+
 ############################
 # matrix/vector arithmetic #
 ############################
@@ -118,6 +136,24 @@ for s in SIZES
     g["schurfact", mstr, s] = @benchmarkable schurfact($m)
     g["qr", mstr, s]        = @benchmarkable qr($m)
     g["qrfact", mstr, s]    = @benchmarkable qrfact($m)
+end
+
+for b in values(g)
+    b.params.time_tolerance = 0.45
+end
+
+##############
+# operations #
+##############
+
+g = addgroup!(SUITE, "operations")
+
+for M in (UpperTriangular, UnitUpperTriangular, NPDUpperTriangular, Hermitian)
+    mstr = typename(M)
+    for s in SIZES
+        m = linalgmat(M, s)
+        g["sqrtm", mstr, s] = @benchmarkable sqrtm($m)
+    end
 end
 
 for b in values(g)
