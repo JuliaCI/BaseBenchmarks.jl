@@ -7,6 +7,7 @@ using BenchmarkTools
 using Compat
 
 import Compat: UTF8String, view
+import Base.LinAlg: UnitUpperTriangular
 
 const SUITE = BenchmarkGroup(["array"])
 
