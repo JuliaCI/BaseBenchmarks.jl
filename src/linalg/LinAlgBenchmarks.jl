@@ -25,6 +25,7 @@ linalgmat(::Type{Tridiagonal}, s) = Tridiagonal(randvec(s-1), randvec(s), randve
 linalgmat(::Type{SymTridiagonal}, s) = SymTridiagonal(randvec(s), randvec(s-1))
 linalgmat(::Type{UpperTriangular}, s) = UpperTriangular(randmat(s))
 linalgmat(::Type{LowerTriangular}, s) = LowerTriangular(randmat(s))
+linalgmat(::Type{UnitUpperTriangular}, s) = UnitUpperTriangular(randmat(s))
 
 function linalgmat(::Type{Hermitian}, s)
     A = randmat(s)
@@ -32,21 +33,17 @@ function linalgmat(::Type{Hermitian}, s)
     return Hermitian(A + A')
 end
 
-function linalgmat{M}(::Type{M}, s, f::Function)
-    A = linalgmat(M, s)
-    for i in 1:s
-        A[i,i] = f(A[i,i])
-    end
-    return A
-end
-linalgmat{T}(::Type{T}, s, identity) = linalgmat(T, s)
-
-linalgmat(::Type{UnitUpperTriangular}, s) = linalgmat(UpperTriangular, s, x -> 1)
-
 # Non-positive-definite upper-triangular matrix
 type NPDUpperTriangular
 end
-linalgmat(::Type{NPDUpperTriangular}, s) = linalgmat(UpperTriangular, s, x -> randn()*x)
+function linalgmat(::Type{NPDUpperTriangular}, s)
+    A = linalgmat(UpperTriangular, s)
+    rr = samerand(s)
+    for i in 1:s
+        A[i,i] = (2*rr[i]-1)*A[i,i]
+    end
+    return A
+end
 typename(::Type{NPDUpperTriangular}) = "NPDUpperTriangular"
 
 
