@@ -85,6 +85,12 @@ for s in SIZES
         g["cumsum!", T, s] = @benchmarkable cumsum!($arr, $arr)
     end
 
+    for M in (UpperTriangular, UnitUpperTriangular, NPDUpperTriangular, Hermitian)
+        mstr = typename(M)
+        m = linalgmat(M, s)
+        g["sqrtm", mstr, s] = @benchmarkable sqrtm($m)
+    end
+
 end
 
 for b in values(g)
@@ -134,24 +140,6 @@ for s in SIZES
     g["schurfact", mstr, s] = @benchmarkable schurfact($m)
     g["qr", mstr, s]        = @benchmarkable qr($m)
     g["qrfact", mstr, s]    = @benchmarkable qrfact($m)
-end
-
-for b in values(g)
-    b.params.time_tolerance = 0.45
-end
-
-##############
-# operations #
-##############
-
-g = addgroup!(SUITE, "operations")
-
-for M in (UpperTriangular, UnitUpperTriangular, NPDUpperTriangular, Hermitian)
-    mstr = typename(M)
-    for s in SIZES
-        m = linalgmat(M, s)
-        g["sqrtm", mstr, s] = @benchmarkable sqrtm($m)
-    end
 end
 
 for b in values(g)
