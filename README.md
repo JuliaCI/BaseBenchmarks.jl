@@ -85,7 +85,7 @@ an actual unique file name):
 using BenchmarkTools, BaseBenchmarks, JLD
 BaseBenchmarks.loadall!() # load all benchmarks
 results = run(BaseBenchmarks.SUITE; verbose = true) # run all benchmarks
-JLD.save("filename.jld", "results", results) # save results to JLD file
+BenchmarkTools.save("filename.jld", "results", results) # save results to JLD file
 ```
 
 Next, you can load the results and check for regressions (once again replacing the JLD file
