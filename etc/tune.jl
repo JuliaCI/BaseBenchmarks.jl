@@ -15,7 +15,7 @@ function rewrite_params_file(paramsgroup)
 end
 
 function rewrite_params_file(paramsgroup, id)
-    old = JLD.load(BaseBenchmarks.PARAMS_PATH)
+    old = BenchmarkTools.load(BaseBenchmarks.PARAMS_PATH)
     jldopen(BaseBenchmarks.PARAMS_PATH, "w") do file
         for (oldid, oldsuite) in old
             if oldid == id
