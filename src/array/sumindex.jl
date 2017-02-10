@@ -191,6 +191,18 @@ function perf_ind2sub(sz, lrange)
     si, sj, sk
 end
 
+function perf_mapr_access(A)
+    z = zero(eltype(A))
+    zz = z*z
+    n = Base.LinAlg.checksquare(A)
+    B = Vector{typeof(zz)}(n)
+
+    @inbounds for j in 1:n
+        B[j] = mapreduce(k -> A[j,k]*A[k,j], +, zz, 1:j)
+    end
+    B
+end
+
 ##########################
 # supporting definitions #
 ##########################
