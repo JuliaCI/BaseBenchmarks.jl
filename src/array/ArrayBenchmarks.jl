@@ -59,6 +59,9 @@ for (A, str) in (arrays_iter..., ranges_iter...)
     g["sumeach_view", str]       = @benchmarkable perf_sumeach_view($A)
     g["sumlinear_view", str]     = @benchmarkable perf_sumlinear_view($A)
     g["sumcartesian_view", str]  = @benchmarkable perf_sumcartesian_view($A)
+    if ndims(A) == 2
+        g["mapr_access", str]    = @benchmarkable perf_mapr_access($A) #20517
+    end
     if ndims(A) <= 2
         g["sumcolon", str]       = @benchmarkable perf_sumcolon($A)
         g["sumrange", str]       = @benchmarkable perf_sumrange($A)
