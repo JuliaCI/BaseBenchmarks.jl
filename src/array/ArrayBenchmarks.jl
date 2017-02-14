@@ -154,7 +154,7 @@ g = addgroup!(SUITE, "subarray", ["lucompletepiv"])
 for s in (100, 250, 500, 1000)
     m = samerand(s, s)
     g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
-    g["lucompletepivSub!", s]  = @benchmarkable perf_lucompletepivCopy!(fill!($m, $n))
+    g["lucompletepivSub!", s]  = @benchmarkable perf_lucompletepivSub!(fill!($m, $n))
 end
 
 #################
