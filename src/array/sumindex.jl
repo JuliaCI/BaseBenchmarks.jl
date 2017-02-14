@@ -191,11 +191,12 @@ function perf_ind2sub(sz, lrange)
     si, sj, sk
 end
 
-setup_mapr_access = quote
+function setup_mapr_access(A)
     z = zero(eltype(A))
     zz = z*z
     n = Base.LinAlg.checksquare(A)
     B = Vector{typeof(zz)}(n)
+    B, zz, n
 end
 function perf_mapr_access(A, B, zz, n) #20517
     @inbounds for j in 1:n
