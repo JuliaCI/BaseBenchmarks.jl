@@ -36,7 +36,7 @@ function perf_lucompletepivSub!(A)
         if A[k,k] ≠ 0
             ρ = k+1:n
             A[ρ, k] = view(A, ρ, k)/A[k, k]
-            A[ρ, ρ] = view(A, ρ, ρ) - view(A, ρ, k) * view(A, k, ρ)
+            A[ρ, ρ] = view(A, ρ, ρ) - view(A, ρ, k:k) * view(A, k:k, ρ)
         end
     end
     return (A, rowpiv, colpiv)
