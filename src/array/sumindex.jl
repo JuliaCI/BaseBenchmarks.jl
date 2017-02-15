@@ -193,7 +193,7 @@ end
 
 function setup_mapr_access(A)
     z = zero(eltype(A))
-    zz = z*z
+    zz = mapreduce(z -> z*z, +, [z]) # z = z*z, with any promotion from mapreduce
     n = Base.LinAlg.checksquare(A)
     B = Vector{typeof(zz)}(n)
     B, zz, n
