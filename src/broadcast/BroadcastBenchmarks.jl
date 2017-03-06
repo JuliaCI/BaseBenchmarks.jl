@@ -62,4 +62,32 @@ g[size(S), 2] = @benchmarkable perf_sparse_op($S, $S)
 
 ###########################################################################
 
+if VERSION > v"0.6-"
+
+g = addgroup!(SUITE, "typeargs", ["broadcast"])
+
+f_round(v) = @compat round.(Int, v)
+
+r1, r2, r3 = rand(3), rand(5), rand(10)
+for r in (r1, r2, r3)
+    g["array", length(r)] = @benchmarkable f_round($r)
+end
+
+t1, t2, t3 = (rand(3)...), (rand(5)...), (rand(10)...)
+for t in (t1, t2, t3)
+    g["tuple", length(t)] = @benchmarkable f_round($t)
+end
+
+###########################################################################
+
+g = addgroup!(SUITE, "mix_scalar_tuple", ["broadcast", "tuple"])
+
+for t in (t1, t2, t3)
+    g[length(t), "scal_tup"]    = @benchmarkable broadcast(+, 1, $t)
+    g[length(t), "tup_tup"]     = @benchmarkable broadcast(+, $t, $t)
+    g[length(t), "scal_tup_x3"] = @benchmarkable broadcast(+, 1, $t, 1, $t, 1, $t)
+end
+
+end # VERSION
+
 end # module
