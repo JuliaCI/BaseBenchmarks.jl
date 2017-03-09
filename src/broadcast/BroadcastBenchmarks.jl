@@ -62,7 +62,7 @@ g[size(S), 2] = @benchmarkable perf_sparse_op($S, $S)
 
 ###########################################################################
 
-if VERSION > v"0.6-"
+if VERSION >= v"0.6.0-pre.alpha.65"
 
 g = addgroup!(SUITE, "typeargs", ["broadcast"])
 
