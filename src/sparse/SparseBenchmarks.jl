@@ -120,17 +120,4 @@ for b in values(g)
     b.params.time_tolerance = 0.3
 end
 
-#############
-# Backsolve #
-#############
-
-g = addgroup!(SUITE, "backsolve")
-
-A = sprand(10^4, 10^4, 1e-4)
-A = A + A' + speye(10^4)
-@assert ishermitian(A)
-b = rand(10^4)
-
-g["hermitiansolve"] = @benchmarkable A \ b
-
 end # module

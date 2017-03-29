@@ -47,6 +47,16 @@ function linalgmat(::Type{NPDUpperTriangular}, s)
 end
 typename(::Type{NPDUpperTriangular}) = "NPDUpperTriangular"
 
+# Hermitian Sparse Matrix With Nonzero Pivots
+type HermitianSparseWithNonZeroPivots
+end
+function linalgmat(::Type{HermitianSparseWithNonZeroPivots}, s)
+    A = samesprand(s, s, 1/s)
+    A = A + A' + speye(s)
+    A
+end
+typename(::Type{HermitianSparseWithNonZeroPivots}) = "HermitianSparseWithNonZeroPivots"
+
 
 ############################
 # matrix/vector arithmetic #
@@ -89,6 +99,13 @@ for s in SIZES
         mstr = typename(M)
         m = linalgmat(M, s)
         g["sqrtm", mstr, s] = @benchmarkable sqrtm($m)
+    end
+
+    # PR 21165
+    for M in (HermitianSparseWithNonZeroPivots,)
+        mstr = typename(M)
+        m = linalgmat(M, s)
+        g["\\", mstr, vstr, s] = @benchmarkable \($m, $v)
     end
 
 end
