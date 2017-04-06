@@ -148,7 +148,7 @@ g["exp","small argument path",             "Float 64"] = @benchmarkable exp(2.0^
 g["exp","normal path -> small, k = -1045", "Float 64"] = @benchmarkable exp(-724.0)
 g["exp","overflow",                        "Float 64"] = @benchmarkable exp(900.0)
 g["exp","underflow",                       "Float 64"] = @benchmarkable exp(-900.0)
- 
+
 g["exp","normal path, k = 2",              "Float 32"] = @benchmarkable exp(1f5)
 g["exp","fast path, k = 1",                "Float 32"] = @benchmarkable exp(0f5)
 g["exp","no agument reduction, k = 9",     "Float 32"] = @benchmarkable exp(0f1)
@@ -159,6 +159,25 @@ g["exp","underflow",                       "Float 32"] = @benchmarkable exp(-150
 
 for b in values(g)
     b.params.time_tolerance = 0.40
+end
+
+##############
+# intfuncs   #
+##############
+
+g = addgroup!(SUITE, "intfuncs", ["prevpow2", "nextpow2"])
+
+for T in INTS
+    x = T[0, 1, 2, 3, 4, 10, 100, 1024, 10000, 2^30, 2^30-1]
+    if T == BigInt
+        push!(x, big(2)^3000, big(2)^3000-1)
+    end
+    y = similar(x)
+    tol = in(T, BIGNUMS) ? 0.40 : 0.25
+    tstr = string(T)
+    for funpow2 = (prevpow2, nextpow2), sgn = (+, -)
+        g[string(funpow2), tstr, string(sgn)] = @benchmarkable map!($funpow2, $y, $(sgn(x))) time_tolerance=tol
+    end
 end
 
 end # module
