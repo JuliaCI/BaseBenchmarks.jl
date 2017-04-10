@@ -29,10 +29,10 @@ end
 
 # retune the whole suite #
 #------------------------#
-# BaseBenchmarks.loadall!(tune = false)
-# warmup(BaseBenchmarks.SUITE)
-# tune!(BaseBenchmarks.SUITE; verbose = true)
-# rewrite_params_file(params(BaseBenchmarks.SUITE))
+BaseBenchmarks.loadall!(tune = false)
+warmup(BaseBenchmarks.SUITE)
+tune!(BaseBenchmarks.SUITE; verbose = true)
+rewrite_params_file(params(BaseBenchmarks.SUITE))
 
 # retune an individual group (using "linalg" as an example) #
 #-----------------------------------------------------------#
