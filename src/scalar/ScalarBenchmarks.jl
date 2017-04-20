@@ -157,6 +157,24 @@ g["exp","normal path -> small, k = -1045", "Float 32"] = @benchmarkable exp(-724
 g["exp","overflow",                        "Float 32"] = @benchmarkable exp(150f0)
 g["exp","underflow",                       "Float 32"] = @benchmarkable exp(-150f0)
 
+g["exp10","no agument reduction, k = 1",     "Float 64"] = @benchmarkable exp10(0.25)
+g["exp10","direct approx, k = 0",            "Float 64"] = @benchmarkable exp10(0.01)
+g["exp10","taylor expansion",                "Float 32"] = @benchmarkable exp10(2f0^-35)
+g["exp10","agument reduction, k = 2",        "Float 64"] = @benchmarkable exp10(0.5)
+g["exp10","agument reduction, k = 83",       "Float 64"] = @benchmarkable exp10(25.0)
+g["exp10","normal path -> small, k = -1075", "Float 64"] = @benchmarkable exp10(-323.6)
+g["exp10","overflow",                        "Float 64"] = @benchmarkable exp10(400.0)
+g["exp10","underflow",                       "Float 64"] = @benchmarkable exp10(-400.0)
+
+g["exp10","no agument reduction, k = 1",     "Float 32"] = @benchmarkable exp10(0.25f0)
+g["exp10","direct approx, k = 0",            "Float 32"] = @benchmarkable exp10(0.01f0)
+g["exp10","taylor expansion",                "Float 32"] = @benchmarkable exp10(2f0^-25)
+g["exp10","agument reduction, k = 2",        "Float 32"] = @benchmarkable exp10(0.5f0)
+g["exp10","agument reduction, k = 83",       "Float 32"] = @benchmarkable exp10(25.0f0)
+g["exp10","normal path -> small, k = -150",  "Float 32"] = @benchmarkable exp10(-45.5f0)
+g["exp10","overflow",                        "Float 32"] = @benchmarkable exp10(100f0)
+g["exp10","underflow",                       "Float 32"] = @benchmarkable exp10(-100f0)
+
 for b in values(g)
     b.params.time_tolerance = 0.40
 end
