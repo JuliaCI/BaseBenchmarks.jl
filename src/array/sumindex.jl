@@ -195,7 +195,7 @@ end
 # supporting definitions #
 ##########################
 
-abstract MyArray{T,N} <: AbstractArray{T,N}
+@compat abstract type MyArray{T,N} <: AbstractArray{T,N} end
 
 immutable ArrayLS{T,N} <: MyArray{T,N}  # LinearSlow
     data::Array{T,N}
@@ -258,9 +258,7 @@ Base.size(A::MyArray) = size(A.data)
 @inline Base.unsafe_getindex{T}(A::ArrayStrides{T,2}, i::Real, j::Real) = Base.unsafe_getindex(A.data, 1+A.strides[1]*(i-1)+A.strides[2]*(j-1))
 @inline Base.unsafe_getindex(A::ArrayStrides1, i::Real, j::Real) = Base.unsafe_getindex(A.data, i + A.stride1*(j-1))
 
-# Using the qualified Base.LinearFast() in the linearindexing definition
-# requires looking up the symbol in the module on each call.
-Base.linearindexing{T<:ArrayLF}(::Type{T}) = Base.LinearFast()
+@compat Base.IndexStyle(::Type{<:ArrayLF}) = IndexLinear()
 
 if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     @inline Base.unsafe_getindex(A::Array, I...) = @inbounds return A[I...]

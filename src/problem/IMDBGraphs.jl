@@ -11,7 +11,7 @@ type IMDBNode
     IMDBNode(name::AbstractString) = new(name, Set{IMDBNode}())
 end
 
-typealias IMDBGraph Dict{UTF8String, IMDBNode}
+const IMDBGraph = Dict{UTF8String, IMDBNode}
 
 function fetch_node!(G::IMDBGraph, name::AbstractString)
     if haskey(G, name)

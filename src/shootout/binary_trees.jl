@@ -4,7 +4,7 @@
 #
 # Ported from an OCaml version
 
-abstract BTree
+@compat abstract type BTree end
 
 type Empty <: BTree
 end
@@ -54,4 +54,3 @@ function perf_binary_trees(N::Int=10)
     loop_depths(min_depth, min_depth, max_depth)
 #    @printf("long lived tree of depth %i\t check: %i\n", max_depth, check(long_lived_tree))
 end
-
