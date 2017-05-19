@@ -37,7 +37,7 @@ type Hit
     normal::Vec
 end
 
-abstract Scene
+@compat abstract type Scene end
 
 immutable Sphere <: Scene
     center::Vec
