@@ -59,6 +59,9 @@ end
 for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
     g["spmat", "col", "array", s] = @benchmarkable getindex($m, $v, $c)
     g["spmat", "col", "range", s] = @benchmarkable getindex($m, $(1:s), $c)
+    if isdefined(Base, :OneTo)
+        g["spmat", "col", "OneTo", s] = @benchmarkable getindex($m, $(Base.OneTo(s)), $c)
+    end
     g["spmat", "col", "logical", s] = @benchmarkable getindex($m, $l, $c)
     # g["spmat", "col", "splogical", s] = @benchmarkable getindex($m, $sl, $c)
 end
@@ -66,6 +69,9 @@ end
 for (s, m, v, l, sl, r) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
     g["spmat", "row", "array", s] = @benchmarkable getindex($m, $r, $v)
     g["spmat", "row", "range", s] = @benchmarkable getindex($m, $r, $(1:s))
+    if isdefined(Base, :OneTo)
+        g["spmat", "row", "OneTo", s] = @benchmarkable getindex($m, $r, $(Base.OneTo(s)))
+    end
     g["spmat", "row", "logical", s] = @benchmarkable getindex($m, $r, $l)
     # g["spmat", "row", "splogical", s] = @benchmarkable getindex($m, $r, $sl)
 end
@@ -74,6 +80,9 @@ for (s, m, v, l, sl, i) in zip(sizes, matrices, vectors, logvecs, splogmats, ind
     g["spmat", "array", s] = @benchmarkable getindex($m, $v, $v)
     g["spmat", "integer", s] = @benchmarkable getindex($m, $i, $i)
     g["spmat", "range", s] = @benchmarkable getindex($m, $(1:s), $(1:s))
+    if isdefined(Base, :OneTo)
+        g["spmat", "OneTo", s] = @benchmarkable getindex($m, $(Base.OneTo(s)), $(Base.OneTo(s)))
+    end
     g["spmat", "logical", s] = @benchmarkable getindex($m, $l, $l)
     g["spmat", "splogical", s] = @benchmarkable getindex($m, $sl)
 end
