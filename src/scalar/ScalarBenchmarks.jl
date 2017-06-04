@@ -75,6 +75,16 @@ for X in NUMS
     end
 end
 
+for X in (INTS..., Char, Bool)
+    x = X(1) # one(X) is not valid for X==Char
+    xstr = string(X)
+    for Y in (INTS..., Bool)
+        VERSION < v"0.6" && Y == BigInt && continue
+        tol = (X != Y || X == BigInt || Y == BigInt) ? 0.40 : 0.25
+        arith["rem type", xstr, string(Y)] = @benchmarkable %($x, $Y) time_tolerance=tol
+    end
+end
+
 #############
 # iteration #
 #############
