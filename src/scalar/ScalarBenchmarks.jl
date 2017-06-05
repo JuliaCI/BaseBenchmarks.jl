@@ -60,9 +60,9 @@ for X in NUMS
     x = one(X)
     xstr = string(X)
     isbignum = in(X, BIGNUMS)
-    fstmth["add", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.40
+    fstmth["add", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.40
     fstmth["sub", xstr] = @benchmarkable @fastmath($x - $(copy(x))) time_tolerance=0.40
-    fstmth["mul", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.40
+    fstmth["mul", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.40
     fstmth["div", xstr] = @benchmarkable @fastmath($x / $(copy(x))) time_tolerance=0.40
     for Y in NUMS
         y = one(Y)
