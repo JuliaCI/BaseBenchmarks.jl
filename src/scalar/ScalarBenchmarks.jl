@@ -207,5 +207,67 @@ for T in INTS
         g[string(funpow2), tstr, string(sgn)] = @benchmarkable map!($funpow2, $y, $(sgn(x))) time_tolerance=tol
     end
 end
+############
+# rem_pio2 #
+############
+# This benchmark suite is used for methods that use rem_pio2 (currently
+# ieee754_rem_pio2, but moving towards rem_pio2_kernel). Specific values target
+# specific branches. Only mod2pi is here now, but this will also contain
+# benchmarks for trig functions later.
+
+g = addgroup!(SUITE, "rem_pio2")
+
+# NaN or Inf
+g["mod2pi", "NaN", "Float64"]  = @benchmarkable mod2pi($(NaN))
+g["mod2pi", "Inf", "Float64"]  = @benchmarkable mod2pi($(Inf))
+g["mod2pi", "-Inf", "Float64"] = @benchmarkable mod2pi($(-Inf))
+# -π/4 <= x <= π/4
+g["mod2pi", "no reduction", "mod2pi", "Float64"] = @benchmarkable mod2pi($(0.0))
+g["mod2pi", "no reduction", "mod2pi", "Float64"] = @benchmarkable mod2pi($(pi/6))
+g["mod2pi", "no reduction", "mod2pi", "Float64"] = @benchmarkable mod2pi($(pi/4+0.000000001))
+g["mod2pi", "no reduction", "mod2pi", "Float64"] = @benchmarkable mod2pi($(-pi/6))
+g["mod2pi", "no reduction", "mod2pi", "Float64"] = @benchmarkable mod2pi($(-pi/4-0.000000001))
+# -2π/4 <= x <= 2π/4
+g["mod2pi", "argument reduction (easy) |x| < 2π/4", "Float64"] = @benchmarkable mod2pi($(2*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 2π/4", "Float64"] = @benchmarkable mod2pi($(-2*pi/4+0.2))
+g["mod2pi", "argument reduction (hard) |x| < 2π/4", "Float64"] = @benchmarkable mod2pi($(2*pi/4-0.000000001))
+g["mod2pi", "argument reduction (hard) |x| < 2π/4", "Float64"] = @benchmarkable mod2pi($(-2*pi/4+0.000000001))
+# -3π/4 <= x <= 3π/4
+g["mod2pi", "argument reduction (easy) |x| < 3π/4", "Float64"] = @benchmarkable mod2pi($(3*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 3π/4", "Float64"] = @benchmarkable mod2pi($(-3*pi/4+0.2))
+# -4π/4 <= x <= 4π/4
+g["mod2pi", "argument reduction (easy) |x| < 4π/4", "Float64"] = @benchmarkable mod2pi($(pi-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 4π/4", "Float64"] = @benchmarkable mod2pi($(-pi+0.2))
+g["mod2pi", "argument reduction (hard) |x| < 4π/4", "Float64"] = @benchmarkable mod2pi($(pi-0.000000001))
+g["mod2pi", "argument reduction (hard) |x| < 4π/4", "Float64"] = @benchmarkable mod2pi($(-pi+0.000000001))
+# -5π/4 <= x <= 5π/4
+g["mod2pi", "argument reduction (easy) |x| < 5π/4", "Float64"] = @benchmarkable mod2pi($(5*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 5π/4", "Float64"] = @benchmarkable mod2pi($(-5*pi/4+0.2))
+# -6π/4 <= x <= 6π/4
+g["mod2pi", "argument reduction (easy) |x| < 6π/4", "Float64"] = @benchmarkable mod2pi($(6*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 6π/4", "Float64"] = @benchmarkable mod2pi($(-6*pi/4+0.2))
+g["mod2pi", "argument reduction (hard) |x| < 6π/4", "Float64"] = @benchmarkable mod2pi($(6*pi/4-0.000000001))
+g["mod2pi", "argument reduction (hard) |x| < 6π/4", "Float64"] = @benchmarkable mod2pi($(-6*pi/4+0.000000001))
+# -7π/4 <= x <= 7π/4
+g["mod2pi", "argument reduction (easy) |x| < 7π/4", "Float64"] = @benchmarkable mod2pi($(7*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 7π/4", "Float64"] = @benchmarkable mod2pi($(-7*pi/4+0.2))
+# -8π/4 <= x <= 8π/4
+g["mod2pi", "argument reduction (easy) |x| < 8π/4", "Float64"] = @benchmarkable mod2pi($(2*pi-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 8π/4", "Float64"] = @benchmarkable mod2pi($(-2*pi+0.2))
+g["mod2pi", "argument reduction (hard) |x| < 8π/4", "Float64"] = @benchmarkable mod2pi($(2*pi-0.000000001))
+g["mod2pi", "argument reduction (hard) |x| < 8π/4", "Float64"] = @benchmarkable mod2pi($(-2*pi+0.000000001))
+# -9π/4 <= x <= 9π/4
+g["mod2pi", "argument reduction (easy) |x| < 9π/4", "Float64"] = @benchmarkable mod2pi($(9*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 9π/4", "Float64"] = @benchmarkable mod2pi($(-9*pi/4+0.2))
+# -2.0^20π/2 <= x <= 2.0^20π/2
+g["mod2pi", "argument reduction (easy) |x| < 2.0^20π/4", "Float64"] = @benchmarkable mod2pi($(2.0^10*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| < 2.0^20π/4", "Float64"] = @benchmarkable mod2pi($(-2.0^10*pi/4+0.2))
+# |x| >= 2.0^20π/2
+# idx < 0
+g["mod2pi", "argument reduction (easy) |x| > 2.0^20*π/2", "Float64"] = @benchmarkable mod2pi($(2.0^30*pi/4-0.2))
+g["mod2pi", "argument reduction (easy) |x| > 2.0^20*π/2", "Float64"] = @benchmarkable mod2pi($(-2.0^30*pi/4+0.2))
+# idx > 0
+g["mod2pi", "argument reduction (easy) |x| > 2.0^20*π/2", "Float64"] = @benchmarkable mod2pi($(2.0^80*pi/4-1.2))
+g["mod2pi", "argument reduction (easy) |x| > 2.0^20*π/2", "Float64"] = @benchmarkable mod2pi($(-2.0^80*pi/4+1.2))
 
 end # module
