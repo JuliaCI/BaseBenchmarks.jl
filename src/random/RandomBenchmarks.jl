@@ -56,6 +56,16 @@ set_tolerance!(g)
 
 g = addgroup!(SUITE, "types", ["rand", "rand!", "randn", "randn!", "randexp", "randexp!"])
 
+g["rand",    "ImplicitRNG",     "ImplicitFloat64"] = @benchmarkable rand()
+g["rand",    "RandomDevice",    "ImplicitFloat64"] = @benchmarkable rand($RD)
+g["rand",    "MersenneTwister", "ImplicitFloat64"] = @benchmarkable rand($MT)
+g["randn",   "ImplicitRNG",     "ImplicitFloat64"] = @benchmarkable randn()
+g["randn",   "RandomDevice",    "ImplicitFloat64"] = @benchmarkable randn($RD)
+g["randn",   "MersenneTwister", "ImplicitFloat64"] = @benchmarkable randn($MT)
+g["randexp", "ImplicitRNG",     "ImplicitFloat64"] = @benchmarkable randexp()
+g["randexp", "RandomDevice",    "ImplicitFloat64"] = @benchmarkable randexp($RD)
+g["randexp", "MersenneTwister", "ImplicitFloat64"] = @benchmarkable randexp($MT)
+
 for T = [Int, Float64]
     tstr = string(T)
     dst = Vector{T}(1000)
