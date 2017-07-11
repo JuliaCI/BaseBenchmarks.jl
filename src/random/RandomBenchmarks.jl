@@ -96,9 +96,17 @@ set_tolerance!(g)
 
 g = addgroup!(SUITE, "collections", ["rand", "rand!"])
 
-for collection in [Dict(1=>2, 3=>4, 5=>6), Set(1:9), IntSet(1:9),
-                   "qwèrtï", [1:9;], 'a':'z']
-    collstr = string(collection)
+for (collection,collstr) in [Dict(1=>2, 3=>4, 5=>6)  => "small Dict",
+                             Dict(zip(1:300, 1:300)) => "large Dict",
+                             Set(1:3)                => "small Set",
+                             Set(1:300)              => "large Set",
+                             IntSet(1:3),            => "small IntSet",
+                             IntSet(1:300),          => "large IntSet",
+                             "qwèrtï"                => "small String",
+                             randstring(300)         => "large String",
+                             [1:3;]                  => "small Vector",
+                             [1:300;]                => "large Vector",
+                             'a':'z'                 => "'a':'z'"]
     dst = Vector{eltype(collection)}(1000)
     g["rand",  "ImplicitRNG",     collstr] = @benchmarkable rand($collection)
     g["rand",  "MersenneTwister", collstr] = @benchmarkable rand($MT, $collection)
