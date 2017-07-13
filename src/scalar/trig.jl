@@ -56,7 +56,7 @@ g["argument reduction (easy) |x| > 2.0^20*π/2", "positive argument", "Float64",
 g["argument reduction (easy) |x| > 2.0^20*π/2", "negative argument", "Float64", "cos_kernel"] = @benchmarkable sin($(-2.0^80*pi/4+1.2))
 
 #######
-# sin #
+# cos #
 #######
 
 g = addgroup!(SUITE, "cos")
