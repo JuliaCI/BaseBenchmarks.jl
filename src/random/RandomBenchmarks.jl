@@ -108,19 +108,19 @@ set_tolerance!(g)
 g = addgroup!(SUITE, "collections", ["rand", "rand!"])
 
 collections = Pair[[1:3;]   => "small Vector",
-                   [1:300;] => "large Vector",
+                   [1:900;] => "large Vector",
                    'a':'z'  => "'a':'z'"]
 
 if VERSION >= v"0.7.0-DEV.973"
     push!(collections,
           Dict(1=>2, 3=>4, 5=>6)  => "small Dict",
-          Dict(zip(1:300, 1:300)) => "large Dict",
+          Dict(zip(1:900, 1:900)) => "large Dict",
           Set(1:3)                => "small Set",
-          Set(1:300)              => "large Set",
+          Set(1:900)              => "large Set",
           IntSet(1:3)             => "small IntSet",
-          IntSet(1:300)           => "large IntSet",
+          IntSet(1:900)           => "large IntSet",
           "qwèrtï"                => "small String",
-          randstring(300)         => "large String")
+          randstring(900)         => "large String")
 end
 
 for (collection, collstr) in collections
