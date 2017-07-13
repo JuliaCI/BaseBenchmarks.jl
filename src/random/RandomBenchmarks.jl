@@ -73,7 +73,7 @@ for T = [Int, Float64]
     g["rand",     "RandomDevice", tstr] = @benchmarkable rand($RD, $T)
     g["rand!",    "ImplicitRNG",  tstr] = @benchmarkable rand!($dst)
     g["rand!",    "RandomDevice", tstr] = @benchmarkable rand!($RD, $dst)
-    T === Float64 && VERSION >= v"0.5-" || continue
+    T === Float64 && VERSION >= v"0.5.0-pre+5657" || continue
     g["randn",    "ImplicitRNG",  tstr] = @benchmarkable randn($T)
     g["randn",    "RandomDevice", tstr] = @benchmarkable randn($RD, $T)
     g["randn!",   "ImplicitRNG",  tstr] = @benchmarkable randn!($dst)
@@ -85,13 +85,13 @@ for T = [Int, Float64]
 end
 
 for T in NUMS
-    T == BigInt && continue
+    T === BigInt && continue
     tstr = string(T)
     dst = Vector{T}(1000)
     g["rand",     "MersenneTwister", tstr] = @benchmarkable rand($MT, $T)
     g["rand!",    "MersenneTwister", tstr] = @benchmarkable rand!($MT, $dst)
-    VERSION >= v"0.5-" || continue
-    T <: AbstractFloat || T in CFLOATS && VERSION >= v"0.7.0-DEV.881" || continue
+    VERSION >= v"0.5.0-pre+5657" || continue
+    T <: AbstractFloat || T in CFLOATS && VERSION >= v"0.7.0-DEV.973" || continue
     g["randn",    "MersenneTwister", tstr] = @benchmarkable randn($MT, $T)
     g["randn!",   "MersenneTwister", tstr] = @benchmarkable randn!($MT, $dst)
     T <: AbstractFloat || continue
@@ -111,7 +111,7 @@ collections = Pair[[1:3;]   => "small Vector",
                    [1:300;] => "large Vector",
                    'a':'z'  => "'a':'z'"]
 
-if VERSION >= v"0.7.0-DEV.881"
+if VERSION >= v"0.7.0-DEV.973"
     push!(collections,
           Dict(1=>2, 3=>4, 5=>6)  => "small Dict",
           Dict(zip(1:300, 1:300)) => "large Dict",
@@ -142,9 +142,9 @@ set_tolerance!(g)
 g = addgroup!(SUITE, "randstring")
 
 qwerty, qwertystr = collect(UInt8, "qwerty"), "collect(UInt8, \"qwerty\""
-g["randstring", "MersenneTwister"]                    = @benchmarkable randstring($MT)
-g["randstring", "MersenneTwister", 100]               = @benchmarkable randstring($MT, 100)
-if VERSION >= v"0.7.0-DEV.881"
+g["randstring", "MersenneTwister"]                        = @benchmarkable randstring($MT)
+g["randstring", "MersenneTwister", 100]                   = @benchmarkable randstring($MT, 100)
+if VERSION >= v"0.7.0-DEV.973"
     g["randstring", "MersenneTwister", "\"qwèrtï\""]      = @benchmarkable randstring($MT, "qwèrtï")
     g["randstring", "MersenneTwister", "\"qwèrtï\"", 100] = @benchmarkable randstring($MT, "qwèrtï", 100)
     g["randstring", "MersenneTwister", qwertystr]         = @benchmarkable randstring($MT, $qwerty)
