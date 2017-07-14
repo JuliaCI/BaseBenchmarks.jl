@@ -211,12 +211,6 @@ end
 ##########
 # mod2pi #
 ##########
-
-# This benchmark suite is used for methods that use rem_pio2 (currently
-# ieee754_rem_pio2, but moving towards rem_pio2_kernel). Specific values target
-# specific branches. Only mod2pi is here now, but this will also contain
-# benchmarks for trig functions later.
-
 g = addgroup!(SUITE, "mod2pi")
 
 # NaN or Inf
