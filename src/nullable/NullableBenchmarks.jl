@@ -4,6 +4,7 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
+using Compat
 
 const SUITE = BenchmarkGroup()
 
@@ -53,7 +54,8 @@ end
 end
 
 Base.size(X::NullableArray) = size(X.values)
-Base.linearindexing{T<:NullableArray}(::Type{T}) = Base.LinearFast()
+
+@compat Base.IndexStyle(::Type{<:NullableArray}) = IndexLinear()
 
 const VEC_LENGTH = 1000
 

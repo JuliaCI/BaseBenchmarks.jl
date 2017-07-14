@@ -60,9 +60,9 @@ for X in NUMS
     x = one(X)
     xstr = string(X)
     isbignum = in(X, BIGNUMS)
-    fstmth["add", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.40
+    fstmth["add", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.40
     fstmth["sub", xstr] = @benchmarkable @fastmath($x - $(copy(x))) time_tolerance=0.40
-    fstmth["mul", xstr] = @benchmarkable @fastmath($x + $(copy(x))) time_tolerance=0.40
+    fstmth["mul", xstr] = @benchmarkable @fastmath($x * $(copy(x))) time_tolerance=0.40
     fstmth["div", xstr] = @benchmarkable @fastmath($x / $(copy(x))) time_tolerance=0.40
     for Y in NUMS
         y = one(Y)
@@ -72,6 +72,16 @@ for X in NUMS
         arith["sub", xstr, ystr] = @benchmarkable -($x, $y) time_tolerance=tol
         arith["mul", xstr, ystr] = @benchmarkable *($x, $y) time_tolerance=tol
         arith["div", xstr, ystr] = @benchmarkable /($x, $y) time_tolerance=tol
+    end
+end
+
+for X in (INTS..., Char, Bool)
+    x = X(1) # one(X) is not valid for X==Char
+    xstr = string(X)
+    for Y in (INTS..., Bool)
+        VERSION < v"0.6" && Y == BigInt && continue
+        tol = (X != Y || X == BigInt || Y == BigInt) ? 0.40 : 0.25
+        arith["rem type", xstr, string(Y)] = @benchmarkable %($x, $Y) time_tolerance=tol
     end
 end
 
