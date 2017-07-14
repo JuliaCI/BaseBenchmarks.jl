@@ -134,7 +134,7 @@ g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", "Flo
 ############
 
 g = addgroup!(SUITE, "rem_pio2")
-_rem = try
+const _rem = try
     method_exists(Base.Math.ieee754_rem_pio2, Tuple{Float64})
     Base.Math.ieee754_rem_pio2
 catch
