@@ -1,16 +1,16 @@
 ## trig.jl
 # The benchmark groups below benchmark trig functions in Base. Numeri-
 # cal evaluation of trig functions consists of two steps: argument re-
-# duction, followed by evaluation of a polynomial on the reduced argu-
+# duction followed by evaluation of a polynomial on the reduced argu-
 # ment. Below, "no reduction" means that the kernel functions are cal-
 # led directly, "argument reduction (easy)" means that we are using
 # the two coefficient Cody-Waite method, "argument reduction (hard)"
 # means that we are using a more precise but more expensive Cody-Waite
 # scheme, and "argument reduction (paynehanek)" means that we are us-
-# ing the expensive Payne-Hanek scheme for large input values. "(hard)"
-# values are either around integer mulitples of pi/2 or for the medium
-# size arguments 9pi/4 <= |x| <= 2.0^20π/2. "(paynehanek)" vales are
-# |x| >= 2.0^20π/2. The tags "sin_kernel" and "cos_kernel" refers to
+# ing the expensive Payne-Hanek scheme for large values. "(hard)"
+# values are either around integer multiples of pi/2 or for the medium
+# size arguments 9pi/4 <= |x| <= 2.0^20π/2. (paynehanek) vales are for
+# |x| >= 2.0^20π/2. The tags "sin_kernel" and "cos_kernel" refer to
 # the actual polynomial being used. "z_kernel" evaluates a polynomial
 # that approximates z∈{sin, cos} on the interval of x's such that
 # |x| <= pi/4.
