@@ -281,8 +281,8 @@ g["argument reduction (easy) |x| > 2.0^20*π/2", "negative argument", "Float64"]
 #######
 # sin #
 #######
-arg_string(::Float64) = "Float64"
-arg_string(::Float32) = "Float32"
+arg_string(::Type{Float32}) = "Float32"
+arg_string(::Type{Float64}) = "Float64"
 g = addgroup!(SUITE, "sin")
 for T in (Float32, Float64)
     _arg_string = arg_string(T)
