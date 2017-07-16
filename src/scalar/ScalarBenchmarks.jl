@@ -400,7 +400,7 @@ catch
     Base.Math.rem_pio2_kernel
 end
 
-for T in (Float32, Float64)
+for T in (Float64, )# (Float32, Float64) add Float32 later
     _arg_string = arg_string(T)
     # -2π/4 <= x <= 2π/4
     g["argument reduction (easy) |x| < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4-T(0.1)))
