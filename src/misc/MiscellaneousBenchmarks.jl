@@ -89,5 +89,26 @@ g["Int"] = @benchmarkable perf_parse($(Vector{Int}(1000)), $(map(string, 1:1000)
 g["Float64"] = @benchmarkable perf_parse($(Vector{Float64}(1000)), $(map(string, 1:1000)))
 
 ###########################################################################
+# Julia language components (parser, etc.)
+
+# horner-like nested expression with n levels: 1*(x + 2*(x + 2*(x + 3* ...
+# ... written as a string so that we can also benchmark parsing of this function.
+nestedexpr_str = """
+function nestedexpr(n)
+    ex = :x
+    for i = n:-1:1
+        ex = :(\$i * (x + \$ex))
+    end
+    return ex
+end"""
+include_string(nestedexpr_str)
+
+g = addgroup!(SUITE, "julia")
+g["parse", "array"] = @benchmarkable parse($("[" * "a + b, "^100 * "]"))
+g["parse", "nested"] = @benchmarkable parse($(string(nestedexpr(100))))
+g["parse", "function"] = @benchmarkable parse($nestedexpr_str)
+g["macroexpand", "evalpoly"] = @benchmarkable macroexpand($(Expr(:macrocall, Symbol("@evalpoly"), 1:10...)))
+
+###########################################################################
 
 end
