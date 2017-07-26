@@ -157,4 +157,15 @@ g = addgroup!(SUITE, "spellcheck", ["spell", "string"])
 
 g["spellcheck"] = @benchmarkable SpellCheck.perf_spellcheck()
 
+#########
+# Chaos #
+#########
+
+include("ChaosGame.jl")
+
+g = addgroup!(SUITE, "chaosgame")
+
+g["chaosgame"] = @benchmarkable ChaosGameFractals.perf_chaos()
+
+
 end # module
