@@ -231,34 +231,34 @@ g["no reduction", "negative argument", "Float64"] = @benchmarkable mod2pi($(-pi+
 g["no reduction", "positive argument", "Float64"] = @benchmarkable mod2pi($(Float64(pi)))
 g["no reduction", "negative argument", "Float64"] = @benchmarkable mod2pi($(Float64(-pi)))
 # -5π/4 <= x <= 5π/4
-g["argument reduction (easy) |x| < 5π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(5*pi/4-0.1))
-g["argument reduction (easy) |x| < 5π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-5*pi/4+0.1))
+g["argument reduction (easy) abs(x) < 5π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(5*pi/4-0.1))
+g["argument reduction (easy) abs(x) < 5π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-5*pi/4+0.1))
 # -6π/4 <= x <= 6π/4
-g["argument reduction (easy) |x| < 6π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(6*pi/4-0.1))
-g["argument reduction (easy) |x| < 6π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-6*pi/4+0.1))
-g["argument reduction (hard) |x| < 6π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(6*pi/4))
-g["argument reduction (hard) |x| < 6π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-6*pi/4))
+g["argument reduction (easy) abs(x) < 6π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(6*pi/4-0.1))
+g["argument reduction (easy) abs(x) < 6π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-6*pi/4+0.1))
+g["argument reduction (hard) abs(x) < 6π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(6*pi/4))
+g["argument reduction (hard) abs(x) < 6π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-6*pi/4))
 # -7π/4 <= x <= 7π/4
-g["argument reduction (easy) |x| < 7π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(7*pi/4-0.1))
-g["argument reduction (easy) |x| < 7π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-7*pi/4+0.1))
+g["argument reduction (easy) abs(x) < 7π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(7*pi/4-0.1))
+g["argument reduction (easy) abs(x) < 7π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-7*pi/4+0.1))
 # -8π/4 <= x <= 8π/4
-g["argument reduction (easy) |x| < 8π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(2*pi-0.1))
-g["argument reduction (easy) |x| < 8π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2*pi+0.1))
-g["argument reduction (hard) |x| < 8π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(2*pi))
-g["argument reduction (hard) |x| < 8π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2*pi))
+g["argument reduction (easy) abs(x) < 8π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(2*pi-0.1))
+g["argument reduction (easy) abs(x) < 8π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2*pi+0.1))
+g["argument reduction (hard) abs(x) < 8π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(2*pi))
+g["argument reduction (hard) abs(x) < 8π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2*pi))
 # -9π/4 <= x <= 9π/4
-g["argument reduction (easy) |x| < 9π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(9*pi/4-0.1))
-g["argument reduction (easy) |x| < 9π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-9*pi/4+0.1))
+g["argument reduction (easy) abs(x) < 9π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(9*pi/4-0.1))
+g["argument reduction (easy) abs(x) < 9π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-9*pi/4+0.1))
 # -2.0^20π/2 <= x <= 2.0^20π/2
-g["argument reduction (easy) |x| < 2.0^20π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(2.0^10*pi/4-0.1))
-g["argument reduction (easy) |x| < 2.0^20π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2.0^10*pi/4+0.1))
-# |x| >= 2.0^20π/2
+g["argument reduction (easy) abs(x) < 2.0^20π/4", "positive argument", "Float64"] = @benchmarkable mod2pi($(2.0^10*pi/4-0.1))
+g["argument reduction (easy) abs(x) < 2.0^20π/4", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2.0^10*pi/4+0.1))
+# abs(x) >= 2.0^20π/2
 # idx < 0
-g["argument reduction (easy) |x| > 2.0^20*π/2", "positive argument", "Float64"] = @benchmarkable mod2pi($(2.0^30*pi/4-0.1))
-g["argument reduction (easy) |x| > 2.0^20*π/2", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2.0^30*pi/4+0.1))
+g["argument reduction (easy) abs(x) > 2.0^20*π/2", "positive argument", "Float64"] = @benchmarkable mod2pi($(2.0^30*pi/4-0.1))
+g["argument reduction (easy) abs(x) > 2.0^20*π/2", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2.0^30*pi/4+0.1))
 # idx > 0
-g["argument reduction (easy) |x| > 2.0^20*π/2", "positive argument", "Float64"] = @benchmarkable mod2pi($(2.0^80*pi/4-1.2))
-g["argument reduction (easy) |x| > 2.0^20*π/2", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2.0^80*pi/4+1.2))
+g["argument reduction (easy) abs(x) > 2.0^20*π/2", "positive argument", "Float64"] = @benchmarkable mod2pi($(2.0^80*pi/4-1.2))
+g["argument reduction (easy) abs(x) > 2.0^20*π/2", "negative argument", "Float64"] = @benchmarkable mod2pi($(-2.0^80*pi/4+1.2))
 
 # trig benchmarks
 
@@ -291,47 +291,47 @@ for T in (Float32, Float64)
     g["no reduction", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(pi)/6))
     g["no reduction", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(pi)/6))
     # -2π/4 <= x <= 2π/4
-    g["argument reduction (easy) |x| < 2π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(2*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 2π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-2*T(pi)/4+T(0.1)))
-    g["argument reduction (hard) |x| < 2π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(2*T(pi)/4))
-    g["argument reduction (hard) |x| < 2π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-2*T(pi)/4))
+    g["argument reduction (easy) abs(x) < 2π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(2*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-2*T(pi)/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 2π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(2*T(pi)/4))
+    g["argument reduction (hard) abs(x) < 2π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-2*T(pi)/4))
     # -3π/4 <= x <= 3π/4
-    g["argument reduction (easy) |x| < 3π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(3*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 3π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-3*T(pi)/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(3*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-3*T(pi)/4+T(0.1)))
     # -4π/4 <= x <= 4π/4
-    g["argument reduction (easy) |x| < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(pi)-T(0.1)))
-    g["argument reduction (easy) |x| < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(pi)+T(0.1)))
-    g["argument reduction (hard) |x| < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(Float64(T(pi))))
-    g["argument reduction (hard) |x| < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(Float64(-T(pi))))
+    g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(pi)-T(0.1)))
+    g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(pi)+T(0.1)))
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(Float64(T(pi))))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(Float64(-T(pi))))
     # -5π/4 <= x <= 5π/4
-    g["argument reduction (easy) |x| < 5π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(5*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 5π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-5*T(pi)/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(5*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-5*T(pi)/4+T(0.1)))
     # -6π/4 <= x <= 6π/4
-    g["argument reduction (easy) |x| < 6π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(6*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 6π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-6*T(pi)/4+T(0.1)))
-    g["argument reduction (hard) |x| < 6π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(6*T(pi)/4))
-    g["argument reduction (hard) |x| < 6π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-6*T(pi)/4))
+    g["argument reduction (easy) abs(x) < 6π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(6*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 6π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-6*T(pi)/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 6π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(6*T(pi)/4))
+    g["argument reduction (hard) abs(x) < 6π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-6*T(pi)/4))
     # -7π/4 <= x <= 7π/4
-    g["argument reduction (easy) |x| < 7π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(7*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 7π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-7*T(pi)/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(7*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-7*T(pi)/4+T(0.1)))
     # -8π/4 <= x <= 8π/4
-    g["argument reduction (easy) |x| < 8π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(2*T(pi)-T(0.1)))
-    g["argument reduction (easy) |x| < 8π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-2*T(pi)+T(0.1)))
-    g["argument reduction (hard) |x| < 8π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(2*T(pi)))
-    g["argument reduction (hard) |x| < 8π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-2*T(pi)))
+    g["argument reduction (easy) abs(x) < 8π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(2*T(pi)-T(0.1)))
+    g["argument reduction (easy) abs(x) < 8π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-2*T(pi)+T(0.1)))
+    g["argument reduction (hard) abs(x) < 8π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(2*T(pi)))
+    g["argument reduction (hard) abs(x) < 8π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-2*T(pi)))
     # -9π/4 <= x <= 9π/4
-    g["argument reduction (easy) |x| < 9π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(9*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 9π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-9*T(pi)/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(9*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-9*T(pi)/4+T(0.1)))
     # -2.0^20π/2 <= x <= 2.0^20π/2
-    g["argument reduction (easy) |x| < 2.0^20π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(2.0)^10*T(pi)/4-T(0.1)))
-    g["argument reduction (easy) |x| < 2.0^20π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(2.0)^10*T(pi)/4+T(0.1)))
-    # |x| >= 2.0^20π/2
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(2.0)^10*T(pi)/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(2.0)^10*T(pi)/4+T(0.1)))
+    # abs(x) >= 2.0^20π/2
     # idx < 0
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(2.0)^30*T(pi)/4-T(0.1)))
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(2.0)^30*T(pi)/4+T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(2.0)^30*T(pi)/4-T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(2.0)^30*T(pi)/4+T(0.1)))
     # idx > 0
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(T(2.0)^80*T(pi)/4-1.2))
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-T(2.0)^80*T(pi)/4+1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(T(2.0)^80*T(pi)/4-1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable sin($(-T(2.0)^80*T(pi)/4+1.2))
 end
 
 #######
@@ -346,47 +346,47 @@ for T in (Float32, Float64)
     g["no reduction", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(pi/6))
     g["no reduction", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-pi/6))
     # -2π/4 <= x <= 2π/4
-    g["argument reduction (easy) |x| < 2π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(2*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 2π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-2*pi/4+T(0.1)))
-    g["argument reduction (hard) |x| < 2π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(2*pi/4))
-    g["argument reduction (hard) |x| < 2π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-2*pi/4))
+    g["argument reduction (easy) abs(x) < 2π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(2*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-2*pi/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 2π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(2*pi/4))
+    g["argument reduction (hard) abs(x) < 2π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-2*pi/4))
     # -3π/4 <= x <= 3π/4
-    g["argument reduction (easy) |x| < 3π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(3*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 3π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-3*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(3*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-3*pi/4+T(0.1)))
     # -4π/4 <= x <= 4π/4
-    g["argument reduction (easy) |x| < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(pi-T(0.1)))
-    g["argument reduction (easy) |x| < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-pi+T(0.1)))
-    g["argument reduction (hard) |x| < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(Float64(pi)))
-    g["argument reduction (hard) |x| < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(Float64(-pi)))
+    g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(pi-T(0.1)))
+    g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-pi+T(0.1)))
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(Float64(pi)))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(Float64(-pi)))
     # -5π/4 <= x <= 5π/4
-    g["argument reduction (easy) |x| < 5π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(5*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 5π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-5*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(5*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-5*pi/4+T(0.1)))
     # -6π/4 <= x <= 6π/4
-    g["argument reduction (easy) |x| < 6π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(6*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 6π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-6*pi/4+T(0.1)))
-    g["argument reduction (hard) |x| < 6π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(6*pi/4))
-    g["argument reduction (hard) |x| < 6π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-6*pi/4))
+    g["argument reduction (easy) abs(x) < 6π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(6*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 6π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-6*pi/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 6π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(6*pi/4))
+    g["argument reduction (hard) abs(x) < 6π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-6*pi/4))
     # -7π/4 <= x <= 7π/4
-    g["argument reduction (easy) |x| < 7π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(7*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 7π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-7*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(7*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-7*pi/4+T(0.1)))
     # -8π/4 <= x <= 8π/4
-    g["argument reduction (easy) |x| < 8π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(2*pi-T(0.1)))
-    g["argument reduction (easy) |x| < 8π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-2*pi+T(0.1)))
-    g["argument reduction (hard) |x| < 8π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(2*pi))
-    g["argument reduction (hard) |x| < 8π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-2*pi))
+    g["argument reduction (easy) abs(x) < 8π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(2*pi-T(0.1)))
+    g["argument reduction (easy) abs(x) < 8π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-2*pi+T(0.1)))
+    g["argument reduction (hard) abs(x) < 8π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(2*pi))
+    g["argument reduction (hard) abs(x) < 8π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-2*pi))
     # -9π/4 <= x <= 9π/4
-    g["argument reduction (easy) |x| < 9π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(9*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 9π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-9*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(9*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-9*pi/4+T(0.1)))
     # -2.0^20π/2 <= x <= 2.0^20π/2
-    g["argument reduction (easy) |x| < 2.0^20π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(T(2.0)^10*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 2.0^20π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-T(2.0)^10*pi/4+T(0.1)))
-    # |x| >= 2.0^20π/2
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(T(2.0)^10*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-T(2.0)^10*pi/4+T(0.1)))
+    # abs(x) >= 2.0^20π/2
     # idx < 0
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(T(2.0)^30*pi/4-T(0.1)))
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-T(2.0)^30*pi/4+T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(T(2.0)^30*pi/4-T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-T(2.0)^30*pi/4+T(0.1)))
     # idx > 0
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(T(2.0)^80*pi/4-1.2))
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-T(2.0)^80*pi/4+1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(T(2.0)^80*pi/4-1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-T(2.0)^80*pi/4+1.2))
 end
 ############
 # rem_pio2 #
@@ -403,46 +403,46 @@ end
 for T in (Float64, )# (Float32, Float64) add Float32 later
     _arg_string = arg_string(T)
     # -2π/4 <= x <= 2π/4
-    g["argument reduction (easy) |x| < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 2π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi/4+T(0.1)))
-    g["argument reduction (hard) |x| < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4))
-    g["argument reduction (hard) |x| < 2π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi/4))
+    g["argument reduction (easy) abs(x) < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4))
+    g["argument reduction (hard) abs(x) < 2π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi/4))
     # -3π/4 <= x <= 3π/4
-    g["argument reduction (easy) |x| < 3π/4", "positive argument", _arg_string] = @benchmarkable _rem($(3*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 3π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-3*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "positive argument", _arg_string] = @benchmarkable _rem($(3*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-3*pi/4+T(0.1)))
     # -4π/4 <= x <= 4π/4
-    g["argument reduction (easy) |x| < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(pi-T(0.1)))
-    g["argument reduction (easy) |x| < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-pi+T(0.1)))
-    g["argument reduction (hard) |x| < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(Float64(pi)))
-    g["argument reduction (hard) |x| < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(Float64(-pi)))
+    g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(pi-T(0.1)))
+    g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-pi+T(0.1)))
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(Float64(pi)))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(Float64(-pi)))
     # -5π/4 <= x <= 5π/4
-    g["argument reduction (easy) |x| < 5π/4", "positive argument", _arg_string] = @benchmarkable _rem($(5*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 5π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-5*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string] = @benchmarkable _rem($(5*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-5*pi/4+T(0.1)))
     # -6π/4 <= x <= 6π/4
-    g["argument reduction (easy) |x| < 6π/4", "positive argument", _arg_string] = @benchmarkable _rem($(6*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 6π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-6*pi/4+T(0.1)))
-    g["argument reduction (hard) |x| < 6π/4", "positive argument", _arg_string] = @benchmarkable _rem($(6*pi/4))
-    g["argument reduction (hard) |x| < 6π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-6*pi/4))
+    g["argument reduction (easy) abs(x) < 6π/4", "positive argument", _arg_string] = @benchmarkable _rem($(6*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 6π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-6*pi/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 6π/4", "positive argument", _arg_string] = @benchmarkable _rem($(6*pi/4))
+    g["argument reduction (hard) abs(x) < 6π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-6*pi/4))
     # -7π/4 <= x <= 7π/4
-    g["argument reduction (easy) |x| < 7π/4", "positive argument", _arg_string] = @benchmarkable _rem($(7*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 7π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-7*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "positive argument", _arg_string] = @benchmarkable _rem($(7*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-7*pi/4+T(0.1)))
     # -8π/4 <= x <= 8π/4
-    g["argument reduction (easy) |x| < 8π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi-T(0.1)))
-    g["argument reduction (easy) |x| < 8π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi+T(0.1)))
-    g["argument reduction (hard) |x| < 8π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi))
-    g["argument reduction (hard) |x| < 8π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi))
+    g["argument reduction (easy) abs(x) < 8π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi-T(0.1)))
+    g["argument reduction (easy) abs(x) < 8π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi+T(0.1)))
+    g["argument reduction (hard) abs(x) < 8π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi))
+    g["argument reduction (hard) abs(x) < 8π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi))
     # -9π/4 <= x <= 9π/4
-    g["argument reduction (easy) |x| < 9π/4", "positive argument", _arg_string] = @benchmarkable _rem($(9*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 9π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-9*pi/4+T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "positive argument", _arg_string] = @benchmarkable _rem($(9*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-9*pi/4+T(0.1)))
     # -2.0^20π/2 <= x <= 2.0^20π/2
-    g["argument reduction (easy) |x| < 2.0^20π/4", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^10*pi/4-T(0.1)))
-    g["argument reduction (easy) |x| < 2.0^20π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^10*pi/4+T(0.1)))
-    # |x| >= 2.0^20π/2
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^10*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^10*pi/4+T(0.1)))
+    # abs(x) >= 2.0^20π/2
     # idx < 0
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^30*pi/4-T(0.1)))
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^30*pi/4+T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^30*pi/4-T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^30*pi/4+T(0.1)))
     # idx > 0
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^80*pi/4-1.2))
-    g["argument reduction (paynehanek) |x| > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^80*pi/4+1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^80*pi/4-1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^80*pi/4+1.2))
 end
 end # module
