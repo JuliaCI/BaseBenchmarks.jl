@@ -15,7 +15,7 @@ const DEFAULT_RNG_SEED = 1234
 # GVector #
 ###########
 
-immutable GVector{T <: AbstractFloat}
+immutable GVector{T <: Number}
     x::T
     y::T
     z::T
@@ -39,7 +39,7 @@ end
 
 Base.show(io::IO, u::GVector) = print(io, "<", u.x, ", ", u.y, ", ", u.z, ">")
 
-function getknots(points::Vector{<:GVector}, degree::Int)
+function getknots{V <: GVector}(points::Vector{V}, degree::Int)
     knots = [zeros(Int, degree); 1:(length(points) - degree)]
     append!(knots, fill(length(points) - degree, degree))
     return knots
@@ -114,7 +114,7 @@ end
 # ChaosGame #
 #############
 
-immutable ChaosGame{T <: AbstractFloat}
+immutable ChaosGame{T <: Number}
     splines::Vector{Spline{T}}
     thickness::T
     minx::T
