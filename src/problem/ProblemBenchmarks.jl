@@ -161,11 +161,13 @@ g["spellcheck"] = @benchmarkable SpellCheck.perf_spellcheck()
 # Chaos #
 #########
 
-include("ChaosGame.jl")
+if VERSION >= v"0.5"
+    include("ChaosGame.jl")
 
-g = addgroup!(SUITE, "chaosgame")
+    g = addgroup!(SUITE, "chaosgame")
 
-g["chaosgame"] = @benchmarkable ChaosGameFractals.perf_chaos()
+    g["chaosgame"] = @benchmarkable ChaosGameFractals.perf_chaos()
+end
 
 
 end # module
