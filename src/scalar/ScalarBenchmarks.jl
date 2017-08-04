@@ -388,6 +388,7 @@ for T in (Float32, Float64)
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(T(2.0)^80*pi/4-1.2))
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-T(2.0)^80*pi/4+1.2))
 end
+
 ############
 # rem_pio2 #
 ############
@@ -445,4 +446,45 @@ for T in (Float64, )# (Float32, Float64) add Float32 later
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^80*pi/4-1.2))
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^80*pi/4+1.2))
 end
+
+########
+# asin #
+########
+
+g = addgroup!(SUITE, "asin")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable asin($(zero(T)))
+    g["small", "positive argument", _arg_string] = @benchmarkable asin($(nextfloat(zero(T))))
+    g["small", "negative argument", _arg_string] = @benchmarkable asin($(prevfloat(zero(T))))
+    g["one", "positive argument", _arg_string] = @benchmarkable asin($(one(T)))
+    g["one", "negative argument", _arg_string] = @benchmarkable asin($(-one(T)))
+    g["|x| < 0.5", "positive argument", _arg_string] = @benchmarkable asin($(T(0.45)))
+    g["|x| < 0.5", "negative argument", _arg_string] = @benchmarkable asin($(T(-0.45)))
+    g["0.5 <= |x| < 0.975", "positive argument", _arg_string] = @benchmarkable asin($(T(0.6)))
+    g["0.5 <= |x| < 0.975", "negative argument", _arg_string] = @benchmarkable asin($T(-0.6))
+    if T == Float64
+        g["0.975 <= |x| < 1.0", "positive argument", _arg_string] = @benchmarkable asin($(0.98))
+        g["0.975 <= |x| < 1.0", "negative argument", _arg_string] = @benchmarkable asin($(-0.98))
+    end
+end
+
+########
+# acos #
+########
+
+g = addgroup!(SUITE, "acos")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable acos($(zero(T)))
+    g["small", "positive argument", _arg_string] = @benchmarkable acos($(nextfloat(zero(T))))
+    g["small", "negative argument", _arg_string] = @benchmarkable acos($(prevfloat(zero(T))))
+    g["one", "positive argument", _arg_string] = @benchmarkable acos($(one(T)))
+    g["one", "negative argument", _arg_string] = @benchmarkable acos($(-one(T)))
+    g["|x| < 0.5", "positive argument", _arg_string] = @benchmarkable acos($(T(0.45)))
+    g["|x| < 0.5", "negative argument", _arg_string] = @benchmarkable acos($(T(-0.45)))
+    g["0.5 <= |x| < 1", "positive argument", _arg_string] = @benchmarkable acos($(T(0.6)))
+    g["0.5 <= |x| < 1", "negative argument", _arg_string] = @benchmarkable acos($T(-0.6))
+end
+
 end # module

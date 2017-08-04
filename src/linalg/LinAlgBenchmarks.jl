@@ -20,9 +20,11 @@ typename{T}(::Type{T}) = string(isa(T,DataType) ? T.name : Base.unwrap_unionall(
 typename{M<:Matrix}(::Type{M}) = "Matrix"
 typename{V<:Vector}(::Type{V}) = "Vector"
 
+const UPLO = VERSION >= v"0.7.0-DEV.884" ? :U : true
+
 linalgmat(::Type{Matrix}, s) = randmat(s)
 linalgmat(::Type{Diagonal}, s) = Diagonal(randvec(s))
-linalgmat(::Type{Bidiagonal}, s) = Bidiagonal(randvec(s), randvec(s-1), true)
+linalgmat(::Type{Bidiagonal}, s) = Bidiagonal(randvec(s), randvec(s-1), UPLO)
 linalgmat(::Type{Tridiagonal}, s) = Tridiagonal(randvec(s-1), randvec(s), randvec(s-1))
 linalgmat(::Type{SymTridiagonal}, s) = SymTridiagonal(randvec(s), randvec(s-1))
 linalgmat(::Type{UpperTriangular}, s) = UpperTriangular(randmat(s))
