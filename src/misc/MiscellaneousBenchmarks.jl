@@ -9,6 +9,53 @@ using Compat
 const SUITE = BenchmarkGroup()
 
 ###########################################################################
+# isbits Union optimizations for type fields & array elements (issue #22441)
+
+g = addgroup!(SUITE, "isbitsunions", ["indexing", "simd", "union"])
+
+mutable struct UnionField
+    u::Union{Int64, Void}
+end
+
+function getsetfield(A)
+    for i = 1:length(A)-1
+        A[i].u = A[i + 1].u
+    end
+end
+
+function makeUnionFieldArray(N)
+    A = [UnionField(i) for i in rand(Int64, N)]
+    for i in rand(1:N, div(N, 4))
+        A[i].u = nothing
+    end
+    return A
+end
+
+g["getsetfield"] = @benchmarkable getsetfield($(makeUnionFieldArray(10000)))
+
+function getsetindex(A)
+    for i = 1:length(A)-1
+        # v = A[i + 1]
+        # if v isa Void
+        #     A[i] = v
+        # else
+        #     A[i] = v
+        # end
+        A[i] = A[i + 1]
+    end
+end
+
+function makeIsBitsUnionArray(N)
+    A = Union{Int64, Void}[i for i in rand(Int64, N)]
+    for i in rand(1:N, div(N, 4))
+        A[i] = nothing
+    end
+    return A
+end
+
+g["getsetindex"] = @benchmarkable getsetindex($(makeIsBitsUnionArray(10000)))
+
+###########################################################################
 # Splatting penalties (issue #13359)
 
 g = addgroup!(SUITE, "splatting", ["array", "getindex"])
