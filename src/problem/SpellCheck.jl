@@ -24,7 +24,7 @@ function train(features)
     return model
 end
 
-const NWORDS = train(words(readstring(joinpath(PROBLEM_DATA_DIR, "norvig_spellcheck.txt"))))
+const NWORDS = train(words(read(joinpath(PROBLEM_DATA_DIR, "norvig_spellcheck.txt"), String)))
 
 function edits(word::AbstractString)
     splits     = [(word[1:i], word[i+1:end]) for i=0:length(word) ]

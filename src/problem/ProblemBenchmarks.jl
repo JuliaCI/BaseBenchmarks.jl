@@ -81,7 +81,7 @@ include("JSONParse.jl")
 
 g = addgroup!(SUITE, "json", ["parse", "closure"])
 
-jstr = readstring(joinpath(PROBLEM_DATA_DIR, "test.json"))
+jstr = read(joinpath(PROBLEM_DATA_DIR, "test.json"), String)
 
 g["parse_json"] = @benchmarkable JSONParse.perf_parse_json($(jstr))
 

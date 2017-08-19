@@ -28,7 +28,7 @@ g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
 
 g["read"]       = @benchmarkable perf_read!($testbuf)
-g["readstring"] = @benchmarkable readstring($testbuf)
+g["readstring"] = @benchmarkable read($testbuf, String)
 
 #################################
 # serialization (#18633, #7893) #
