@@ -32,7 +32,7 @@ const subs = [
 
 function perf_regex_dna()
     infile = joinpath(SHOOTOUT_DATA_PATH, "regexdna-input.txt")
-    seq = readstring(infile)
+    seq = read(infile, String)
     l1 = length(seq)
 
     seq = replace(seq, r">.*\n|\n", "")
