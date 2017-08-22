@@ -100,15 +100,24 @@ small_rct = samesprand(600, 400, 0.01)
 large_sqr = samesprand(20000, 20000, 0.01)
 large_rct = samesprand(20000, 10000, 0.01)
 
-g = addgroup!(SUITE, "transpose", ["ctranspose"])
+if VERSION >= v"0.7.0-DEV.1415"
+    g = addgroup!(SUITE, "transpose", ["adjoint"])
+else
+    g = addgroup!(SUITE, "transpose", ["ctranspose"])
+end
 
 for m in (small_sqr, small_rct, large_sqr, large_rct)
     cm = m + m*im
     s = size(m)
     g["transpose", s] = @benchmarkable transpose($m)
     g["transpose!", s] = @benchmarkable transpose!($(m.'), $m)
-    g["ctranspose", s] = @benchmarkable ctranspose($cm)
-    g["ctranspose!", s] = @benchmarkable ctranspose!($(cm.'), $cm)
+    if VERSION >= v"0.7.0-DEV.1415"
+        g["adjoint", s] = @benchmarkable adjoint($cm)
+        g["adjoint!", s] = @benchmarkable adjoint!($(cm.'), $cm)
+    else
+        g["ctranspose", s] = @benchmarkable ctranspose($cm)
+        g["ctranspose!", s] = @benchmarkable ctranspose!($(cm.'), $cm)
+    end
 end
 
 for b in values(g)
