@@ -487,4 +487,31 @@ for T in (Float32, Float64)
     g["0.5 <= abs(x) < 1", "negative argument", _arg_string] = @benchmarkable acos($T(-0.6))
 end
 
+########
+# atan #
+########
+
+# Before calculating atan(x) a range reduction is performed. The various inter-
+# vals below are chosen such that all branches of the reduction and evaluation
+# phases are reached and benchmarked.
+
+g = addgroup!(SUITE, "atan")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable atan($(zero(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable atan($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable atan($(prevfloat(zero(T))))
+    g["very large", "positive argument", _arg_string] = @benchmarkable atan($(T(2.0)^67))
+    g["very large", "negative argument", _arg_string] = @benchmarkable atan($(-T(2.0)^67))
+    g["0 <= abs(x) < 7/16", "positive argument", _arg_string] = @benchmarkable atan($(T(6/16)))
+    g["0 <= abs(x) < 7/16", "negative argument", _arg_string] = @benchmarkable atan($(-T(6/16)))
+    g["7/16 <= abs(x) < 11/16", "positive argument", _arg_string] = @benchmarkable atan($(T(10/16)))
+    g["7/16 <= abs(x) < 11/16", "negative argument", _arg_string] = @benchmarkable atan($(-T(10/16)))
+    g["11/16 <= abs(x) < 19/16", "positive argument", _arg_string] = @benchmarkable atan($(T(18/16)))
+    g["11/16 <= abs(x) < 19/16", "negative argument", _arg_string] = @benchmarkable atan($(-T(18/16)))
+    g["19/16 <= abs(x) < 39/16", "positive argument", _arg_string] = @benchmarkable atan($(T(38/16)))
+    g["19/16 <= abs(x) < 39/16", "negative argument", _arg_string] = @benchmarkable atan($(-T(38/16)))
+    g["39/16 <= abs(x) < 2^66", "positive argument", _arg_string] = @benchmarkable atan($(T(50/16)))
+    g["39/16 <= abs(x) < 2^66", "negative argument", _arg_string] = @benchmarkable atan($(-T(50/16)))
+end
 end # module
