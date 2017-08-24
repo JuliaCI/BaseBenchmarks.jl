@@ -307,8 +307,8 @@ function makearrays{T}(::Type{T}, r::Integer, c::Integer)
     C = samerand(T, 4, r, c)
     Asub4 = view(C, 1, :, :)
     Asub5 = view(ArrayLS(C), 1, :, :)
-    Asub6 = view(view(C, :, :, :), :, 2:c+1)
-    Asub7 = view(view(ArrayLS(C), :, :, :), :, 2:c+1)
+    Asub6 = view(reshape(view(C, :, :, :), Val(2)), :, 2:c+1)
+    Asub7 = view(reshape(view(ArrayLS(C), :, :, :), Val(2)), :, 2:c+1)
 
     return (A, AF, AS, ASS, Asub, Asub2, Asub3, Asub4, Asub5, Asub6, Asub7)
 end
