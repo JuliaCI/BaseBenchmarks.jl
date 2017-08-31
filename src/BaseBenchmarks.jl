@@ -12,6 +12,7 @@ const PARAMS_PATH = joinpath(dirname(@__FILE__), "..", "etc", "params.json")
 const SUITE = BenchmarkGroup()
 const MODULES = Dict("array" => :ArrayBenchmarks,
                      "broadcast" => :BroadcastBenchmarks,
+                     "collection" => :CollectionBenchmarks,
                      "dates" => :DatesBenchmarks,
                      "find" => :FindBenchmarks,
                      "io" => :IOBenchmarks,
