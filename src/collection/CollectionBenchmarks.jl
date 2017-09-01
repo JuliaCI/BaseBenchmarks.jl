@@ -14,7 +14,7 @@ const sortedints = sort(ints)
 
 # random element, in the collections iff 2nd parameter is true
 let anyshuffled = shuffle(MT, anys),
-    filter = Iterators.filter
+    filter = VERSION >= v"0.5.0" ? Iterators.filter : Base.filter
     d = Dict((Int,    true ) => first(filter(i->isa(i, Int),    anyshuffled))::Int,
              (String, true ) => first(filter(i->isa(i, String), anyshuffled))::String,
              (Int,    false) => first(filter(i->!in(i, ints), rand(MT, 1:iterlen) for _ in 1:typemax(Int)))::Int,
@@ -48,7 +48,8 @@ end
 @inline newcoll(::Type{Dict}, ::Type{T}) where {T} = Dict{T,T}()
 @inline newcoll(::Type{IntSet}, ::Type{Int}) = IntSet()
 
-askey(C, elt) = C === Dict ? first(elt) : elt
+askey(::Type, elt) = elt
+askey(::Type{Dict}, elt) = first(elt)
 
 objstr(T) = T === Int ? "Int" : T === Vector ? "Vector" : string(T)
 
@@ -115,7 +116,7 @@ set_tolerance!(g)
 # Deletion #
 ############
 
-g = addgroup!(SUITE, "deletion", ["AbstractSet", "Associative"])
+g = addgroup!(SUITE, "deletion", ["AbstractVector", "AbstractSet", "Associative"])
 
 function perf_pop!(C)
     while !isempty(C)
@@ -123,8 +124,15 @@ function perf_pop!(C)
     end
 end
 
+pred(::Type{C}, ::Type{Any})    where{C} = x -> isa(askey(C, x), Int)
+pred(::Type{C}, ::Type{String}) where{C} = x -> Int(askey(C, x)[1]) < 90
+pred(::Type{C}, ::Type{Int})    where{C} = x -> iseven(askey(C, x))
+
 foreach_container() do C, cstr, T, tstr, c
-    g[cstr, tstr] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
+    g[cstr, tstr, "pop!"] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
+    C === IntSet && return
+    g[cstr, tstr, "filter!"] = @benchmarkable filter!($(pred(C, T)), d) setup=(d=copy($c)) evals=1
+    g[cstr, tstr, "filter"] =  @benchmarkable filter( $(pred(C, T)), $c)
 end
 
 set_tolerance!(g)
