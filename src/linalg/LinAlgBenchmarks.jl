@@ -101,7 +101,23 @@ for s in SIZES
     for M in (UpperTriangular, UnitUpperTriangular, NPDUpperTriangular, Hermitian)
         mstr = typename(M)
         m = linalgmat(M, s)
-        g["sqrtm", mstr, s] = @benchmarkable sqrtm($m)
+        if VERSION >= v"0.7.0-DEV.1599"
+            g["sqrt", mstr, s] = @benchmarkable sqrt($m)
+        else
+            g["sqrt", mstr, s] = @benchmarkable sqrtm($m)
+        end
+        if M == Hermitian
+            if VERSION >= v"0.7.0-DEV.1597"
+                g["log", mstr, s] = @benchmarkable log($m)
+            else
+                g["log", mstr, s] = @benchmarkable logm($m)
+            end
+            if VERSION >= v"0.7.0-DEV.1486"
+                g["exp", mstr, s] = @benchmarkable exp($m)
+            else
+                g["exp", mstr, s] = @benchmarkable expm($m)
+            end
+        end
     end
 
     # PR 21165
