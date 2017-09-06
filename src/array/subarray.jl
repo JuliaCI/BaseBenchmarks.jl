@@ -1,12 +1,18 @@
 #
 
+if VERSION >= v"0.7.0-DEV.1660"
+    _maxind(A) = indmax(A).I
+else
+    _maxind(A) = ind2sub(size(A), indmax(A))
+end
+
 function perf_lucompletepivCopy!(A)
     n = size(A, 1)
     rowpiv=zeros(Int, n-1)
     colpiv=zeros(Int, n-1)
     for k = 1:n-1
         As = @compat abs.(A[k:n, k:n])
-        μ, λ = ind2sub(size(As), indmax(As))
+        μ, λ = _maxind(As)
         μ += k-1; λ += k-1
         rowpiv[k] = μ
         A[[k,μ], 1:n] = A[[μ,k], 1:n]
@@ -27,7 +33,7 @@ function perf_lucompletepivSub!(A)
     colpiv=zeros(Int, n-1)
     for k = 1:n-1
         As = @compat abs.(view(A, k:n, k:n))
-        μ, λ = ind2sub(size(As), indmax(As))
+        μ, λ = _maxind(As)
         μ += k-1; λ += k-1
         rowpiv[k] = μ
         A[[k,μ], 1:n] = view(A, [μ,k], 1:n)
