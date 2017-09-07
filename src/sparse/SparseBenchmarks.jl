@@ -138,4 +138,23 @@ for b in values(g)
     b.params.time_tolerance = 0.3
 end
 
+################
+# constructors #
+################
+g = addgroup!(SUITE, "constructors")
+
+const UPLO = VERSION >= v"0.7.0-DEV.884" ? :U : true
+for s in sizes
+    nz = floor(Int, 1e-4*s*s)
+    I = samerand(1:s, nz)
+    J = samerand(1:s, nz)
+    V = randvec(nz)
+    g["IV", s] = @benchmarkable sparsevec($I, $V)
+    g["IJV", s] = @benchmarkable sparse($I, $J, $V)
+    g["Diagonal", s] = @benchmarkable sparse($(Diagonal(randvec(s))))
+    g["Bidiagonal", s] = @benchmarkable sparse($(Bidiagonal(randvec(s), randvec(s-1), UPLO)))
+    g["Tridiagonal", s] = @benchmarkable sparse($(Tridiagonal(randvec(s-1), randvec(s), randvec(s-1))))
+    g["SymTridiagonal", s] = @benchmarkable sparse($(SymTridiagonal(randvec(s), randvec(s-1))))
+end
+
 end # module
