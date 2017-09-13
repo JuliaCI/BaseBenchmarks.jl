@@ -59,6 +59,23 @@ testdata_buf = serialized_buf(testdata)
 g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, $testdata) setup=(io=IOBuffer())
 g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek($testdata_buf, 0); deserialize($testdata_buf))
 
+###################################
+# limited array printing (#23681) #
+###################################
+
+g = addgroup!(SUITE, "array_limit", ["array", "display"])
+
+test_vector = rand(10^8)
+test_column_matrix = reshape(test_vector, length(test_vector), 1)
+test_square_matrix = reshape(test_vector, 10^4, 10^4)
+disp = TextDisplay(IOContext(DevNull, :limit=>true))
+
+for A in (test_vector, test_column_matrix, test_square_matrix)
+    g["display", "$(typeof(A))$(size(A))"] = @benchmarkable display($disp, $A)
+end
+
+###################################
+
 function perf_skipchars_21109()
     mktemp() do _, file
         println(file, "G")
