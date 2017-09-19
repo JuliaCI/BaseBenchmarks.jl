@@ -29,4 +29,27 @@ g = addgroup!(SUITE, "searchindex")
 g["Char"] = @benchmarkable searchindex($str,  $('x'))
 g["String"] = @benchmarkable searchindex($str, $("x"))
 
+######################
+# readuntil (#20621) #
+######################
+
+buffer = IOBuffer("A" ^ 50000)
+
+g = addgroup!(SUITE, "readuntil")
+for len in (1, 2, 1000, 50000)
+    g["target length $len"] = @benchmarkable readuntil(seekstart($buffer), $("A" ^ len))
+end
+
+buffer = IOBuffer(("A" ^ 50000) * "B")
+target = ("A" ^ 5000) * "Z"
+g["backtracking"] = @benchmarkable readuntil(seekstart($buffer), $target)
+
+buffer = IOBuffer(randstring('A':'X', 40000) * target)
+target = "Y" * ("Z" ^ 999)
+g["no backtracking"] = @benchmarkable readuntil(seekstart($buffer), $target)
+
+buffer = IOBuffer(("bar" ^ 20000) * "ians")
+target = ("bar" ^ 300) * "ian"
+g["barbarian backtrack"] = @benchmarkable readuntil(seekstart($buffer), $target)
+
 end # module
