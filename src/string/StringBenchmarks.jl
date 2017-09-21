@@ -44,7 +44,7 @@ buffer = IOBuffer(("A" ^ 50000) * "B")
 target = ("A" ^ 5000) * "Z"
 g["backtracking"] = @benchmarkable readuntil(seekstart($buffer), $target)
 
-buffer = IOBuffer(randstring('A':'X', 40000) * target)
+buffer = IOBuffer(String(rand(RandUtils.SEED, 'A':'X', 40000)) * target)
 target = "Y" * ("Z" ^ 999)
 g["no backtracking"] = @benchmarkable readuntil(seekstart($buffer), $target)
 
