@@ -389,6 +389,26 @@ for T in (Float32, Float64)
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-T(2.0)^80*pi/4+1.2))
 end
 
+########
+# tan #
+########
+
+g = addgroup!(SUITE, "tan")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable tan($(zero(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable tan($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable tan($(prevfloat(zero(T))))
+    g["small", "positive argument", _arg_string] = @benchmarkable tan($(prevfloat(sqrt(eps(T))/2)))
+    g["small", "negative argument", _arg_string] = @benchmarkable tan($(nextfloat(-sqrt(eps(T))/2)))
+    g["medium", "positive argument", _arg_string] = @benchmarkable tan($T(0.6743))
+    g["medium", "negative argument", _arg_string] = @benchmarkable tan($T(-0.6743))
+    g["large", "positive argument", _arg_string] = @benchmarkable tan($T(0.6745))
+    g["large", "negative argument", _arg_string] = @benchmarkable tan($T(-0.6745))
+    g["large", "positive argument", _arg_string] = @benchmarkable tan($T(2.5))
+    g["large", "negative argument", _arg_string] = @benchmarkable tan($T(-2.5))
+end
+
 ############
 # rem_pio2 #
 ############
