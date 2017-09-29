@@ -534,4 +534,66 @@ for T in (Float32, Float64)
     g["39/16 <= abs(x) < 2^66", "positive argument", _arg_string] = @benchmarkable atan($(T(50/16)))
     g["39/16 <= abs(x) < 2^66", "negative argument", _arg_string] = @benchmarkable atan($(-T(50/16)))
 end
+
+#########
+# atan2 #
+#########
+
+#
+
+g = addgroup!(SUITE, "atan2")
+for T in (Float32, Float64)
+    # when referring to y and x we refer to y and x in atan2(y, x)
+    _arg_string = arg_string(T)
+    r = T(randn())
+    absr = abs(r)
+    # x is one
+    g["x one", _arg_string] = @benchmarkable atan2($(T(r)), $(one(T)))
+    # y zero
+    g["y zero", "y positive", "x positive", _arg_string] = @benchmarkable atan2($(T(r)), $(one(T)))
+    g["y zero", "y positive", "x positive", _arg_string] = @benchmarkable atan2($(zero(T)), $absr)
+    g["y zero", "y negative", "x positive", _arg_string] = @benchmarkable atan2($(-zero(T)), $absr)
+    g["y zero", "y positive", "x negative", _arg_string] = @benchmarkable atan2($(zero(T)), $(-absr))
+    g["y zero", "y negative", "x negative", _arg_string] = @benchmarkable atan2($(-zero(T)), $(-absr))
+    # x zero and y not zero
+    g["x zero", "y positive", _arg_string] = @benchmarkable atan2($(one(T)), $(zero(T)))
+    g["x zero", "y negative", _arg_string] = @benchmarkable atan2($(-one(T)), $(zero(T)))
+    # isinf(x) == true && isinf(y) == true
+    g["y infinite", "y positive", "x infinite", "x positive", _arg_string] = @benchmarkable atan2($(T(Inf)), $(T(Inf)))
+    g["y infinite", "y negative", "x infinite", "x positive", _arg_string] = @benchmarkable atan2($(-T(Inf)), $(T(Inf)))
+    g["y infinite", "y positive", "x infinite", "x negative", _arg_string] = @benchmarkable atan2($(T(Inf)), $(-T(Inf)))
+    g["y infinite", "y negative", "x infinite", "x negative", _arg_string] = @benchmarkable atan2($(-T(Inf)), $(-T(Inf)))
+    # isinf(x) == true && isinf(y) == false
+    # m in 0 through 3 are different cases explained in the atan2 code
+    g["y finite", "y positive", "x infinite", "x positive", _arg_string] = @benchmarkable atan2($(absr), $(T(Inf))) # m == 0
+    g["y finite", "y negative", "x infinite", "x positive", _arg_string] = @benchmarkable atan2($(-absr), $(T(Inf))) # m == 1
+    g["y finite", "y positive", "x infinite", "x negative", _arg_string] = @benchmarkable atan2($(absr), $(-T(Inf))) # m == 2
+    g["y finite", "y negative", "x infinite", "x negative", _arg_string] = @benchmarkable atan2($(-absr), $(-T(Inf))) # m == 3
+    # isinf(y) == true && isinf(x) == false
+    g["y infinite", "y positive", "x finite", "x positive", _arg_string] = @benchmarkable atan2($(T(Inf)), $(absr))
+    g["y infinite", "y negative", "x finite", "x positive", _arg_string] = @benchmarkable atan2($(-T(Inf)), $(absr))
+    g["y infinite", "y positive", "x finite", "x negative", _arg_string] = @benchmarkable atan2($(T(Inf)), $(-absr))
+    g["y infinite", "y negative", "x finite", "x negative", _arg_string] = @benchmarkable atan2($(-T(Inf)), $(-absr))
+    # |y/x| above high threshold
+    atanpi = T(1.5707963267948966)
+    g["abs(y/x) high", "y positive", "x positive", _arg_string] = @benchmarkable atan2($(T(2.0^61)), $(T(1.0)))
+    g["abs(y/x) high", "y negative", "x positive", _arg_string] = @benchmarkable atan2($(-T(2.0^61)), $(T(1.0)))
+    g["abs(y/x) high", "y positive", "x negative", _arg_string] = @benchmarkable atan2($(T(2.0^61)), $(-T(1.0)))
+    g["abs(y/x) high", "y negative", "x negative", _arg_string] = @benchmarkable atan2($(-T(2.0^61)), $(-T(1.0)))
+    g["abs(y/x) high", "y infinite", "y negative", "x finite", "x negative", _arg_string] = @benchmarkable atan2($(-T(Inf)), $(-absr))
+    # |y|/x between 0 and low threshold
+    g["abs(y/x) small", "y positive", "x positive", _arg_string] = @benchmarkable atan2($(T(2.0^-61)), $(T(1.0)))
+    g["abs(y/x) small", "y positive", "x negative", _arg_string] = @benchmarkable atan2($(T(2.0^-61)), $(-T(1.0)))
+    # y/x is "safe" ("arbitrary values", just need to hit the branch)
+    _ATAN2_PI_LO(::Type{Float32}) = -8.7422776573f-08
+    _ATAN2_PI_LO(::Type{Float64}) = 1.2246467991473531772E-16
+    g["abs(y/x) safe (small)", "y positive", "x positive", _arg_string] = @benchmarkable atan2($(T(5.0)), $(T(2.5)))
+    g["abs(y/x) safe (small)", "y negative", "x positive", _arg_string] = @benchmarkable atan2($(-T(5.0)), $(T(2.5)))
+    g["abs(y/x) safe (small)", "y positive", "x negative", _arg_string] = @benchmarkable atan2($(T(5.0)), $(-T(2.5)))
+    g["abs(y/x) safe (small)", "y negative", "x negative", _arg_string] = @benchmarkable atan2($(-T(5.0)), $(-T(2.5)))
+    g["abs(y/x) safe (large)", "y positive", "x positive", _arg_string] = @benchmarkable atan2($(T(1235.2341234)), $(T(2.5)))
+    g["abs(y/x) safe (large)", "y negative", "x positive", _arg_string] = @benchmarkable atan2($(-T(1235.2341234)), $(T(2.5)))
+    g["abs(y/x) safe (large)", "y positive", "x negative", _arg_string] = @benchmarkable atan2($(T(1235.2341234)), $(-T(2.5)))
+    g["abs(y/x) safe (large)", "y negative", "x negative", _arg_string] = @benchmarkable atan2($(-T(1235.2341234)), $(-T(2.5)))
+end
 end # module
