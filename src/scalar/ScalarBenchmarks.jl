@@ -392,7 +392,7 @@ end
 ##########
 # sincos #
 ##########
-
+if VERSION >= v"0.7.0-DEV.337"
 g = addgroup!(SUITE, "sincos")
 for T in (Float32, Float64)
     _arg_string = arg_string(T)
@@ -442,6 +442,7 @@ for T in (Float32, Float64)
     # idx > 0
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable sincos($(T(2.0)^80*pi/4-1.2))
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable sincos($(-T(2.0)^80*pi/4+1.2))
+end
 end
 
 ########
