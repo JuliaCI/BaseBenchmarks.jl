@@ -301,8 +301,8 @@ for T in (Float32, Float64)
     # -4π/4 <= x <= 4π/4
     g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(pi)-T(0.1)))
     g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(pi)+T(0.1)))
-    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(Float64(T(pi))))
-    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(Float64(-T(pi))))
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(T(pi)))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-T(pi)))
     # -5π/4 <= x <= 5π/4
     g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(5*T(pi)/4-T(0.1)))
     g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable sin($(-5*T(pi)/4+T(0.1)))
@@ -356,8 +356,8 @@ for T in (Float32, Float64)
     # -4π/4 <= x <= 4π/4
     g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(pi-T(0.1)))
     g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-pi+T(0.1)))
-    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(Float64(pi)))
-    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(Float64(-pi)))
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(T(pi)))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(T(-pi)))
     # -5π/4 <= x <= 5π/4
     g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(5*pi/4-T(0.1)))
     g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string, "cos_kernel"] = @benchmarkable cos($(-5*pi/4+T(0.1)))
