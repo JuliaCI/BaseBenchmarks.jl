@@ -389,6 +389,61 @@ for T in (Float32, Float64)
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string, "sin_kernel"] = @benchmarkable cos($(-T(2.0)^80*pi/4+1.2))
 end
 
+##########
+# sincos #
+##########
+
+g = addgroup!(SUITE, "sincos")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    # -π/4 <= x <= π/4
+    g["no reduction", "zero", _arg_string] = @benchmarkable sincos($(0.0))
+    g["no reduction", "positive argument", _arg_string] = @benchmarkable sincos($(pi/6))
+    g["no reduction", "negative argument", _arg_string] = @benchmarkable sincos($(-pi/6))
+    # -2π/4 <= x <= 2π/4
+    g["argument reduction (easy) abs(x) < 2π/4", "positive argument", _arg_string] = @benchmarkable sincos($(2*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-2*pi/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 2π/4", "positive argument", _arg_string] = @benchmarkable sincos($(2*pi/4))
+    g["argument reduction (hard) abs(x) < 2π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-2*pi/4))
+    # -3π/4 <= x <= 3π/4
+    g["argument reduction (easy) abs(x) < 3π/4", "positive argument", _arg_string] = @benchmarkable sincos($(3*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 3π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-3*pi/4+T(0.1)))
+    # -4π/4 <= x <= 4π/4
+    g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable sincos($(pi-T(0.1)))
+    g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-pi+T(0.1)))
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable sincos($(T(pi)))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable sincos($(T(-pi)))
+    # -5π/4 <= x <= 5π/4
+    g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string] = @benchmarkable sincos($(5*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-5*pi/4+T(0.1)))
+    # -6π/4 <= x <= 6π/4
+    g["argument reduction (easy) abs(x) < 6π/4", "positive argument", _arg_string] = @benchmarkable sincos($(6*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 6π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-6*pi/4+T(0.1)))
+    g["argument reduction (hard) abs(x) < 6π/4", "positive argument", _arg_string] = @benchmarkable sincos($(6*pi/4))
+    g["argument reduction (hard) abs(x) < 6π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-6*pi/4))
+    # -7π/4 <= x <= 7π/4
+    g["argument reduction (easy) abs(x) < 7π/4", "positive argument", _arg_string] = @benchmarkable sincos($(7*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 7π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-7*pi/4+T(0.1)))
+    # -8π/4 <= x <= 8π/4
+    g["argument reduction (easy) abs(x) < 8π/4", "positive argument", _arg_string] = @benchmarkable sincos($(2*pi-T(0.1)))
+    g["argument reduction (easy) abs(x) < 8π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-2*pi+T(0.1)))
+    g["argument reduction (hard) abs(x) < 8π/4", "positive argument", _arg_string] = @benchmarkable sincos($(2*pi))
+    g["argument reduction (hard) abs(x) < 8π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-2*pi))
+    # -9π/4 <= x <= 9π/4
+    g["argument reduction (easy) abs(x) < 9π/4", "positive argument", _arg_string] = @benchmarkable sincos($(9*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 9π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-9*pi/4+T(0.1)))
+    # -2.0^20π/2 <= x <= 2.0^20π/2
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "positive argument", _arg_string] = @benchmarkable sincos($(T(2.0)^10*pi/4-T(0.1)))
+    g["argument reduction (easy) abs(x) < 2.0^20π/4", "negative argument", _arg_string] = @benchmarkable sincos($(-T(2.0)^10*pi/4+T(0.1)))
+    # abs(x) >= 2.0^20π/2
+    # idx < 0
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable sincos($(T(2.0)^30*pi/4-T(0.1)))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable sincos($(-T(2.0)^30*pi/4+T(0.1)))
+    # idx > 0
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable sincos($(T(2.0)^80*pi/4-1.2))
+    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable sincos($(-T(2.0)^80*pi/4+1.2))
+end
+
 ########
 # tan #
 ########
@@ -538,8 +593,6 @@ end
 #########
 # atan2 #
 #########
-
-#
 
 g = addgroup!(SUITE, "atan2")
 for T in (Float32, Float64)
