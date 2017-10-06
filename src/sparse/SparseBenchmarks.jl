@@ -157,4 +157,116 @@ for s in sizes
     g["SymTridiagonal", s] = @benchmarkable sparse($(SymTridiagonal(randvec(s), randvec(s-1))))
 end
 
+#########################
+# matrix multiplication #
+#########################
+
+g = addgroup!(SUITE, "matmul")
+
+# mixed sparse-dense matmul #
+#---------------------------#
+
+using Base.LinAlg: *, A_mul_B!,
+    A_mul_Bt,  A_mul_Bc,  A_mul_Bt!,  A_mul_Bc!,
+    At_mul_B,  Ac_mul_B,  At_mul_B!,  Ac_mul_B!,
+    At_mul_Bt, Ac_mul_Bc, At_mul_Bt!, Ac_mul_Bc!
+
+function allocmats_ds(om, ok, on, s, nnzc, T)
+    m, k, n = map(x -> Int(s*x), (om, ok, on))
+    densemat, sparsemat = rand(T, m, k), sprand(T, k, n, nnzc/k)
+    tdensemat, tsparsemat = transpose(densemat), transpose(sparsemat)
+    destmat = similar(densemat, m, n)
+    return m, k, n, destmat,
+        densemat, sparsemat,
+        tdensemat, tsparsemat
+end
+function allocmats_sd(om, ok, on, s, nnzc, T)
+    m, k, n = map(x -> Int(s*x), (om, ok, on))
+    densemat, sparsemat = rand(T, k, m), sprand(T, n, k, nnzc/n)
+    tdensemat, tsparsemat = transpose(densemat), transpose(sparsemat)
+    destmat = similar(densemat, n, m)
+    return m, k, n, destmat,
+        densemat, sparsemat,
+        tdensemat, tsparsemat
+end
+
+for (om, ok, on) in (# order of matmul dimensions m, k, and n
+        (10^2, 10^2, 10^2),  # dense square * sparse square -> dense square
+        (10^1, 10^1, 10^3),  # dense square * sparse short -> dense short
+        (10^2, 10^2, 10^1),  # dense square * sparse tall -> dense tall
+        (10^1, 10^3, 10^3),  # dense short * sparse square -> dense short
+        (10^1, 10^2, 10^3),  # dense short * sparse short -> dense short
+        (10^1, 10^3, 10^2),  # dense short * sparse tall -> dense short
+        (10^3, 10^1, 10^1),  # dense tall * sparse square -> dense tall
+        (10^2, 10^1, 10^2),  # dense tall * sparse short -> dense square
+        ) # the preceding descriptions apply to dense-sparse matmul without
+          # any transpositions. other cases are described below
+    #
+    # the transpose and adjoint variants share kernel code
+    # the in-place and out-of-place variants share kernel code
+    # so exercise the different variants in different ways
+    #
+    # for A[t|c]_mul_B[t|c][!]([dense,], dense, sparse) kernels,
+    # the dense matrix is m-by-k, or k-by-m for A(c|t) operations
+    # the sparse matrix is k-by-n, or n-by-k for B(c|t) operations
+    # and the (dense) destination matrix is m-by-n in any case
+    # the sparse matrix has approximately 10 entries per column
+    #
+    # # out-of-place dense-sparse ops, transpose variants, i.e. A[t]_mul_B[t](dense, sparse)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_ds(om, ok, on, 1/2, 4, Float64)
+    g["A_mul_B",   "dense $(m)x$(k), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable *($densemat, $sparsemat)
+    g["A_mul_Bt",  "dense $(m)x$(k), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable A_mul_Bt($densemat, $tsparsemat)
+    g["At_mul_B",  "dense $(k)x$(m), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable At_mul_B($tdensemat, $sparsemat)
+    g["At_mul_Bt", "dense $(k)x$(m), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable At_mul_Bt($tdensemat, $tsparsemat)
+    # in-place dense-sparse -> dense ops, transpose variants, i.e. A[t]_mul[t]!(dense, dense, sparse)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_ds(om, ok, on, 4, 12, Float64)
+    g["A_mul_B!",   "dense $(m)x$(k), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable A_mul_B!($destmat, $densemat, $sparsemat)
+    g["A_mul_Bt!",  "dense $(m)x$(k), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable A_mul_Bt!($destmat, $densemat, $tsparsemat)
+    g["At_mul_B!",  "dense $(k)x$(m), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable At_mul_B!($destmat, $tdensemat, $sparsemat)
+    g["At_mul_Bt!", "dense $(k)x$(m), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable At_mul_Bt!($destmat, $tdensemat, $tsparsemat)
+    # out-of-place dense-sparse ops, adjoint variants, i.e. A[c]_mul_B[c](dense, sparse)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_ds(om, ok, on, 1/2, 4, Complex{Float64})
+    g["A_mul_Bc",  "dense $(m)x$(k), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable A_mul_Bc($densemat, $tsparsemat)
+    g["Ac_mul_B",  "dense $(k)x$(m), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable Ac_mul_B($tdensemat, $sparsemat)
+    g["Ac_mul_Bc", "dense $(k)x$(m), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable Ac_mul_Bc($tdensemat, $tsparsemat)
+    # in-place dense-sparse -> dense ops, adjoint variants, i.e. A[c]_mul[c]!(dense, dense, sparse)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_ds(om, ok, on, 2, 8, Complex{Float64})
+    g["A_mul_Bc!",  "dense $(m)x$(k), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable A_mul_Bc!($destmat, $densemat, $tsparsemat)
+    g["Ac_mul_B!",  "dense $(k)x$(m), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable Ac_mul_B!($destmat, $tdensemat, $sparsemat)
+    g["Ac_mul_Bc!", "dense $(k)x$(m), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable Ac_mul_Bc!($destmat, $tdensemat, $tsparsemat)
+    #
+    # for A[t|c]_mul_B[t|c][!]([dense,], sparse, dense) kernels,
+    # the sparse matrix is n-by-k, or k-by-n for B(c|t) operations
+    # the dense matrix is k-by-m, or m-by-k for A(c|t) operations
+    # and the (dense) destination matrix is n-by-m in any case
+    # the sparse matrix has approximately 10 entries per column
+    #
+    # out-of-place sparse-dense ops, transpose variants, i.e. A[t]_mul_B[t](sparse, dense)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_sd(om, ok, on, 1/2, 4, Complex{Float64})
+    g["A_mul_B",   "sparse $(n)x$(k), dense $(k)x$(m) -> dense $(n)x$(m)"] = @benchmarkable *($sparsemat, $densemat)
+    g["A_mul_Bt",  "sparse $(n)x$(k), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable A_mul_Bt($sparsemat, $tdensemat)
+    g["At_mul_B",  "sparse $(k)x$(n), dense $(k)x$(m) -> dense $(n)x$(m)"] = @benchmarkable At_mul_B($tsparsemat, $densemat)
+    g["At_mul_Bt", "sparse $(k)x$(n), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable At_mul_Bt($tsparsemat, $tdensemat)
+    # in-place sparse-dense -> dense ops, transpose variants, i.e. A[t|c]_mul_B[t|c]!(dense, sparse, dense)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_sd(om, ok, on, 4, 12, Complex{Float64})
+    g["A_mul_B!",   "sparse $(n)x$(k), dense $(k)x$(m) -> dense $(n)x$(m)"] = @benchmarkable A_mul_B!($destmat, $sparsemat, $densemat)
+    g["A_mul_Bt!",  "sparse $(n)x$(k), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable A_mul_Bt!($destmat, $sparsemat, $tdensemat)
+    g["At_mul_B!",  "sparse $(k)x$(n), dense $(k)x$(m) -> dense $(n)x$(m)"] = @benchmarkable At_mul_B!($destmat, $tsparsemat, $densemat)
+    g["At_mul_Bt!", "sparse $(k)x$(n), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable At_mul_Bt!($destmat, $tsparsemat, $tdensemat)
+    # out-of-place sparse-dense ops, adjoint variants, i.e. A[c]_mul_B[c](sparse, dense)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_sd(om, ok, on, 1/2, 4, Complex{Float64})
+    g["A_mul_Bc",  "sparse $(n)x$(k), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable A_mul_Bc($sparsemat, $tdensemat)
+    g["Ac_mul_B",  "sparse $(k)x$(n), dense $(k)x$(m) -> dense $(n)x$(m)"] = @benchmarkable Ac_mul_B($tsparsemat, $densemat)
+    g["Ac_mul_Bc", "sparse $(k)x$(n), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable Ac_mul_Bc($tsparsemat, $tdensemat)
+    # in-place sparse-dense -> dense ops, adjoint variants, i.e. A[t|c]_mul_B[t|c]!(dense, sparse, dense)
+    m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_sd(om, ok, on, 2, 8, Complex{Float64})
+    g["A_mul_Bc!",  "sparse $(n)x$(k), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable A_mul_Bc!($destmat, $sparsemat, $tdensemat)
+    g["Ac_mul_B!",  "sparse $(k)x$(n), dense $(k)x$(m) -> dense $(n)x$(m)"] = @benchmarkable Ac_mul_B!($destmat, $tsparsemat, $densemat)
+    g["Ac_mul_Bc!", "sparse $(k)x$(n), dense $(m)x$(k) -> dense $(n)x$(m)"] = @benchmarkable Ac_mul_Bc!($destmat, $tsparsemat, $tdensemat)
+end
+
+for b in values(g)
+    b.params.time_tolerance = 0.3
+end
+
 end # module
