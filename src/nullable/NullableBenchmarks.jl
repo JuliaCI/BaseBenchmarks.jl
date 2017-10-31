@@ -36,12 +36,12 @@ end
 
 g = addgroup!(SUITE, "nullablearray")
 
-immutable NullableArray{T, N} <: AbstractArray{Nullable{T}, N}
+struct NullableArray{T, N} <: AbstractArray{Nullable{T}, N}
     values::Array{T, N}
     hasvalue::Array{Bool, N}
 end
 
-@inline function Base.getindex{T, N}(X::NullableArray{T, N}, I::Int...)
+@inline function Base.getindex(X::NullableArray{T, N}, I::Int...) where {T, N}
     if isbits(T)
         ifelse(X.hasvalue[I...], Nullable{T}(X.values[I...]), Nullable{T}())
     else
@@ -55,11 +55,11 @@ end
 
 Base.size(X::NullableArray) = size(X.values)
 
-@compat Base.IndexStyle(::Type{<:NullableArray}) = IndexLinear()
+Base.IndexStyle(::Type{<:NullableArray}) = IndexLinear()
 
 const VEC_LENGTH = 1000
 
-function perf_sum{T<:Nullable}(X::AbstractArray{T})
+function perf_sum(X::AbstractArray{T}) where T<:Nullable
     S = eltype(T)
     s = zero(S)+zero(S)
     @inbounds @simd for i in eachindex(X)
@@ -68,7 +68,7 @@ function perf_sum{T<:Nullable}(X::AbstractArray{T})
     s
 end
 
-function perf_countnulls{T<:Nullable}(X::AbstractArray{T})
+function perf_countnulls(X::AbstractArray{T}) where T<:Nullable
     n = 0
     @inbounds for i in eachindex(X)
         n += isnull(X[i])
@@ -76,7 +76,7 @@ function perf_countnulls{T<:Nullable}(X::AbstractArray{T})
     n
 end
 
-function perf_countequals{T<:Nullable}(X::AbstractArray{T}, Y::AbstractArray{T})
+function perf_countequals(X::AbstractArray{T}, Y::AbstractArray{T}) where T<:Nullable
     n = 0
     @inbounds for i in eachindex(X, Y)
         n += isequal(X[i], Y[i])

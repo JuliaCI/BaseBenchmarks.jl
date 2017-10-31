@@ -10,8 +10,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup(["recursion", "fibonacci", "fib",  "parse", "parseint",
                               "mandel", "mandelbrot", "sort", "quicksort", "pi", "π", "sum",
                               "pisum", "πsum", "rand", "randmatstat", "rand", "randmatmul"])

@@ -12,8 +12,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup(["example", "regex", "pi", "π", "tree"])
 const SHOOTOUT_DATA_PATH = joinpath(dirname(@__FILE__), "data")
 

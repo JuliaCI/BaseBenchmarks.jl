@@ -38,7 +38,7 @@ function perf_gk(n, myeps)
         epse = eps .* e
         csum = zeros(n)
 
-        while(stop != 1)
+        while stop != 1
             t = t+1
             iter = t
 
@@ -62,7 +62,7 @@ function perf_gk(n, myeps)
                 U[i] += A[i,k]
             end
 
-            s = @compat sum(p[1:n] .* exp.((eps/2) .* A[1:n,k]))
+            s = sum(p[1:n] .* exp.((eps/2) .* A[1:n,k]))
 
             for i=1:n
                 p[i] = (p[i]*exp((eps/2)*A[i,k])) / s
@@ -88,7 +88,7 @@ function perf_gk(n, myeps)
         etx=sum(x)
         AX = A*X
         Ax = A*x
-        error = @compat abs.(AX) .- abs.(U)
+        error = abs.(AX) .- abs.(U)
         Axepse = 0
 
         for i=1:n

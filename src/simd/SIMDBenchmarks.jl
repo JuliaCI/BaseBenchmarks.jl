@@ -6,8 +6,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup(["array", "inbounds"])
 
 ###########
@@ -88,21 +86,21 @@ function perf_local_arrays(V)
     return X
 end
 
-immutable ImmutableFields{V<:AbstractVector}
+struct ImmutableFields{V<:AbstractVector}
     X::V
     Y::V
     Z::V
 end
 
-ImmutableFields{V}(X::V) = ImmutableFields{V}(X, X, X)
+ImmutableFields(X::V) where {V} = ImmutableFields{V}(X, X, X)
 
-type MutableFields{V<:AbstractVector}
+mutable struct MutableFields{V<:AbstractVector}
     X::V
     Y::V
     Z::V
 end
 
-MutableFields{V}(X::V) = ImmutableFields{V}(X, X, X)
+MutableFields(X::V) where {V} = ImmutableFields{V}(X, X, X)
 
 function perf_loop_fields!(obj)
     # SIMD loop with field access

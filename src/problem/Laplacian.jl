@@ -2,8 +2,6 @@ module Laplacian
 
 using Compat
 
-import Compat: UTF8String, view
-
 ################################
 # Sparse Matrix * Dense Vector #
 ################################
@@ -76,7 +74,7 @@ function perf_laplace_iter_vec(N)
     Niter = 2^10
     dx2 = dy2 = 0.1*0.1
     for i = 1:Niter
-        @compat u[2:N-1, 2:N-1] .= ((u[1:N-2, 2:N-1] .+ u[3:N, 2:N-1]).*dy2 .+ (u[2:N-1, 1:N-2] .+ u[2:N-1, 3:N]).*dx2) .* (1 / (2*(dx2+dy2)))
+        u[2:N-1, 2:N-1] .= ((u[1:N-2, 2:N-1] .+ u[3:N, 2:N-1]).*dy2 .+ (u[2:N-1, 1:N-2] .+ u[2:N-1, 3:N]).*dx2) .* (1 / (2*(dx2+dy2)))
     end
     return u
 end
@@ -92,7 +90,7 @@ function perf_laplace_iter_sub(N)
     u3 = view(u, 2:N-1, 1:N-2)
     u4 = view(u, 2:N-1, 3:N)
     for i = 1:Niter
-        @compat u0 .= ((u1 .+ u2).*dy2 .+ (u3 .+ u4).*dx2) .* (1 / (2*(dx2+dy2)))
+        u0 .= ((u1 .+ u2).*dy2 .+ (u3 .+ u4).*dx2) .* (1 / (2*(dx2+dy2)))
     end
     return u
 end

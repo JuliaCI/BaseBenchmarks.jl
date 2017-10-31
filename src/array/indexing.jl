@@ -1,4 +1,4 @@
-function perf_hdindexing{T}(u_i::AbstractArray{T, 6}, u_ip1::AbstractArray{T, 6})
+function perf_hdindexing(u_i::AbstractArray{T, 6}, u_ip1::AbstractArray{T, 6}) where T
   d1min = 3
   d1max = size(u_i, 5) - 2
   d2min = 3
@@ -27,7 +27,7 @@ function perf_hdindexing{T}(u_i::AbstractArray{T, 6}, u_ip1::AbstractArray{T, 6}
 end
 
 
-function kernel5{T}(idx, u_i::AbstractArray{T,6}, u_ip1::AbstractArray{T,6})
+function kernel5(idx, u_i::AbstractArray{T,6}, u_ip1::AbstractArray{T,6}) where T
 
   d1 = idx[1]
   d2 = idx[2]

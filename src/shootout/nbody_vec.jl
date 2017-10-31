@@ -13,7 +13,7 @@ const solar_mass = 4 * pi * pi
 const days_per_year = 365.24
 
 # A heavenly body in the system
-type Body
+mutable struct Body
     pos::Array{Float64, 1}
     v::Array{Float64, 1}
     mass::Float64
@@ -35,7 +35,7 @@ function advance(bodies, dt)
     delta = [0.,0.,0.]
     for i = 1:length(bodies)
         for j = i+1:length(bodies)
-            @compat delta .= bodies[i].pos .- bodies[j].pos
+            delta .= bodies[i].pos .- bodies[j].pos
             dsq = sum(abs2, delta)
             distance = sqrt(dsq)
             mag = dt / (dsq * distance)
@@ -57,7 +57,7 @@ function energy(bodies)
         e += 0.5 * bodies[i].mass *
              sum(abs2, bodies[i].v)
         for j = i+1:length(bodies)
-            @compat delta .= bodies[i].pos .- bodies[j].pos
+            delta .= bodies[i].pos .- bodies[j].pos
             distance = sqrt(sum(abs2, delta))
             e -= (bodies[i].mass * bodies[j].mass) / distance
         end
