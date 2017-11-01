@@ -2,8 +2,6 @@ module Raytracer
 
 using Compat
 
-import Compat: UTF8String, view
-
 # This is a translation from Java/C++ of the raytracer located at
 #   http://www.ffconsultancy.com/languages/tracerayr/
 # This code was discussed at
@@ -12,34 +10,34 @@ import Compat: UTF8String, view
 
 const DELTA = sqrt(eps(Float64))
 
-immutable Vec
+struct Vec
     x::Float64
     y::Float64
     z::Float64
 end
 
-@compat(Base.:+)(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
-@compat(Base.:-)(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
-@compat(Base.:*)(a::Float64, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
-@compat(Base.:*)(a::Int, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
-@compat(Base.:*)(a::Vec, b::Float64) = *(b,a)
+Base.:+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z)
+Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
+Base.:*(a::Float64, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
+Base.:*(a::Int, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
+Base.:*(a::Vec, b::Float64) = *(b,a)
 Base.dot(a::Vec, b::Vec) = (a.x*b.x + a.y*b.y + a.z*b.z)
 
 unitize(a::Vec) = (1. / sqrt(dot(a, a)) * a)
 
-type Ray
+mutable struct Ray
     orig::Vec
     dir::Vec
 end
 
-type Hit
+mutable struct Hit
     lambda::Float64
     normal::Vec
 end
 
-@compat abstract type Scene end
+abstract type Scene end
 
-immutable Sphere <: Scene
+struct Sphere <: Scene
     center::Vec
     radius::Float64
 end
@@ -69,7 +67,7 @@ function intersect(s::Sphere, i::Hit, ray::Ray)
     end
 end
 
-immutable Group <: Scene
+struct Group <: Scene
     bound::Sphere
     objs::Array{Scene}
 end
@@ -128,7 +126,7 @@ function perf_raytrace(levels, n, ss)
             g = 0.
             for dx in 0:1:(ss-1)
                 for dy in 0:1:(ss-1)
-                    d = Vec(x+dx*1./ss-n/2., y+dy*1./ss-n/2., n*1.0)
+                    d = Vec(x + dx/ss - n/2.0, y + dy/ss - n/2.0, Float64(n))
                     ray = Ray(Vec(0., 0., -4.0), unitize(d))
                     g += traceray(light, ray, scene);
                 end

@@ -7,7 +7,6 @@ using BenchmarkTools
 using Compat
 using Compat.Iterators
 
-import Compat: UTF8String, view
 import Base.LinAlg: UnitUpperTriangular
 
 const SUITE = BenchmarkGroup(["array"])
@@ -16,9 +15,9 @@ const SIZES = (2^8, 2^10)
 const MATS = (Matrix, Diagonal, Bidiagonal, Tridiagonal, SymTridiagonal, UpperTriangular, LowerTriangular)
 const DIVMATS = Iterators.filter(x -> !(in(x, (Bidiagonal, Tridiagonal, SymTridiagonal))), MATS)
 
-typename{T}(::Type{T}) = string(isa(T,DataType) ? T.name : Base.unwrap_unionall(T).name)
-typename{M<:Matrix}(::Type{M}) = "Matrix"
-typename{V<:Vector}(::Type{V}) = "Vector"
+typename(::Type{T}) where {T} = string(isa(T,DataType) ? T.name : Base.unwrap_unionall(T).name)
+typename(::Type{M}) where {M<:Matrix} = "Matrix"
+typename(::Type{V}) where {V<:Vector} = "Vector"
 
 const UPLO = VERSION >= v"0.7.0-DEV.884" ? :U : true
 
@@ -38,7 +37,7 @@ function linalgmat(::Type{Hermitian}, s)
 end
 
 # Non-positive-definite upper-triangular matrix
-type NPDUpperTriangular
+mutable struct NPDUpperTriangular
 end
 function linalgmat(::Type{NPDUpperTriangular}, s)
     A = linalgmat(UpperTriangular, s)
@@ -51,7 +50,7 @@ end
 typename(::Type{NPDUpperTriangular}) = "NPDUpperTriangular"
 
 # Hermitian Sparse Matrix With Nonzero Pivots
-type HermitianSparseWithNonZeroPivots
+mutable struct HermitianSparseWithNonZeroPivots
 end
 function linalgmat(::Type{HermitianSparseWithNonZeroPivots}, s)
     A = samesprand(s, s, 1/s)

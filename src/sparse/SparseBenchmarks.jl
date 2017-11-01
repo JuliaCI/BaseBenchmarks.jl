@@ -6,8 +6,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup(["array"])
 
 #########
@@ -24,13 +22,8 @@ g = addgroup!(SUITE, "index")
 
 sizes = (10^3, 10^4, 10^5)
 
-if VERSION < v"0.5.0-dev+763"
-    spvecs = map(s -> samesprand(s, 1, inv(sqrt(s))), sizes)
-    splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
-else
-    spvecs = map(s -> samesprand(s, inv(sqrt(s))), sizes)
-    splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
-end
+spvecs = map(s -> samesprand(s, inv(sqrt(s))), sizes)
+splogvecs = map(s -> samesprandbool(s, 1e-5), sizes)
 
 for (s, v, l) in zip(sizes, spvecs, splogvecs)
     g["spvec", "array",   s] = @benchmarkable getindex($v, $(samerand(1:s, s)))
@@ -49,12 +42,7 @@ matrices = map(s -> samesprand(s, s, inv(sqrt(s))), sizes)
 vectors = map(s -> samerand(1:s, s), sizes)
 logvecs = map(s -> samerand(Bool, s), sizes)
 splogmats = map(s -> samesprandbool(s, s, 1e-5), sizes)
-
-if VERSION < v"0.5.0-dev+763"
-    splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
-else
-    splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
-end
+splogvecs = map(s -> samesprandbool(s, 1, 1e-5), sizes)
 
 for (s, m, v, l, sl, c) in zip(sizes, matrices, vectors, logvecs, splogvecs, inds)
     g["spmat", "col", "array", s] = @benchmarkable getindex($m, $v, $c)

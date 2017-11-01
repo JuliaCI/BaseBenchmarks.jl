@@ -74,7 +74,7 @@ if !method_exists(parse, Tuple{Type{DateTime}, AbstractString})
     Base.parse(::Type{DateTime}, s::AbstractString) = DateTime(s)
 end
 
-function perf_parse{T}(result::AbstractVector{T}, strings::AbstractVector)
+function perf_parse(result::AbstractVector{T}, strings::AbstractVector) where T
     assert(length(result) == length(strings))
     for i = 1:length(strings)
         @inbounds result[i] = parse(T, strings[i])
@@ -101,7 +101,7 @@ function nestedexpr(n)
     end
     return ex
 end"""
-include_string(nestedexpr_str)
+include_string(@__MODULE__, nestedexpr_str)
 
 g = addgroup!(SUITE, "julia")
 g["parse", "array"] = @benchmarkable parse($("[" * "a + b, "^100 * "]"))

@@ -2,6 +2,7 @@ module RandomBenchmarks
 
 using BenchmarkTools
 using Base.Random: RangeGenerator
+using Compat
 
 const SUITE = BenchmarkGroup()
 

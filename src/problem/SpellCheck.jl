@@ -83,7 +83,7 @@ function perf_spellcheck(; bias=0, verbose=false)
         end
     end
     return Dict("bad"=>bad, "n"=>n, "bias"=>bias,
-                "pct"=>round(Int, 100. - 100.*bad/n),
+                "pct"=>round(Int, 100.0 - 100.0 * bad / n),
                 "unknown"=>unknown, "secs"=>toq())
 end
 

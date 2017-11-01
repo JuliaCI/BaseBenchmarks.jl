@@ -14,8 +14,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup(["example", "kernel"])
 const PROBLEM_DATA_DIR = joinpath(dirname(@__FILE__), "data")
 
@@ -161,13 +159,9 @@ g["spellcheck"] = @benchmarkable SpellCheck.perf_spellcheck()
 # Chaos #
 #########
 
-if VERSION >= v"0.5"
-    include("ChaosGame.jl")
-
-    g = addgroup!(SUITE, "chaosgame")
-
-    g["chaosgame"] = @benchmarkable ChaosGameFractals.perf_chaos()
-end
+include("ChaosGame.jl")
+g = addgroup!(SUITE, "chaosgame")
+g["chaosgame"] = @benchmarkable ChaosGameFractals.perf_chaos()
 
 
 end # module

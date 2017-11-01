@@ -22,7 +22,7 @@ function perf_euro_option_devec(npaths)
         end
     end
 
-    return @compat mean(exp(-r*T) .* max.(K .- S, 0))
+    return mean(exp(-r*T) .* max.(K .- S, 0))
 end
 
 function perf_euro_option_vec(npaths)
@@ -35,13 +35,13 @@ function perf_euro_option_vec(npaths)
     S = fill(100.0, npaths)
     t1 = (r - 0.5*sigma^2)*dt
     t2 = sigma*sqrt(dt)
-    R = @compat Array{Float64}(npaths)
+    R = Array{Float64}(npaths)
 
     for i=1:steps
-        S .*= @compat exp.(t2 .* randn!(R) .+ t1)
+        S .*= exp.(t2 .* randn!(R) .+ t1)
     end
 
-    return @compat mean(exp(-r*T) .* max.(K .- S, 0))
+    return mean(exp(-r*T) .* max.(K .- S, 0))
 end
 
 end # module

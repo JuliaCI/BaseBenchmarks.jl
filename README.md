@@ -82,19 +82,19 @@ following code to execute all benchmarks and save the results (replacing `filena
 an actual unique file name):
 
 ```julia
-using BenchmarkTools, BaseBenchmarks, JLD
+using BenchmarkTools, BaseBenchmarks
 BaseBenchmarks.loadall!() # load all benchmarks
 results = run(BaseBenchmarks.SUITE; verbose = true) # run all benchmarks
-BenchmarkTools.save("filename.jld", "results", results) # save results to JLD file
+BenchmarkTools.save("filename.json", results) # save results to JSON file
 ```
 
-Next, you can load the results and check for regressions (once again replacing the JLD file
+Next, you can load the results and check for regressions (once again replacing the JSON file
 names used here with the actual file names):
 
 ```julia
-using BenchmarkTools, BaseBenchmarks, JLD
-master = load("master.jld", "results")
-pr = load("pr.jld", "results")
+using BenchmarkTools, BaseBenchmarks
+master = BenchmarkTools.load("master.json")
+pr = BenchmarkTools.load("pr.json")
 regs = regressions(judge(minimum(pr), minimum(master))) # a BenchmarkGroup containing the regressions
 pairs = leaves(regs) # an array of (ID, `TrialJudgement`) pairs
 ```

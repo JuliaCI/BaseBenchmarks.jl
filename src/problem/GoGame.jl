@@ -33,7 +33,7 @@ const deltaj = (0, 0, -1, 1)
 # RNG #
 #######
 
-type XorRNG
+mutable struct XorRNG
     state::UInt32
 end
 
@@ -50,7 +50,7 @@ xor_randn!(rand::XorRNG, n::Int) = Int(xor_randn!(rand, UInt32(n)))
 # Board #
 #########
 
-type Board
+mutable struct Board
     size::Int
     komi::Float64
 

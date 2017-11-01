@@ -209,28 +209,28 @@ end
 # supporting definitions #
 ##########################
 
-@compat abstract type MyArray{T,N} <: AbstractArray{T,N} end
+abstract type MyArray{T,N} <: AbstractArray{T,N} end
 
-immutable ArrayLS{T,N} <: MyArray{T,N}  # LinearSlow
+struct ArrayLS{T,N} <: MyArray{T,N}  # LinearSlow
     data::Array{T,N}
 end
 
-immutable ArrayLSLS{T,N} <: MyArray{T,N}  # LinearSlow with LinearSlow similar
+struct ArrayLSLS{T,N} <: MyArray{T,N}  # LinearSlow with LinearSlow similar
     data::Array{T,N}
 end
 
-immutable ArrayLF{T,N} <: MyArray{T,N}  # LinearFast
+struct ArrayLF{T,N} <: MyArray{T,N}  # LinearFast
     data::Array{T,N}
 end
 
-immutable ArrayStrides{T,N} <: MyArray{T,N}
+struct ArrayStrides{T,N} <: MyArray{T,N}
     data::Array{T,N}
     strides::NTuple{N,Int}
 end
 
 ArrayStrides(A::Array) = ArrayStrides(A, strides(A))
 
-immutable ArrayStrides1{T} <: MyArray{T,2}
+struct ArrayStrides1{T} <: MyArray{T,2}
     data::Matrix{T}
     stride1::Int
 end
@@ -247,32 +247,32 @@ Base.size(A::MyArray) = size(A.data)
 # To ensure that ArrayLS and ArrayLSLS really are LinearSlow even
 # after inlining, let's make the size differ from the parent array
 # (ref https://github.com/JuliaLang/julia/pull/17355#issuecomment-231748251)
-@inline Base.size{T}(A::ArrayLS{T,1})   = (sz = size(A.data); (sz[1]-1,))
-@inline Base.size{T}(A::ArrayLSLS{T,1}) = (sz = size(A.data); (sz[1]-1,))
-@inline Base.size{T}(A::ArrayLS{T,2})   = (sz = size(A.data); (sz[1]-1,sz[2]-1))
-@inline Base.size{T}(A::ArrayLSLS{T,2}) = (sz = size(A.data); (sz[1]-1,sz[2]-1))
+@inline Base.size(A::ArrayLS{T,1}) where {T}   = (sz = size(A.data); (sz[1]-1,))
+@inline Base.size(A::ArrayLSLS{T,1}) where {T} = (sz = size(A.data); (sz[1]-1,))
+@inline Base.size(A::ArrayLS{T,2}) where {T}   = (sz = size(A.data); (sz[1]-1,sz[2]-1))
+@inline Base.size(A::ArrayLSLS{T,2}) where {T} = (sz = size(A.data); (sz[1]-1,sz[2]-1))
 @inline Base.size(A::ArrayLS)   = map(n->n-1, size(A.data))
 @inline Base.size(A::ArrayLSLS) = map(n->n-1, size(A.data))
 
-@inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Int})     = ArrayLSLS(similar(A.data, T, (dims[1]+1,)))
-@inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Int,Int}) = ArrayLSLS(similar(A.data, T, (dims[1]+1,dims[2]+1)))
-@inline Base.similar{T}(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) = ArrayLSLS(similar(A.data, T, map(n->n+1, dims)))
+@inline Base.similar(A::ArrayLSLS, ::Type{T}, dims::Tuple{Int}) where {T}     = ArrayLSLS(similar(A.data, T, (dims[1]+1,)))
+@inline Base.similar(A::ArrayLSLS, ::Type{T}, dims::Tuple{Int,Int}) where {T} = ArrayLSLS(similar(A.data, T, (dims[1]+1,dims[2]+1)))
+@inline Base.similar(A::ArrayLSLS, ::Type{T}, dims::Tuple{Vararg{Int}}) where {T} = ArrayLSLS(similar(A.data, T, map(n->n+1, dims)))
 
 Base.@propagate_inbounds Base.getindex(A::ArrayLF, i::Int) = getindex(A.data, i)
-Base.@propagate_inbounds Base.getindex{T}(A::ArrayLS{T,2}, i::Int, j::Int) = getindex(A.data, i, j)
-Base.@propagate_inbounds Base.getindex{T}(A::ArrayLS{T,3}, i::Int, j::Int, k::Int) = getindex(A.data, i, j, k)
-Base.@propagate_inbounds Base.getindex{T}(A::ArrayLSLS{T,2}, i::Int, j::Int) = getindex(A.data, i, j)
+Base.@propagate_inbounds Base.getindex(A::ArrayLS{T,2}, i::Int, j::Int) where {T} = getindex(A.data, i, j)
+Base.@propagate_inbounds Base.getindex(A::ArrayLS{T,3}, i::Int, j::Int, k::Int) where {T} = getindex(A.data, i, j, k)
+Base.@propagate_inbounds Base.getindex(A::ArrayLSLS{T,2}, i::Int, j::Int) where {T} = getindex(A.data, i, j)
 Base.@propagate_inbounds Base.unsafe_getindex(A::ArrayLF, indx::Int) = Base.unsafe_getindex(A.data, indx)
-Base.@propagate_inbounds Base.unsafe_getindex{T}(A::ArrayLS{T,2}, i::Int, j::Int) = Base.unsafe_getindex(A.data, i, j)
-Base.@propagate_inbounds Base.unsafe_getindex{T}(A::ArrayLS{T,3}, i::Int, j::Int, k::Int) = Base.unsafe_getindex(A.data, i, j, k)
-Base.@propagate_inbounds Base.unsafe_getindex{T}(A::ArrayLSLS{T,2}, i::Int, j::Int) = Base.unsafe_getindex(A.data, i, j)
+Base.@propagate_inbounds Base.unsafe_getindex(A::ArrayLS{T,2}, i::Int, j::Int) where {T} = Base.unsafe_getindex(A.data, i, j)
+Base.@propagate_inbounds Base.unsafe_getindex(A::ArrayLS{T,3}, i::Int, j::Int, k::Int) where {T} = Base.unsafe_getindex(A.data, i, j, k)
+Base.@propagate_inbounds Base.unsafe_getindex(A::ArrayLSLS{T,2}, i::Int, j::Int) where {T} = Base.unsafe_getindex(A.data, i, j)
 
-Base.@propagate_inbounds Base.getindex{T}(A::ArrayStrides{T,2}, i::Real, j::Real) = getindex(A.data, 1+A.strides[1]*(i-1)+A.strides[2]*(j-1))
+Base.@propagate_inbounds Base.getindex(A::ArrayStrides{T,2}, i::Real, j::Real) where {T} = getindex(A.data, 1+A.strides[1]*(i-1)+A.strides[2]*(j-1))
 Base.@propagate_inbounds Base.getindex(A::ArrayStrides1, i::Real, j::Real) = getindex(A.data, i + A.stride1*(j-1))
-Base.@propagate_inbounds Base.unsafe_getindex{T}(A::ArrayStrides{T,2}, i::Real, j::Real) = Base.unsafe_getindex(A.data, 1+A.strides[1]*(i-1)+A.strides[2]*(j-1))
+Base.@propagate_inbounds Base.unsafe_getindex(A::ArrayStrides{T,2}, i::Real, j::Real) where {T} = Base.unsafe_getindex(A.data, 1+A.strides[1]*(i-1)+A.strides[2]*(j-1))
 Base.@propagate_inbounds Base.unsafe_getindex(A::ArrayStrides1, i::Real, j::Real) = Base.unsafe_getindex(A.data, i + A.stride1*(j-1))
 
-@compat Base.IndexStyle(::Type{<:ArrayLF}) = IndexLinear()
+Base.IndexStyle(::Type{<:ArrayLF}) = IndexLinear()
 
 if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     Base.@propagate_inbounds Base.unsafe_getindex(A::Array, I...) = @inbounds return A[I...]
@@ -280,17 +280,8 @@ if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     Base.@propagate_inbounds Base.unsafe_getindex(A::SubArray, I...) = @inbounds return A[I...]
     Base.@propagate_inbounds Base.unsafe_getindex(A::BitArray, I1::BitArray, I2::Int) = Base.unsafe_getindex(A, Base.to_index(I1), I2)
 end
-# Add support for views with CartesianIndex in a comparable method to how indexing works
-if v"0.5-" < VERSION < v"0.6-"
-    @eval Base.@propagate_inbounds Base.view(A::AbstractArray, I::Union{AbstractArray,Colon,Real,CartesianIndex}...) =
-        view(A, Base.IteratorsMD.flatten(I)...)
-elseif v"0.4-" < VERSION < v"0.5-"
-    @generated function Base.slice(A::AbstractArray, I::Union{AbstractVector,Colon,Int,CartesianIndex}...)
-        :($(Expr(:meta, :inline)); slice(A, $(Base.cartindex_exprs(I, :I)...)))
-    end
-end
 
-function makearrays{T}(::Type{T}, r::Integer, c::Integer)
+function makearrays(::Type{T}, r::Integer, c::Integer) where T
     A = samerand(T, r, c)
     B = similar(A, r+1, c+1)
     B[1:r, 1:c] = A

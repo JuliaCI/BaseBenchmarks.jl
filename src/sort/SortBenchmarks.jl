@@ -6,8 +6,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup()
 const LIST_SIZE = 50000
 const LISTS = (

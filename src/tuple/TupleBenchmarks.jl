@@ -6,20 +6,18 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
-import Compat: UTF8String, view
-
 const SUITE = BenchmarkGroup()
 
 ###############
 # issue #5274 #
 ###############
 
-immutable TupleWrapper{N, T}
+struct TupleWrapper{N, T}
     data::NTuple{N, T}
 end
 
-Base.eltype{N,T}(::TupleWrapper{N,T}) = T
-Base.length{N,T}(::TupleWrapper{N,T}) = N
+Base.eltype(::TupleWrapper{N,T}) where {N,T} = T
+Base.length(::TupleWrapper{N,T}) where {N,T} = N
 
 function get_index(n::NTuple, i::Int)
     @inbounds v = n[i]
@@ -57,28 +55,28 @@ end
 
 # Short fixed size array implementation
 
-@compat abstract type FixedArray{T, N} <: AbstractArray{T, N} end
+abstract type FixedArray{T, N} <: AbstractArray{T, N} end
 
-@compat Base.IndexStyle(::Type{<: FixedArray}) = IndexLinear()
+Base.IndexStyle(::Type{<: FixedArray}) = IndexLinear()
 Base.getindex(fsa::FixedArray, i::Int) = fsa.data[i]
 
 
-immutable FixedVector{L, T} <: FixedArray{T, 1}
+struct FixedVector{L, T} <: FixedArray{T, 1}
     data::NTuple{L, T}
 end
 
-Base.size{L}(::FixedVector{L}) = (L,)
-Base.size{L, T}(::Type{FixedVector{L, T}}) = (L,)
-Base.length{L}(::FixedVector{L}) = L
+Base.size(::FixedVector{L}) where {L} = (L,)
+Base.size(::Type{FixedVector{L, T}}) where {L, T} = (L,)
+Base.length(::FixedVector{L}) where {L} = L
 
 
-immutable FixedMatrix{R, C, T, RC} <: FixedArray{T, 2}
+struct FixedMatrix{R, C, T, RC} <: FixedArray{T, 2}
     data::NTuple{RC, T}
 end
 
-Base.size{R, C}(::FixedMatrix{R, C}) = (R, C)
-Base.size{R, C, T, RC}(::Type{FixedMatrix{R, C, T, RC}}) = (R, C)
-Base.length{R, C, T, RC}(::FixedMatrix{R, C, T, RC}) = RC
+Base.size(::FixedMatrix{R, C}) where {R, C} = (R, C)
+Base.size(::Type{FixedMatrix{R, C, T, RC}}) where {R, C, T, RC} = (R, C)
+Base.length(::FixedMatrix{R, C, T, RC}) where {R, C, T, RC} = RC
 
 
 # Reductions
@@ -110,7 +108,7 @@ perf_minimum(a::FixedArray) = perf_reduce(min, a)
     end
 end
 
-perf_sum{T}(v::FixedArray{T}) = perf_reduce(+, zero(T), v)
+perf_sum(v::FixedArray{T}) where {T} = perf_reduce(+, zero(T), v)
 
 
 @inline function perf_mapreduce(f, op, v0, a1::FixedArray)
@@ -125,12 +123,12 @@ perf_sum{T}(v::FixedArray{T}) = perf_reduce(+, zero(T), v)
     end
 end
 
-perf_sumabs2{T}(a::FixedArray{T}) = perf_mapreduce(abs2, +, zero(T), a)
+perf_sumabs2(a::FixedArray{T}) where {T} = perf_mapreduce(abs2, +, zero(T), a)
 
 
 # Linear Algebra
 
-@generated function perf_matvec{R, C, T}(A::FixedMatrix{R, C, T}, b::FixedVector{C, T})
+@generated function perf_matvec(A::FixedMatrix{R, C, T}, b::FixedVector{C, T}) where {R, C, T}
     sA = size(A)
     sB = size(b)
     exprs = Expr(:tuple, [reduce((ex1,ex2) -> :(+($ex1,$ex2)),
@@ -140,7 +138,7 @@ perf_sumabs2{T}(a::FixedArray{T}) = perf_mapreduce(abs2, +, zero(T), a)
     end
 end
 
-@generated function perf_matmat{R1, R2, C, T}(A::FixedMatrix{R1, C, T}, B::FixedMatrix{C, R2, T})
+@generated function perf_matmat(A::FixedMatrix{R1, C, T}, B::FixedMatrix{C, R2, T}) where {R1, R2, C, T}
     sA = size(A)
     sB = size(B)
     exprs =  Expr(:tuple, [reduce((ex1,ex2) -> :(+($ex1,$ex2)),
@@ -150,8 +148,6 @@ end
         @inbounds return $result_type($exprs)
     end
 end
-
-if VERSION >= v"0.5"
 
 # Benchmarks #
 ##############
@@ -176,8 +172,6 @@ for (m, v) in zip((m2x2, m4x4, m8x8, m16x16), (v2, v4, v8, v16 ))
     g["matvec", size(m), size(v)] = @benchmarkable perf_matvec($m, $v)
     g["matmat", size(m), size(m)] = @benchmarkable perf_matmat($m, $m)
 end
-
-end # version
 
 
 end # module

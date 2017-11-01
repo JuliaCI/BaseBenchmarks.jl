@@ -1,8 +1,8 @@
 module DatesBenchmarks
 # Based on https://github.com/quinnj/Dates.jl/blob/master/perf/perf.jl
 
-
 using BenchmarkTools
+using Compat
 
 const SUITE = BenchmarkGroup()
 

@@ -38,7 +38,7 @@ function flog_fdtd!(steps, U, Vx, Vy, A, B)
     end
 end
 
-function perf_seismic_sim{T}(::Type{T})
+function perf_seismic_sim(::Type{T}) where T
     m = 200
     n = 200
     A = fill(convert(T, 0.2), m, n)
