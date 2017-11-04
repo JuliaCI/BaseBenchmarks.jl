@@ -62,7 +62,7 @@ function correct(word::AbstractString)
 end
 
 function perf_spellcheck(; bias=0, verbose=false)
-    n, bad, unknown, start = 0, 0, 0, tic()
+    n, bad, unknown, start = 0, 0, 0, time_ns()
     if bias > 0
         for target in keys(TEST_DATA)
             NWORDS[target] = get(NWORDS, target, 1) + bias
@@ -84,7 +84,7 @@ function perf_spellcheck(; bias=0, verbose=false)
     end
     return Dict("bad"=>bad, "n"=>n, "bias"=>bias,
                 "pct"=>round(Int, 100.0 - 100.0 * bad / n),
-                "unknown"=>unknown, "secs"=>toq())
+                "unknown"=>unknown, "secs"=>(time_ns()-start)/1e9)
 end
 
 const TEST_DATA = Dict("access"=> "acess", "accessing"=> "accesing", "accommodation"=>

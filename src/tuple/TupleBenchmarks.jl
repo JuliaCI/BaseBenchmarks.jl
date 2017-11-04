@@ -29,7 +29,7 @@ function get_index(n::TupleWrapper, i::Int)
     return v
 end
 
-function sum_tuple{N, T}(n::Union{NTuple{N, T}, TupleWrapper{N, T}})
+function sum_tuple(n::Union{NTuple{N, T}, TupleWrapper{N, T}}) where {N, T}
     s = zero(T)
     for i in 1:N
         s += get_index(n, i)

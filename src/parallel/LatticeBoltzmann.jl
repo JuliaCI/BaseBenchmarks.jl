@@ -165,35 +165,28 @@ function perf_lattice_boltzmann(n)
     numactivenodes = sum(1-BOUND)
 
     while (ts < 4000  &&  (1e-10 < abs((prevavu-avu)/avu)))  ||  ts < 100
-        tic()
         # Propagate -- nearest and next-nearest neighbors
-        for i = 2:19
+        tprop += @elapsed for i = 2:19
             circshift3d1!(F, i, prop_shifts[i-1])
         end
-        tprop = tprop + toq()
 
         # Densities bouncing back at next timestep
         BOUNCEDBACK = F[TO_REFLECT]
 
-        tic()
-
-        # Relax; calculate equilibrium state (FEQ) with equivalent speed and density to F
-        @threads for chunk=1:nchunk
-            relax!(F, UX, UY, UZ, nx, ny, nz, deltaU, t1D, t2D, t3D, sSQU, chunkid, nchunk)
+        trelax += @elapsed begin
+            # Relax; calculate equilibrium state (FEQ) with equivalent speed and density to F
+            @threads for chunk=1:nchunk
+                relax!(F, UX, UY, UZ, nx, ny, nz, deltaU, t1D, t2D, t3D, sSQU, chunkid, nchunk)
+            end
+            for o in ON
+                UX[o] = UY[o] = UZ[o] = t1D[o] = t2D[o] = t3D[o] = sSQU[o] = 0.0
+            end
         end
-        for o in ON
-            UX[o] = UY[o] = UZ[o] = t1D[o] = t2D[o] = t3D[o] = sSQU[o] = 0.0
-        end
-
-        trelax = trelax + toq()
-        tic()
 
         # Calculate equilibrium distribution: stationary
-        @threads for chunk=1:nchunk
+        tequi += @elapsed @threads for chunk=1:nchunk
             calc_equi!(F, FEQ, t1D, t2D, t3D, U, UX, UY, UZ, sSQU, nx, ny, nz, omega)
         end
-
-        tequi = tequi + toq()
 
         F[REFLECTED] = BOUNCEDBACK
 

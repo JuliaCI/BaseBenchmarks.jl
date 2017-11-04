@@ -107,7 +107,7 @@ g = addgroup!(SUITE, "julia")
 g["parse", "array"] = @benchmarkable parse($("[" * "a + b, "^100 * "]"))
 g["parse", "nested"] = @benchmarkable parse($(string(nestedexpr(100))))
 g["parse", "function"] = @benchmarkable parse($nestedexpr_str)
-g["macroexpand", "evalpoly"] = @benchmarkable macroexpand($(Expr(:macrocall, Symbol("@evalpoly"), 1:10...)))
+g["macroexpand", "evalpoly"] = @benchmarkable macroexpand(@__MODULE__, $(Expr(:macrocall, Symbol("@evalpoly"), 1:10...)))
 
 ###########################################################################
 

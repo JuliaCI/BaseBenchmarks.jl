@@ -4,6 +4,11 @@ using BenchmarkTools
 using Base.Random: RangeGenerator
 using Compat
 
+# TODO: Remove once Compat has BitSet
+if !isdefined(Base, :BitSet)
+    const BitSet = IntSet
+end
+
 const SUITE = BenchmarkGroup()
 
 const BITINTS = [Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128]
@@ -118,8 +123,8 @@ if VERSION >= v"0.7.0-DEV.973"
           Dict(zip(1:900, 1:900)) => "large Dict",
           Set(1:3)                => "small Set",
           Set(1:900)              => "large Set",
-          IntSet(1:3)             => "small IntSet",
-          IntSet(1:900)           => "large IntSet",
+          BitSet(1:3)             => "small BitSet",
+          BitSet(1:900)           => "large BitSet",
           "qwèrtï"                => "small String",
           randstring(900)         => "large String")
 end
