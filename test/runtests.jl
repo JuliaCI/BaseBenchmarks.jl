@@ -2,7 +2,8 @@ addprocs(1)
 
 using BaseBenchmarks
 using BenchmarkTools
-using Base.Test
+using Compat
+using Compat.Test
 
 BaseBenchmarks.loadall!()
 

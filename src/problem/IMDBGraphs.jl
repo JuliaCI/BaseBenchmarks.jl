@@ -2,6 +2,7 @@ module IMDBGraphs
 
 using ..ProblemBenchmarks: PROBLEM_DATA_DIR
 using Compat
+using Base.Iterators
 
 mutable struct IMDBNode
     name::String # actor//film name

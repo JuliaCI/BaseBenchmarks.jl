@@ -1,9 +1,17 @@
 module SparseFEM
 
+using Compat
+
+if VERSION >= v"0.7.0-DEV.2116"
+    const _spdiagm = spdiagm
+else
+    _spdiagm(pairs::Pair{<:Integer,<:AbstractArray}...) = spdiagm(last.(pairs), first.(pairs))
+end
+
 # assemble the finite-difference laplacian
 function fdlaplacian(N)
     # create a 1D laplacian and a sparse identity
-    fdl1 = spdiagm((ones(N-1),-2*ones(N),ones(N-1)), [-1,0,1])
+    fdl1 = _spdiagm(-1 => ones(N-1), 0 => -2*ones(N), 1 => ones(N-1))
     # laplace operator on the full grid
     return kron(speye(N), fdl1) + kron(fdl1, speye(N))
 end
@@ -12,7 +20,7 @@ end
 function get_free(N)
     L = zeros(Int, N, N)
     L[2:N-1, 2:N-1] = 1
-    return find(L)
+    return find(!iszero, L)
 end
 
 # timing of assembly, slice and solve
