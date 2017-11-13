@@ -161,7 +161,7 @@ using Base.LinAlg: *, A_mul_B!,
 
 function allocmats_ds(om, ok, on, s, nnzc, T)
     m, k, n = map(x -> Int(s*x), (om, ok, on))
-    densemat, sparsemat = rand(T, m, k), sprand(T, k, n, nnzc/k)
+    densemat, sparsemat = samerand(T, m, k), samesprand(T, k, n, nnzc/k)
     tdensemat, tsparsemat = transpose(densemat), transpose(sparsemat)
     destmat = similar(densemat, m, n)
     return m, k, n, destmat,
@@ -170,7 +170,7 @@ function allocmats_ds(om, ok, on, s, nnzc, T)
 end
 function allocmats_sd(om, ok, on, s, nnzc, T)
     m, k, n = map(x -> Int(s*x), (om, ok, on))
-    densemat, sparsemat = rand(T, k, m), sprand(T, n, k, nnzc/n)
+    densemat, sparsemat = samerand(T, k, m), samesprand(T, n, k, nnzc/n)
     tdensemat, tsparsemat = transpose(densemat), transpose(sparsemat)
     destmat = similar(densemat, n, m)
     return m, k, n, destmat,
