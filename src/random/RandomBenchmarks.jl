@@ -62,6 +62,13 @@ set_tolerance!(g)
 
 g = addgroup!(SUITE, "types", ["rand", "rand!", "randn", "randn!", "randexp", "randexp!"])
 
+# these functions are used to interpolate values instead of Types in @benchmarkable,
+# to measure the best possible performance, cf. #124
+@inline _rand(        ::Val{T}) where {T} = rand(Base.GLOBAL_RNG, T)
+@inline _rand(   rng, ::Val{T}) where {T} = rand(rng, T)
+@inline _randn(  rng, ::Val{T}) where {T} = randn(rng, T)
+@inline _randexp(rng, ::Val{T}) where {T} = randexp(rng, T)
+
 g["rand",    "ImplicitRNG",     "ImplicitFloat64"] = @benchmarkable rand()
 g["rand",    "RandomDevice",    "ImplicitFloat64"] = @benchmarkable rand($RD)
 g["rand",    "MersenneTwister", "ImplicitFloat64"] = @benchmarkable rand($MT)
@@ -75,17 +82,17 @@ g["randexp", "MersenneTwister", "ImplicitFloat64"] = @benchmarkable randexp($MT)
 for T = [Int, Float64]
     tstr = string(T)
     dst = Vector{T}(1000)
-    g["rand",     "ImplicitRNG",  tstr] = @benchmarkable rand($T)
-    g["rand",     "RandomDevice", tstr] = @benchmarkable rand($RD, $T)
+    g["rand",     "ImplicitRNG",  tstr] = @benchmarkable _rand($(Val{T}()))
+    g["rand",     "RandomDevice", tstr] = @benchmarkable _rand($RD, $(Val{T}()))
     g["rand!",    "ImplicitRNG",  tstr] = @benchmarkable rand!($dst)
     g["rand!",    "RandomDevice", tstr] = @benchmarkable rand!($RD, $dst)
     T === Float64 && VERSION >= v"0.5.0-pre+5657" || continue
-    g["randn",    "ImplicitRNG",  tstr] = @benchmarkable randn($T)
-    g["randn",    "RandomDevice", tstr] = @benchmarkable randn($RD, $T)
+    g["randn",    "ImplicitRNG",  tstr] = @benchmarkable randn(Float64)
+    g["randn",    "RandomDevice", tstr] = @benchmarkable randn($RD, Float64)
     g["randn!",   "ImplicitRNG",  tstr] = @benchmarkable randn!($dst)
     g["randn!",   "RandomDevice", tstr] = @benchmarkable randn!($RD, $dst)
-    g["randexp",  "ImplicitRNG",  tstr] = @benchmarkable randexp($T)
-    g["randexp",  "RandomDevice", tstr] = @benchmarkable randexp($RD, $T)
+    g["randexp",  "ImplicitRNG",  tstr] = @benchmarkable randexp(Float64)
+    g["randexp",  "RandomDevice", tstr] = @benchmarkable randexp($RD, Float64)
     g["randexp!", "ImplicitRNG",  tstr] = @benchmarkable randexp!($dst)
     g["randexp!", "RandomDevice", tstr] = @benchmarkable randexp!($RD, $dst)
 end
@@ -94,14 +101,14 @@ for T in NUMS
     T === BigInt && continue
     tstr = string(T)
     dst = Vector{T}(1000)
-    g["rand",     "MersenneTwister", tstr] = @benchmarkable rand($MT, $T)
+    g["rand",     "MersenneTwister", tstr] = @benchmarkable _rand($MT, $(Val{T}()))
     g["rand!",    "MersenneTwister", tstr] = @benchmarkable rand!($MT, $dst)
     VERSION >= v"0.5.0-pre+5657" || continue
     T <: AbstractFloat || T in CFLOATS && VERSION >= v"0.7.0-DEV.973" || continue
-    g["randn",    "MersenneTwister", tstr] = @benchmarkable randn($MT, $T)
+    g["randn",    "MersenneTwister", tstr] = @benchmarkable _randn($MT, $(Val{T}()))
     g["randn!",   "MersenneTwister", tstr] = @benchmarkable randn!($MT, $dst)
     T <: AbstractFloat || continue
-    g["randexp",  "MersenneTwister", tstr] = @benchmarkable randexp($MT, $T)
+    g["randexp",  "MersenneTwister", tstr] = @benchmarkable _randexp($MT, $(Val{T}()))
     g["randexp!", "MersenneTwister", tstr] = @benchmarkable randexp!($MT, $dst)
 end
 
