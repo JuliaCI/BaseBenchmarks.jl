@@ -93,8 +93,8 @@ names used here with the actual file names):
 
 ```julia
 using BenchmarkTools, BaseBenchmarks
-master = BenchmarkTools.load("master.json")
-pr = BenchmarkTools.load("pr.json")
+master = BenchmarkTools.load("master.json")[1]
+pr = BenchmarkTools.load("pr.json")[1]
 regs = regressions(judge(minimum(pr), minimum(master))) # a BenchmarkGroup containing the regressions
 pairs = leaves(regs) # an array of (ID, `TrialJudgement`) pairs
 ```
