@@ -274,4 +274,59 @@ g["Float64", "Int"] = @benchmarkable  perf_convert!($x_float, $x_int)
 g["Complex{Float64}", "Int"] = @benchmarkable  perf_convert!($x_complex, $x_int)
 g["Int", "Complex{Float64}"] = @benchmarkable  perf_convert!($x_int, $x_complex)
 
+
+################
+# == and isequal
+################
+
+x_range = 1:10_000
+x_vec = collect(x_range)
+
+g = addgroup!(SUITE, "equality", ["==", "isequal"])
+
+# Only test cases which do not short-circuit, else performance
+# depends too much on the data
+for x in (x_range, x_vec, Int16.(x_range), Float64.(x_range), Float32.(x_range))
+    g["==", string(typeof(x))] = @benchmarkable $x == $(copy(x))
+    g["isequal", string(typeof(x))] = @benchmarkable isequal($x, $(copy(x)))
+
+    g["==", string(typeof(x_vec), " == ", typeof(x))] =
+        @benchmarkable $x_vec == $x
+    g["isequal", string(typeof(x_vec), " isequa l", typeof(x))] =
+        @benchmarkable isequal($x_vec, $x)
+end
+
+x_bool = fill(false, 10_000)
+x_bitarray = falses(10_000)
+g["==", "Vector{Bool}"] = @benchmarkable $x_bool == $(copy(x_bool))
+g["isequal", "Vector{Bool}"] = @benchmarkable isequal($x_bool, $(copy(x_bool)))
+g["==", "BitArray"] = @benchmarkable $x_bitarray == $(copy(x_bitarray))
+g["isequal", "BitArray"] = @benchmarkable isequal($x_bitarray, $(copy(x_bitarray)))
+
+###########
+# any & all
+###########
+
+x_false = fill(false, 10_000)
+x_true = fill(true, 10_000)
+
+g = addgroup!(SUITE, "any/all", ["any", "all"])
+
+# Only test cases which do not short-circuit, else performance
+# depends too much on the data
+g["any", "Vector{Bool}"] = @benchmarkable any($x_false)
+g["all", "Vector{Bool}"] = @benchmarkable all($x_true)
+g["any", "BitArray"] = @benchmarkable any($(BitArray(x_false)))
+g["all", "BitArray"] = @benchmarkable all($(BitArray(x_true)))
+
+x_range = 1:10_000
+for x in (x_range, collect(x_range), Int16.(x_range), Float64.(x_range), Float32.(x_range))
+    g["any", string(typeof(x))] = @benchmarkable any(v -> v < 0, $x)
+    g["all", string(typeof(x))] = @benchmarkable all(v -> v > 0, $x)
+
+    gen = (v for v in x)
+    g["any", string(typeof(x), " generator")] = @benchmarkable any(v -> v < 0, $gen)
+    g["all", string(typeof(x), " generator")] = @benchmarkable all(v -> v > 0, $gen)
+end
+
 end # module
