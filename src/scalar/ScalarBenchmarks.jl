@@ -596,4 +596,138 @@ for T in (Float32, Float64)
     g["abs(y/x) safe (large)", "y positive", "x negative", _arg_string] = @benchmarkable atan2($(T(1235.2341234)), $(-T(2.5)))
     g["abs(y/x) safe (large)", "y negative", "x negative", _arg_string] = @benchmarkable atan2($(-T(1235.2341234)), $(-T(2.5)))
 end
+
+########
+# sinh #
+########
+
+g = addgroup!(SUITE, "sinh")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable sinh($(zero(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable sinh($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable sinh($(prevfloat(zero(T))))
+    g["very large", "positive argument", _arg_string] = @benchmarkable sinh($(T(1000)))
+    g["very large", "negative argument", _arg_string] = @benchmarkable sinh($(-T(1000)))
+end
+g["0 <= abs(x) < 2f-12", "positive argument", "Float32"] = @benchmarkable sinh($(prevfloat(2f-12)))
+g["0 <= abs(x) < 2f-12", "negative argument", "Float32"] = @benchmarkable sinh($(nextfloat(-2f-12)))
+g["2f-12 <= abs(x) < 9f0", "positive argument", "Float32"] = @benchmarkable sinh($(5f0))
+g["2f-12 <= abs(x) < 9f0", "negative argument", "Float32"] = @benchmarkable sinh($(-5f0))
+g["9f0 <= abs(x) < 88.72283f0", "positive argument", "Float32"] = @benchmarkable sinh($(22f0))
+g["9f0 <= abs(x) < 88.72283f0", "negative argument", "Float32"] = @benchmarkable sinh($(-22f0))
+g["0 <= abs(x) < 2.0^-28", "positive argument", "Float64"] = @benchmarkable sinh($(prevfloat(2.0^-28)))
+g["0 <= abs(x) < 2.0^-28", "negative argument", "Float64"] = @benchmarkable sinh($(nextfloat(-2.0^-28)))
+g["2.0^-28 <= abs(x) < 22.0", "positive argument", "Float64"] = @benchmarkable sinh($(5.0))
+g["2.0^-28 <= abs(x) < 22.0", "negative argument", "Float64"] = @benchmarkable sinh($(-5.0))
+g["22.0 <= abs(x) < 709.7822265633563", "positive argument", "Float64"] = @benchmarkable sinh($(30.0))
+g["22.0 <= abs(x) < 709.7822265633563", "negative argument", "Float64"] = @benchmarkable sinh($(-30.0))
+
+########
+# cosh #
+########
+
+g = addgroup!(SUITE, "cosh")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable cosh($(zero(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable cosh($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable cosh($(prevfloat(zero(T))))
+    g["very large", "positive argument", _arg_string] = @benchmarkable cosh($(T(1000)))
+    g["very large", "negative argument", _arg_string] = @benchmarkable cosh($(-T(1000)))
+end
+g["0 <= abs(x) < 0.00024414062f0", "positive argument", "Float32"] = @benchmarkable sinh($(prevfloat(0.00024414062f0)))
+g["0 <= abs(x) < 0.00024414062f0", "negative argument", "Float32"] = @benchmarkable sinh($(nextfloat(-0.00024414062f0)))
+g["0.00024414062f0 <= abs(x) < 9f0", "positive argument", "Float32"] = @benchmarkable sinh($(5f0))
+g["0.00024414062f0 <= abs(x) < 9f0", "negative argument", "Float32"] = @benchmarkable sinh($(-5f0))
+g["9f0 <= abs(x) < 88.72283f0", "positive argument", "Float32"] = @benchmarkable sinh($(22f0))
+g["9f0 <= abs(x) < 88.72283f0", "negative argument", "Float32"] = @benchmarkable sinh($(-22f0))
+g["0 <= abs(x) < 2.7755602085408512e-17", "positive argument", "Float64"] = @benchmarkable sinh($(prevfloat(2.7755602085408512e-17)))
+g["0 <= abs(x) < 2.7755602085408512e-17", "negative argument", "Float64"] = @benchmarkable sinh($(nextfloat(-2.7755602085408512e-17)))
+g["2.7755602085408512e-17 <= abs(x) < 22.0", "positive argument", "Float64"] = @benchmarkable sinh($(5.0))
+g["2.7755602085408512e-17 <= abs(x) < 22.0", "negative argument", "Float64"] = @benchmarkable sinh($(-5.0))
+g["22.0 <= abs(x) < 709.7822265633563", "positive argument", "Float64"] = @benchmarkable sinh($(30.0))
+g["22.0 <= abs(x) < 709.7822265633563", "negative argument", "Float64"] = @benchmarkable sinh($(-30.0))
+
+########
+# tanh #
+########
+
+g = addgroup!(SUITE, "tanh")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable tanh($(zero(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable tanh($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable tanh($(prevfloat(zero(T))))
+    g["very large", "positive argument", _arg_string] = @benchmarkable tanh($(T(2.0)^67))
+    g["very large", "negative argument", _arg_string] = @benchmarkable tanh($(-T(2.0)^67))
+end
+g["0 <= abs(x) < 2f0^-12", "positive argument", "Float32"] = @benchmarkable sinh($(prevfloat(2f0^-12)))
+g["0 <= abs(x) < 2f0^-12", "negative argument", "Float32"] = @benchmarkable sinh($(nextfloat(-2f0^-12)))
+g["2f0^-12 <= abs(x) < 1f0", "positive argument", "Float32"] = @benchmarkable sinh($(0.5f0))
+g["2f0^-12 <= abs(x) < 1f0", "negative argument", "Float32"] = @benchmarkable sinh($(-0.5f0))
+g["1f0 <= abs(x) < 9f0", "positive argument", "Float32"] = @benchmarkable sinh($(8f0))
+g["1f0 <= abs(x) < 9f0", "negative argument", "Float32"] = @benchmarkable sinh($(-8f0))
+g["0 <= abs(x) < 2.0^-28", "positive argument", "Float64"] = @benchmarkable sinh($(prevfloat(2.0^-28)))
+g["0 <= abs(x) < 2.0^-28", "negative argument", "Float64"] = @benchmarkable sinh($(nextfloat(-2.0^-28)))
+g["2.0^-28 <= abs(x) < 1.0", "positive argument", "Float64"] = @benchmarkable sinh($(0.5))
+g["2.0^-28 <= abs(x) < 1.0", "negative argument", "Float64"] = @benchmarkable sinh($(-0.5))
+g["1.0 <= abs(x) < 22.0", "positive argument", "Float64"] = @benchmarkable sinh($(14.0))
+g["1.0 <= abs(x) < 22.0", "negative argument", "Float64"] = @benchmarkable sinh($(-14.0))
+
+
+#########
+# asinh #
+#########
+
+g = addgroup!(SUITE, "asinh")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable asinh($(zero(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable asinh($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable asinh($(prevfloat(zero(T))))
+    g["very large", "positive argument", _arg_string] = @benchmarkable asinh($(T(2)^28))
+    g["very large", "negative argument", _arg_string] = @benchmarkable asinh($(-T(2)^28))
+    g["0 <= abs(x) < 2^-28", "positive argument", _arg_string] = @benchmarkable asinh($(T(2)^-28))
+    g["0 <= abs(x) < 2^-28", "negative argument", _arg_string] = @benchmarkable asinh($(-T(2)^-28))
+    g["2^-28 <= abs(x) < 2", "positive argument", _arg_string] = @benchmarkable asinh($(T(1.5)))
+    g["2^-28 <= abs(x) < 2", "negative argument", _arg_string] = @benchmarkable asinh($(-T(1.5)))
+    g["2 <= abs(x) < 2^28", "positive argument", _arg_string] = @benchmarkable asinh($(T(1000)))
+    g["2 <= abs(x) < 2^28", "negative argument", _arg_string] = @benchmarkable asinh($(-T(1000)))
+end
+
+#########
+# acosh #
+#########
+
+g = addgroup!(SUITE, "acosh")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["one", _arg_string] = @benchmarkable acosh($(one(T)))
+    g["very large", "positive argument", _arg_string] = @benchmarkable acosh($(T(2.0)^28))
+    g["very large", "negative argument", _arg_string] = @benchmarkable acosh($(-T(2.0)^28))
+    g["1 <= abs(x) < 2", "positive argument", _arg_string] = @benchmarkable acosh($(T(0.5)))
+    g["1 <= abs(x) < 2", "negative argument", _arg_string] = @benchmarkable acosh($(-T(0.5)))
+    g["2 <= abs(x) < 2^28", "positive argument", _arg_string] = @benchmarkable acosh($(T(1000)))
+    g["2 <= abs(x) < 2^28", "negative argument", _arg_string] = @benchmarkable acosh($(-T(1000)))
+end
+
+#########
+# atanh #
+#########
+
+g = addgroup!(SUITE, "atanh")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable atanh($(zero(T)))
+    g["one", _arg_string] = @benchmarkable atanh($(one(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable atanh($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable atanh($(prevfloat(zero(T))))
+    g["very large", "positive argument", _arg_string] = @benchmarkable atanh($(T(2.0)^67))
+    g["very large", "negative argument", _arg_string] = @benchmarkable atanh($(-T(2.0)^67))
+    g["2^-28 <= abs(x) < 0.5", "positive argument", _arg_string] = @benchmarkable atanh($(T(0.25)))
+    g["2^-28 <= abs(x) < 0.5", "negative argument", _arg_string] = @benchmarkable atanh($(-T(0.25)))
+    g["0.5 <= abs(x) < 1", "positive argument", _arg_string] = @benchmarkable atanh($(T(0.75)))
+    g["0.5 <= abs(x) < 1", "negative argument", _arg_string] = @benchmarkable atanh($(-T(0.75)))
+end
 end # module
