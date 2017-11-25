@@ -137,7 +137,9 @@ foreach_container() do C, cstr, T, tstr, c
     g[cstr, tstr, "pop!"] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
     C === BitSet && return
     g[cstr, tstr, "filter!"] = @benchmarkable filter!($(pred(C, T)), d) setup=(d=copy($c)) evals=1
-    g[cstr, tstr, "filter"] =  @benchmarkable filter( $(pred(C, T)), $c)
+    if VERSION >= v"0.7.0-" || !(c isa Dict)
+        g[cstr, tstr, "filter"] =  @benchmarkable filter( $(pred(C, T)), $c)
+    end
 end
 
 set_tolerance!(g)
