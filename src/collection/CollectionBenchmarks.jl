@@ -123,9 +123,9 @@ set_tolerance!(g)
 
 g = addgroup!(SUITE, "deletion", ["AbstractVector", "AbstractSet", "Associative"])
 
-function perf_pop!(C)
-    while !isempty(C)
-        pop!(C)
+function perf_pop!(c)
+    while !isempty(c)
+        pop!(c)
     end
 end
 
@@ -134,10 +134,12 @@ pred(::Type{C}, ::Type{String}) where{C} = x -> Int(askey(C, x)[1]) < 90
 pred(::Type{C}, ::Type{Int})    where{C} = x -> iseven(askey(C, x))
 
 foreach_container() do C, cstr, T, tstr, c
-    g[cstr, tstr, "pop!"] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
+    if VERSION >= v"0.7.0-" || C !== Dict
+        g[cstr, tstr, "pop!"] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
+    end
     C === BitSet && return
     g[cstr, tstr, "filter!"] = @benchmarkable filter!($(pred(C, T)), d) setup=(d=copy($c)) evals=1
-    if VERSION >= v"0.7.0-" || !(c isa Dict)
+    if VERSION >= v"0.7.0-" || C !== Dict
         g[cstr, tstr, "filter"] =  @benchmarkable filter( $(pred(C, T)), $c)
     end
 end
