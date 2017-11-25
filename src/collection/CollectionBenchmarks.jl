@@ -180,7 +180,9 @@ foreach_container() do C, cstr, T, tstr, c
         g[cstr, tstr, "pop!",  "specified"] = @benchmarkable  pop!(push!(d, $eltin), $(askey(C, eltin))) setup=(d=copy($c)) evals=1
 
     end
-    g[cstr, tstr, "pop!", "unspecified"] = @benchmarkable pop!(d) setup=(d=copy($c))
+    if C !== Dict || VERSION >= v"0.7.0-"
+        g[cstr, tstr, "pop!", "unspecified"] = @benchmarkable pop!(d) setup=(d=copy($c))
+    end
 end
 
 set_tolerance!(g)
