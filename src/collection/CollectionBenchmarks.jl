@@ -2,6 +2,11 @@ module CollectionBenchmarks
 
 using BenchmarkTools
 
+# TODO: Remove once Compat has BitSet
+if !isdefined(Base, :BitSet)
+    const BitSet = IntSet
+end
+
 const SUITE = BenchmarkGroup()
 
 const MT = MersenneTwister(0)
@@ -29,13 +34,13 @@ const coll = Dict((Vector, Int)    => ints,
                   (Pair, Int)      => map(Pair, ints, ints),
                   (Pair, String)   => map(Pair, strings, strings),
                   (Pair, Any)      => map(Pair, anys, anys),
-                  (IntSet, Int)    => IntSet(ints))
+                  (BitSet, Int)    => BitSet(ints))
 
 # return a collection that can serve to initialize a container C of type T
 initcoll(C, T) = let initmap = Dict(Vector => Vector,
                                     Dict   => Pair,
                                     Set    => Vector,
-                                    IntSet => Vector)
+                                    BitSet => Vector)
     coll[initmap[C], T]
 end
 
@@ -46,18 +51,18 @@ end
 
 @inline newcoll(::Type{C}, ::Type{T}) where {C,T} = C{T}()
 @inline newcoll(::Type{Dict}, ::Type{T}) where {T} = Dict{T,T}()
-@inline newcoll(::Type{IntSet}, ::Type{Int}) = IntSet()
+@inline newcoll(::Type{BitSet}, ::Type{Int}) = BitSet()
 
 askey(::Type, elt) = elt
 askey(::Type{Dict}, elt) = first(elt)
 
 objstr(T) = T === Int ? "Int" : T === Vector ? "Vector" : string(T)
 
-function foreach_container(bench; T = (Int, String, Any), C = (Vector, Dict, Set, IntSet))
+function foreach_container(bench; T = (Int, String, Any), C = (Vector, Dict, Set, BitSet))
     for _C in C
         cstr = objstr(_C)
         for _T in T
-            _C === IntSet && _T !== Int && continue
+            _C === BitSet && _T !== Int && continue
             c = coll[_C, _T]
             bench(_C, cstr, _T, objstr(_T), c)
         end
@@ -89,12 +94,12 @@ foreach_container(C = (Vector, Dict, Set)) do C, cstr, T, tstr, c
         @benchmarkable perf_push!(sizehint!(newcoll($C, $T), iterlen), $(initcoll(C, T)))
 end
 
-g["IntSet", "Int", "unsorted", "iterator"]          = @benchmarkable IntSet($ints)
-g["IntSet", "Int", "sorted",   "iterator"]          = @benchmarkable IntSet($sortedints)
-g["IntSet", "Int", "unsorted", "loop"]              = @benchmarkable perf_push!(IntSet(), $ints)
-g["IntSet", "Int", "sorted",   "loop"]              = @benchmarkable perf_push!(IntSet(), $sortedints)
-g["IntSet", "Int", "unsorted", "loop", "sizehint!"] = @benchmarkable perf_push!(sizehint!(IntSet(), iterlen), $ints)
-g["IntSet", "Int", "sorted",   "loop", "sizehint!"] = @benchmarkable perf_push!(sizehint!(IntSet(), iterlen), $sortedints)
+g["BitSet", "Int", "unsorted", "iterator"]          = @benchmarkable BitSet($ints)
+g["BitSet", "Int", "sorted",   "iterator"]          = @benchmarkable BitSet($sortedints)
+g["BitSet", "Int", "unsorted", "loop"]              = @benchmarkable perf_push!(BitSet(), $ints)
+g["BitSet", "Int", "sorted",   "loop"]              = @benchmarkable perf_push!(BitSet(), $sortedints)
+g["BitSet", "Int", "unsorted", "loop", "sizehint!"] = @benchmarkable perf_push!(sizehint!(BitSet(), iterlen), $ints)
+g["BitSet", "Int", "sorted",   "loop", "sizehint!"] = @benchmarkable perf_push!(sizehint!(BitSet(), iterlen), $sortedints)
 
 set_tolerance!(g)
 
@@ -130,7 +135,7 @@ pred(::Type{C}, ::Type{Int})    where{C} = x -> iseven(askey(C, x))
 
 foreach_container() do C, cstr, T, tstr, c
     g[cstr, tstr, "pop!"] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
-    C === IntSet && return
+    C === BitSet && return
     g[cstr, tstr, "filter!"] = @benchmarkable filter!($(pred(C, T)), d) setup=(d=copy($c)) evals=1
     g[cstr, tstr, "filter"] =  @benchmarkable filter( $(pred(C, T)), $c)
 end
@@ -145,9 +150,9 @@ g = addgroup!(SUITE, "queries & updates", ["AbstractVector", "AbstractSet", "Ass
 
 foreach_container() do C, cstr, T, tstr, c
     if T === Int # seems unnecessary to run those with all types
-        g[cstr, tstr, "length"] = @benchmarkable length($c) # probably useful only for IntSet
+        g[cstr, tstr, "length"] = @benchmarkable length($c) # probably useful only for BitSet
         g[cstr, tstr, "first"]  = @benchmarkable first($c)
-        if C in (Vector, IntSet)
+        if C in (Vector, BitSet)
             g[cstr, tstr, "last"] = @benchmarkable last($c)
         end
     end
@@ -183,11 +188,11 @@ set_tolerance!(g)
 g = addgroup!(SUITE, "set operations", ["AbstractSet", "Array"])
 const newints = [rand(MT, ints, 10); rand(MT, 1:iterlen, 10); rand(MT, iterlen:2iterlen, 10);]
 
-foreach_container(C = (IntSet, Set, Vector), T = (Int,)) do C, cstr, T, tstr, c
+foreach_container(C = (BitSet, Set, Vector), T = (Int,)) do C, cstr, T, tstr, c
     g[cstr, tstr, "union"]     = @benchmarkable union($c)
     g[cstr, tstr, "intersect"] = @benchmarkable intersect($c)
     g[cstr, tstr, "symdiff"]   = @benchmarkable symdiff($c)
-    for C2 in (IntSet, Set, Vector)
+    for C2 in (BitSet, Set, Vector)
         c2 = C2(newints)
         c2str = objstr(C2)
         g[cstr, tstr, "union",     c2str] = @benchmarkable union($c, $c2)
@@ -199,13 +204,13 @@ foreach_container(C = (IntSet, Set, Vector), T = (Int,)) do C, cstr, T, tstr, c
         g[cstr, tstr, "intersect", c2str, c2str] = @benchmarkable intersect($c, $c2, $c2)
         g[cstr, tstr, "symdiff", c2str, c2str]   = @benchmarkable symdiff($c, $c2, $c2)
 
-        if C === IntSet && C2 === IntSet
+        if C === BitSet && C2 === BitSet
             g[cstr, tstr, "intersect!", c2str] = @benchmarkable intersect!(d, $c2) setup=(d=copy($c)) evals=1
         end
-        if C === IntSet
+        if C === BitSet
             g[cstr, tstr, "symdiff!",   c2str] = @benchmarkable symdiff!(d, $c2)   setup=(d=copy($c)) evals=1
         end
-        if C in (IntSet, Set)
+        if C in (BitSet, Set)
             g[cstr, tstr, "setdiff!",   c2str] = @benchmarkable setdiff!(d, $c2)   setup=(d=copy($c)) evals=1
             g[cstr, tstr, "union!",     c2str] = @benchmarkable union!(d, $c2)     setup=(d=copy($c)) evals=1
         end
@@ -222,16 +227,16 @@ foreach_container(C = (IntSet, Set, Vector), T = (Int,)) do C, cstr, T, tstr, c
     g[cstr,    tstr, "==", "self"] = @benchmarkable ==($c, $c)
 end
 
-# test IntSet with very large values
-const small, big = IntSet(2), IntSet(2^18)
-g["IntSet", "Int", "union!",     "big"]   = @benchmarkable union!(b, $small)     setup=(b=IntSet(2^18)) evals=1
-g["IntSet", "Int", "union!",     "small"] = @benchmarkable union!(s, $big)       setup=(s=IntSet(2))    evals=1
-g["IntSet", "Int", "intersect!", "big"]   = @benchmarkable intersect!(b, $small) setup=(b=IntSet(2^18)) evals=1
-g["IntSet", "Int", "intersect!", "small"] = @benchmarkable intersect!(s, $big)   setup=(s=IntSet(2))    evals=1
-g["IntSet", "Int", "setdiff!",   "big"]   = @benchmarkable setdiff!(b, $small)   setup=(b=IntSet(2^18)) evals=1
-g["IntSet", "Int", "setdiff!",   "small"] = @benchmarkable setdiff!(s, $big)     setup=(s=IntSet(2))    evals=1
-g["IntSet", "Int", "symdiff!",   "big"]   = @benchmarkable symdiff!(b, $small)   setup=(b=IntSet(2^18)) evals=1
-g["IntSet", "Int", "symdiff!",   "small"] = @benchmarkable symdiff!(s, $big)     setup=(s=IntSet(2))    evals=1
+# test BitSet with very large values
+const small, big = BitSet(2), BitSet(2^18)
+g["BitSet", "Int", "union!",     "big"]   = @benchmarkable union!(b, $small)     setup=(b=BitSet(2^18)) evals=1
+g["BitSet", "Int", "union!",     "small"] = @benchmarkable union!(s, $big)       setup=(s=BitSet(2))    evals=1
+g["BitSet", "Int", "intersect!", "big"]   = @benchmarkable intersect!(b, $small) setup=(b=BitSet(2^18)) evals=1
+g["BitSet", "Int", "intersect!", "small"] = @benchmarkable intersect!(s, $big)   setup=(s=BitSet(2))    evals=1
+g["BitSet", "Int", "setdiff!",   "big"]   = @benchmarkable setdiff!(b, $small)   setup=(b=BitSet(2^18)) evals=1
+g["BitSet", "Int", "setdiff!",   "small"] = @benchmarkable setdiff!(s, $big)     setup=(s=BitSet(2))    evals=1
+g["BitSet", "Int", "symdiff!",   "big"]   = @benchmarkable symdiff!(b, $small)   setup=(b=BitSet(2^18)) evals=1
+g["BitSet", "Int", "symdiff!",   "small"] = @benchmarkable symdiff!(s, $big)     setup=(s=BitSet(2))    evals=1
 
 set_tolerance!(g)
 
@@ -240,7 +245,7 @@ set_tolerance!(g)
 #############################################
 
 # cf. issue #20903 and PR #21964
-g = addgroup!(SUITE, "optimizations", ["Dict", "Set", "IntSet", "Vector"])
+g = addgroup!(SUITE, "optimizations", ["Dict", "Set", "BitSet", "Vector"])
 
 for T in (Void, Bool, Int8, UInt16)
     v::Vector{T} = T === Void ? Vector{Void}(100000) :
@@ -254,7 +259,7 @@ for T in (Void, Bool, Int8, UInt16)
         g["Vector", "abstract", tstr] = @benchmarkable Vector($v)
         g["Vector", "concrete", tstr] = @benchmarkable Vector{$T}($v)
     else
-        g["IntSet", tstr] = @benchmarkable IntSet($v)
+        g["BitSet", tstr] = @benchmarkable BitSet($v)
     end
 end
 
