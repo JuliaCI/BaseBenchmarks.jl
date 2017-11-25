@@ -63,11 +63,11 @@ g = addgroup!(SUITE, "typeargs", ["broadcast"])
 f_round(v) = round.(Int, v)
 
 r1, r2, r3 = rand(3), rand(5), rand(10)
-for r in (r1, r2, r3)
-    g["array", length(r)] = @benchmarkable f_round($r)
+for ri in (r1, r2, r3)
+    g["array", length(ri)] = @benchmarkable f_round($ri)
 end
 
-t1, t2, t3 = (rand(3)...), (rand(5)...), (rand(10)...)
+t1, t2, t3 = (rand(3)...,), (rand(5)...,), (rand(10)...,)
 for t in (t1, t2, t3)
     g["tuple", length(t)] = @benchmarkable f_round($t)
 end

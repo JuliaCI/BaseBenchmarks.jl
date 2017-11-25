@@ -39,10 +39,10 @@ end
 
 include("sumindex.jl")
 
-s = 500
+σ = 500
 A3d = samerand(11,11,11)
 S3d = view(A3d, 1:10, 1:10, 1:10)
-arrays = (makearrays(Int32, s, s)..., makearrays(Float32, s, s)..., trues(s, s), A3d, S3d)
+arrays = (makearrays(Int32, σ, σ)..., makearrays(Float32, σ, σ)..., trues(σ, σ), A3d, S3d)
 ranges = (1:10^5, 10^5:-1:1, 1.0:1e5, linspace(1,2,10^4))
 arrays_iter = map(x -> (x, string(typeof(x))), arrays)
 ranges_iter = map(x -> (x, repr(x)), ranges)
@@ -324,7 +324,7 @@ for x in (x_range, collect(x_range), Int16.(x_range), Float64.(x_range), Float32
     g["any", string(typeof(x))] = @benchmarkable any(v -> v < 0, $x)
     g["all", string(typeof(x))] = @benchmarkable all(v -> v > 0, $x)
 
-    gen = (v for v in x)
+    gen = (xi for xi in x)
     g["any", string(typeof(x), " generator")] = @benchmarkable any(v -> v < 0, $gen)
     g["all", string(typeof(x), " generator")] = @benchmarkable all(v -> v > 0, $gen)
 end

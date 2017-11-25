@@ -2,18 +2,13 @@ module SparseFEM
 
 using Compat
 
-if VERSION >= v"0.7.0-DEV.2116"
-    const _spdiagm = spdiagm
-else
-    _spdiagm(pairs::Pair{<:Integer,<:AbstractArray}...) = spdiagm(last.(pairs), first.(pairs))
-end
-
 # assemble the finite-difference laplacian
 function fdlaplacian(N)
     # create a 1D laplacian and a sparse identity
-    fdl1 = _spdiagm(-1 => ones(N-1), 0 => -2*ones(N), 1 => ones(N-1))
+    fdl1 = spdiagm(-1 => ones(N-1), 0 => -2*ones(N), 1 => ones(N-1))
     # laplace operator on the full grid
-    return kron(speye(N), fdl1) + kron(fdl1, speye(N))
+    I_N = sparse(1.0I, N, N)
+    return kron(I_N, fdl1) + kron(fdl1, I_N)
 end
 
 # get the list of boundary dof-indices

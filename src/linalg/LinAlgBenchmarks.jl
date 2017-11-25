@@ -54,7 +54,7 @@ mutable struct HermitianSparseWithNonZeroPivots
 end
 function linalgmat(::Type{HermitianSparseWithNonZeroPivots}, s)
     A = samesprand(s, s, 1/s)
-    A = A + A' + speye(s)
+    A = A + A' + I
     A
 end
 typename(::Type{HermitianSparseWithNonZeroPivots}) = "HermitianSparseWithNonZeroPivots"
