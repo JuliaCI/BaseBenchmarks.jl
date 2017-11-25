@@ -3,6 +3,7 @@ module DatesBenchmarks
 
 using BenchmarkTools
 using Compat
+using Compat.Dates
 
 const SUITE = BenchmarkGroup()
 

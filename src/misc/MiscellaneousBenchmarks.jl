@@ -5,6 +5,7 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 using .RandUtils
 using BenchmarkTools
 using Compat
+using Compat.Dates
 
 const SUITE = BenchmarkGroup()
 
