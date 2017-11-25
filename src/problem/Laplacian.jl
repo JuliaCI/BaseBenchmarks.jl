@@ -33,9 +33,12 @@ function ddx_spdiags(m)
 end
 
 function laplace_sparse_matvec(n1, n2, n3)
-    D1 = kron(speye(n3), kron(speye(n2), ddx_spdiags(n1)))
-    D2 = kron(speye(n3), kron(ddx_spdiags(n2), speye(n1)))
-    D3 = kron(ddx_spdiags(n3), kron(speye(n2), speye(n1)))
+    I_n1 = sparse(1.0I, n1, n1)
+    I_n2 = sparse(1.0I, n2, n2)
+    I_n3 = sparse(1.0I, n3, n3)
+    D1 = kron(I_n3, kron(I_n2, ddx_spdiags(n1)))
+    D2 = kron(I_n3, kron(ddx_spdiags(n2), I_n1))
+    D3 = kron(ddx_spdiags(n3), kron(I_n2, I_n1))
     D = [D1 D2 D3] # divergence from faces to cell-centers
     return D*D'
 end

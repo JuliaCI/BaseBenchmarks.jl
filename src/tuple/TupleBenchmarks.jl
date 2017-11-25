@@ -151,8 +151,8 @@ end
 
 # Benchmarks #
 ##############
-v2, v4, v8, v16 = [FixedVector((rand(i)...)) for i in (2, 4, 8, 16)]
-m2x2, m4x4, m8x8, m16x16 = [FixedMatrix{i,i, Float64, i*i}((rand(i*i)...)) for i in (2, 4, 8, 16)]
+v2, v4, v8, v16 = [FixedVector((rand(i)...,)) for i in (2, 4, 8, 16)]
+m2x2, m4x4, m8x8, m16x16 = [FixedMatrix{i,i, Float64, i*i}((rand(i*i)...,)) for i in (2, 4, 8, 16)]
 
 
 # Reductions
