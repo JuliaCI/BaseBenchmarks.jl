@@ -705,7 +705,7 @@ for T in (Float32, Float64)
     _arg_string = arg_string(T)
     g["one", _arg_string] = @benchmarkable acosh($(one(T)))
     g["very large", "positive argument", _arg_string] = @benchmarkable acosh($(T(2.0)^28))
-    g["1 <= abs(x) < 2", "positive argument", _arg_string] = @benchmarkable acosh($(T(0.5)))
+    g["1 <= abs(x) < 2", "positive argument", _arg_string] = @benchmarkable acosh($(T(1.5)))
     g["2 <= abs(x) < 2^28", "positive argument", _arg_string] = @benchmarkable acosh($(T(1000)))
 end
 
