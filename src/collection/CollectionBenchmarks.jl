@@ -258,7 +258,8 @@ for T in (Void, Bool, Int8, UInt16)
     if T === Void
         g["Vector", "abstract", tstr] = @benchmarkable Vector($v)
         g["Vector", "concrete", tstr] = @benchmarkable Vector{$T}($v)
-    else
+    elseif !(T <: Unsigned) || VERSION >= v"0.7.0-"
+        # there is a bug on 0.6, will probably get fixed on v6.2, cf. #24365
         g["BitSet", tstr] = @benchmarkable BitSet($v)
     end
 end
