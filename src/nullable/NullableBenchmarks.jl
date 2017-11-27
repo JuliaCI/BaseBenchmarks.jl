@@ -8,75 +8,34 @@ using Compat
 
 const SUITE = BenchmarkGroup()
 
-####################
-# basic operations #
-####################
+########################
+# array Union{T, Void} #
+########################
 
-g = addgroup!(SUITE, "basic")
-
-for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat)
-    tol = (T == BigInt || T == BigFloat) ? 0.6 : 0.3
-
-    x = Nullable(one(T))
-    g["get1", string(x)] = @benchmarkable get($x) time_tolerance=tol
-
-    for x in (Nullable(one(T)), Nullable{T}())
-        g["isnull", string(x)] = @benchmarkable isnull($x) time_tolerance=tol
-        g["get2", string(x)] = @benchmarkable get($x, $(zero(T))) time_tolerance=tol
-
-        for y in (Nullable(one(T)), Nullable(zero(T)), Nullable{T}()) time_tolerance=tol
-            g["isequal", string(x), string(y)] = @benchmarkable isequal($x, $y) time_tolerance=tol
-        end
-    end
-end
-
-####################
-# nullable array   #
-####################
-
-g = addgroup!(SUITE, "nullablearray")
-
-struct NullableArray{T, N} <: AbstractArray{Nullable{T}, N}
-    values::Array{T, N}
-    hasvalue::Array{Bool, N}
-end
-
-@inline function Base.getindex(X::NullableArray{T, N}, I::Int...) where {T, N}
-    if isbits(T)
-        ifelse(X.hasvalue[I...], Nullable{T}(X.values[I...]), Nullable{T}())
-    else
-        if X.hasvalue[I...]
-            Nullable{T}(X.values[I...])
-        else
-            Nullable{T}()
-        end
-    end
-end
-
-Base.size(X::NullableArray) = size(X.values)
-
-Base.IndexStyle(::Type{<:NullableArray}) = IndexLinear()
+g = addgroup!(SUITE, "array")
 
 const VEC_LENGTH = 1000
 
-function perf_sum(X::AbstractArray{T}) where T<:Nullable
-    S = eltype(T)
-    s = zero(S)+zero(S)
-    @inbounds @simd for i in eachindex(X)
-        s += get(X[i], zero(S))
+_zero(::Type{T}) where {T} = zero(T)
+_zero(::Type{Union{T, Void}}) where {T} = zero(T)
+
+function perf_sum(X::AbstractArray{T}) where T
+    s = _zero(T) + _zero(T)
+    @inbounds @simd for x in X
+        s += ifelse(x === nothing, _zero(T), x)
     end
     s
 end
 
-function perf_countnulls(X::AbstractArray{T}) where T<:Nullable
+function perf_countnothing(X::AbstractArray)
     n = 0
-    @inbounds for i in eachindex(X)
-        n += isnull(X[i])
+    @inbounds for x in X
+        n += x === nothing
     end
     n
 end
 
-function perf_countequals(X::AbstractArray{T}, Y::AbstractArray{T}) where T<:Nullable
+function perf_countequals(X::AbstractArray, Y::AbstractArray)
     n = 0
     @inbounds for i in eachindex(X, Y)
         n += isequal(X[i], Y[i])
@@ -94,53 +53,22 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
     end
 
     # 10% of missing values
-    X = NullableArray(Vector{T}(samerand(S, VEC_LENGTH)), Vector{Bool}(samerand(VEC_LENGTH) .> .9))
-    Y = NullableArray(Vector{T}(samerand(S, VEC_LENGTH)), Vector{Bool}(samerand(VEC_LENGTH) .> .9))
+    X = Vector{Union{T, Void}}(Vector{T}(samerand(S, VEC_LENGTH)))
+    Y = Vector{Union{T, Void}}(Vector{T}(samerand(S, VEC_LENGTH)))
+    X2 = Vector{Union{T, Void}}(Vector{T}(samerand(S, VEC_LENGTH)))
+    Y2 = Vector{Union{T, Void}}(Vector{T}(samerand(S, VEC_LENGTH)))
+    X2[samerand(VEC_LENGTH) .> .9] = nothing
+    Y2[samerand(VEC_LENGTH) .> .9] = nothing    
 
-    for (A, X, Y) in (("NullableArray", X, Y), ("Array", collect(X), collect(Y)))
-        g["perf_sum", A, string(T)] = @benchmarkable perf_sum($X)
-        g["perf_countnulls", A, string(T)] = @benchmarkable perf_countnulls($X)
-        g["perf_countequals", A, string(T)] = @benchmarkable perf_countequals($X, $Y)
+    for A in (X, X2)
+        g["perf_sum", string(typeof(A))] = @benchmarkable perf_sum($A)
+        g["perf_countnothing", string(typeof(A))] = @benchmarkable perf_countnothing($A)
     end
-end
 
-function perf_all(X::AbstractArray{Nullable{Bool}})
-    @inbounds for i in eachindex(X)
-        x = X[i]
-        if isnull(x)
-            return Nullable{Bool}()
-        elseif !get(x)
-            return Nullable(false)
-        end
+    for (A, B) in ((X, Y), (X2, Y2), (X, Y2))
+        g["perf_countequals", string(eltype(A), eltype(B))] =
+            @benchmarkable perf_countequals($A, $B)
     end
-    Nullable(true)
-end
-
-function perf_any(X::AbstractArray{Nullable{Bool}})
-    allnull = true
-    @inbounds for i in eachindex(X)
-        x = X[i]
-        if !isnull(x)
-            allnull = false
-            get(x) && return Nullable(true)
-        end
-    end
-    allnull ? Nullable{Bool}() : Nullable(false)
-end
-
-# Ensure no short-circuit happens
-X = NullableArray(fill(true, VEC_LENGTH), fill(true, VEC_LENGTH))
-# 10% of missing values
-Y = NullableArray(fill(false, VEC_LENGTH), Vector{Bool}(samerand(VEC_LENGTH) .> .1))
-
-g["perf_all", "NullableArray"] = @benchmarkable perf_all($X)
-g["perf_any", "NullableArray"] = @benchmarkable perf_any($Y)
-
-g["perf_all", "Array"] = @benchmarkable perf_all($(collect(X)))
-g["perf_any", "Array"] = @benchmarkable perf_any($(collect(Y)))
-
-for b in values(g)
-    b.params.time_tolerance = 0.50
 end
 
 end # module
