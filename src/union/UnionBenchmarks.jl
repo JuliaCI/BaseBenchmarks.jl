@@ -1,4 +1,4 @@
-module NullableBenchmarks
+module UnionBenchmarks
 
 include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
