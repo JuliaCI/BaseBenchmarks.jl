@@ -13,6 +13,7 @@ const SUITE = BenchmarkGroup()
 const MODULES = Dict("array" => :ArrayBenchmarks,
                      "broadcast" => :BroadcastBenchmarks,
                      "dates" => :DatesBenchmarks,
+                     "find" => :FindBenchmarks,
                      "io" => :IOBenchmarks,
                      "linalg" => :LinAlgBenchmarks,
                      "micro" => :MicroBenchmarks,
