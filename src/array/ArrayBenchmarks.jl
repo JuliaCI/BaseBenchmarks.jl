@@ -292,7 +292,7 @@ for x in (x_range, x_vec, Int16.(x_range), Float64.(x_range), Float32.(x_range))
 
     g["==", string(typeof(x_vec), " == ", typeof(x))] =
         @benchmarkable $x_vec == $x
-    g["isequal", string(typeof(x_vec), " isequa l", typeof(x))] =
+    g["isequal", string(typeof(x_vec), " isequal ", typeof(x))] =
         @benchmarkable isequal($x_vec, $x)
 end
 
