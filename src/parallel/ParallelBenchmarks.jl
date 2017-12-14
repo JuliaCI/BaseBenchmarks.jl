@@ -6,6 +6,10 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
+if VERSION >= v"0.7.0-DEV.2954"
+    using Distributed
+end
+
 const SUITE = BenchmarkGroup()
 
 #################################################
