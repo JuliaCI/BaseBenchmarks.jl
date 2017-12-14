@@ -1,5 +1,9 @@
 module JSONParse
 
+if VERSION >= v"0.7.0-DEV.2915"
+    using Unicode
+end
+
 # Adapted from http://www.mathworks.com/matlabcentral/fileexchange/23393
 # Original BSD Licence, (c) 2011, François Glineur
 

@@ -3,6 +3,10 @@ module SpellCheck
 using ..ProblemBenchmarks: PROBLEM_DATA_DIR
 using Compat
 
+if VERSION >= v"0.7.0-DEV.2915"
+    using Unicode
+end
+
 # Peter Norvig's Spelling Corrector (http://norvig.com/spell-correct.html)
 
 # I've attempted to keep this close to the python version, although in some
