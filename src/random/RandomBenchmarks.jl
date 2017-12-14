@@ -19,7 +19,7 @@ const NUMS    = [INTS; FLOATS; CFLOATS; [Complex{T} for T in BITINTS];]
 
 const MT = MersenneTwister(0)
 const RD = RandomDevice()
-const vectint = Vector{Int}(1000)
+const vectint = Vector{Int}(uninitialized, 1000)
 
 function set_tolerance!(g, tol=0.25)
     for b in values(g)
@@ -81,7 +81,7 @@ g["randexp", "MersenneTwister", "ImplicitFloat64"] = @benchmarkable randexp($MT)
 
 for T = [Int, Float64]
     tstr = string(T)
-    dst = Vector{T}(1000)
+    dst = Vector{T}(uninitialized, 1000)
     g["rand",     "ImplicitRNG",  tstr] = @benchmarkable _rand($(Val{T}()))
     g["rand",     "RandomDevice", tstr] = @benchmarkable _rand($RD, $(Val{T}()))
     g["rand!",    "ImplicitRNG",  tstr] = @benchmarkable rand!($dst)
@@ -100,7 +100,7 @@ end
 for T in NUMS
     T === BigInt && continue
     tstr = string(T)
-    dst = Vector{T}(1000)
+    dst = Vector{T}(uninitialized, 1000)
     g["rand",     "MersenneTwister", tstr] = @benchmarkable _rand($MT, $(Val{T}()))
     g["rand!",    "MersenneTwister", tstr] = @benchmarkable rand!($MT, $dst)
     VERSION >= v"0.5.0-pre+5657" || continue
@@ -137,7 +137,7 @@ if VERSION >= v"0.7.0-DEV.973"
 end
 
 for (collection, collstr) in collections
-    dst = Vector{eltype(collection)}(1000)
+    dst = Vector{eltype(collection)}(uninitialized, 1000)
     g["rand",  "ImplicitRNG",     collstr] = @benchmarkable rand($collection)
     g["rand",  "MersenneTwister", collstr] = @benchmarkable rand($MT, $collection)
     g["rand",  "RandomDevice",    collstr] = @benchmarkable rand($RD, $collection)
