@@ -1,5 +1,6 @@
 module Ziggurat
 
+using Compat
 using ..RandUtils
 
 # Based on http://m.seehuhn.de/data/ziggurat/gauss.c
@@ -143,7 +144,7 @@ end
 randn_zig(sigma::Number) = sigma*randn_zig()
 
 function perf_ziggurat(n)
-    A = Vector{Float64}(n)
+    A = Vector{Float64}(uninitialized, n)
     for i=1:length(A)
         A[i] = randn_zig()
     end

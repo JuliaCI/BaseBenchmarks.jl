@@ -38,7 +38,7 @@ function isless(x::KNuc, y::KNuc)
 end
 
 function sorted_array(m::Dict{AbstractString, Int})
-    kn = Vector{KNuc}(length(m))
+    kn = Vector{KNuc}(uninitialized, length(m))
     i = 1
     for elem in m
         kn[i] = KNuc(elem...)

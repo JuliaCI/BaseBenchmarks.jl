@@ -58,7 +58,7 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
     X2 = Vector{Union{T, Void}}(Vector{T}(samerand(S, VEC_LENGTH)))
     Y2 = Vector{Union{T, Void}}(Vector{T}(samerand(S, VEC_LENGTH)))
     X2[samerand(VEC_LENGTH) .> .9] = nothing
-    Y2[samerand(VEC_LENGTH) .> .9] = nothing    
+    Y2[samerand(VEC_LENGTH) .> .9] = nothing
 
     for A in (X, X2)
         g["perf_sum", string(typeof(A))] = @benchmarkable perf_sum($A)

@@ -91,9 +91,6 @@ for (name, x) in (("50-50", samerand(Bool, VEC_LENGTH)),
     gp[string(typeof(bx)), name] = @benchmarkable perf_findprev($bx)
 end
 
-
-ispos(x) = x > 0
-
 for T in (Bool, Int8, Int, UInt8, UInt, Float32, Float64)
     y = samerand(T, VEC_LENGTH)
     gn["ispos", string(typeof(y))] = @benchmarkable perf_findnext($ispos, $y)

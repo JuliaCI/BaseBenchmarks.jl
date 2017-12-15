@@ -195,7 +195,7 @@ function setup_mapr_access(A)
     z = zero(eltype(A))
     zz = sum(z -> z * z, [z]) # z = z*z, with any promotion from sum
     n = minimum(size(A))
-    B = Vector{typeof(zz)}(n)
+    B = Vector{typeof(zz)}(uninitialized, n)
     B, zz, n
 end
 function perf_mapr_access(A, B, zz, n) #20517

@@ -241,7 +241,13 @@ end
 
 n, range = 10^6, -3:3
 a, b = samerand(range, n), samerand(range)
-boolarr, bitarr = Vector{Bool}(n), BitArray(n)
+
+boolarr = Vector{Bool}(uninitialized, n)
+if VERSION >= v"0.7.0-DEV.2687"
+    bitarr = BitArray(uninitialized, n)
+else
+    bitarr = BitArray(n)
+end
 
 g = addgroup!(SUITE, "bool", ["index", "bitarray", "fill!"])
 
