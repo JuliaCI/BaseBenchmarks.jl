@@ -6,6 +6,10 @@
 
 module NBody
 
+if VERSION >= v"0.7.0-DEV.3052"
+    using Printf
+end
+
 # Constants
 const solar_mass = 4 * pi * pi
 const days_per_year = 365.24
