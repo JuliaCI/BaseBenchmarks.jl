@@ -7,6 +7,10 @@ module Laplace3D
 using Base.Cartesian
 using Base.Threads
 
+if VERSION >= v"0.7.0-DEV.3052"
+    using Printf
+end
+
 const SIXTH = 1.0f0/6.0f0
 const ERROR_TOL = 0.00001
 

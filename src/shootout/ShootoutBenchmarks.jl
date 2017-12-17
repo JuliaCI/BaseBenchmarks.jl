@@ -15,6 +15,9 @@ using Compat
 if VERSION >= v"0.7.0-DEV.2915"
     using Unicode
 end
+if VERSION >= v"0.7.0-DEV.3052"
+    using Printf
+end
 
 const SUITE = BenchmarkGroup(["example", "regex", "pi", "π", "tree"])
 const SHOOTOUT_DATA_PATH = joinpath(dirname(@__FILE__), "data")
