@@ -171,10 +171,19 @@ function perf_sumvector_view(A)
     return s
 end
 
+
+if VERSION >= v"0.7.0-DEV.3025"
+    _ind2sub(sz, l) = Tuple(CartesianIndices(sz)[l])
+    _sub2ind(sz, i, j, k) = LinearIndices(sz)[i, j, k]
+else
+    _ind2sub(sz, l) = ind2sub(sz, l)
+    _sub2ind(sz, i, j, k) = sub2ind(sz, i, j, k)
+end
+
 function perf_sub2ind(sz, irange, jrange, krange)
     s = 0
     for k in krange, j in jrange, i in irange
-        ind = sub2ind(sz, i, j, k)
+        ind = _sub2ind(sz, i, j, k)
         s += ind
     end
     s
@@ -183,7 +192,7 @@ end
 function perf_ind2sub(sz, lrange)
     si = sj = sk = 0
     for l in lrange
-        i, j, k = ind2sub(sz, l)
+        i, j, k = _ind2sub(sz, l)
         si += i
         sj += j
         sk += k
