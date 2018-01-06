@@ -20,7 +20,7 @@ end
 
 # timing of assembly, slice and solve
 function perf_sparse_fem(N)
-    Ifree = get_free(N)
+    Ifree = [LinearIndices((N, N))[i] for i in get_free(N)]
     # assembly
     A = fdlaplacian(N)
     # boundary condition
