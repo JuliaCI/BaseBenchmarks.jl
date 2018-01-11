@@ -21,7 +21,7 @@ function generateLoops(N, npts)
 
   np1 = N + 1
   str = ""
-  str *= "function perf_hdindexing$npts{T}(u_i::AbstractArray{T, $np1}, u_ip1::AbstractArray{T, $np1})\n"
+  str *= "function perf_hdindexing$npts(u_i::AbstractArray{T, $np1}, u_ip1::AbstractArray{T, $np1}) where T\n"
 
   indent = "  "
 
