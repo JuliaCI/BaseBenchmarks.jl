@@ -130,19 +130,19 @@ perf_sumabs2(a::FixedArray{T}) where {T} = perf_mapreduce(abs2, +, zero(T), a)
 
 @generated function perf_matvec(A::FixedMatrix{R, C, T}, b::FixedVector{C, T}) where {R, C, T}
     sA = size(A)
-    sB = size(b)
+    indA = LinearIndices(sA)
     exprs = Expr(:tuple, [reduce((ex1,ex2) -> :(+($ex1,$ex2)),
-                [:(A[$(sub2ind(sA, k, j))]*b[$j]) for j = 1:sA[2]]) for k = 1:sA[1]]...)
+                [:(A[$(indA[k, j])]*b[$j]) for j = 1:sA[2]]) for k = 1:sA[1]]...)
     return quote
         @inbounds return FixedVector{R, T}($exprs)
     end
 end
 
 @generated function perf_matmat(A::FixedMatrix{R1, C, T}, B::FixedMatrix{C, R2, T}) where {R1, R2, C, T}
-    sA = size(A)
-    sB = size(B)
+    sA, sB = size(A), size(B)
+    indA, indB = LinearIndices(sA), LinearIndices(sB)
     exprs =  Expr(:tuple, [reduce((ex1,ex2) -> :(+($ex1,$ex2)),
-                [:(A[$(sub2ind(sA, k1, j))] * B[$(sub2ind(sB, j, k2))]) for j = 1:sA[2]]) for k1 = 1:sA[1], k2 = 1:sB[2]]...)
+                [:(A[$(indA[k1, j])] * B[$(indB[j, k2])]) for j = 1:sA[2]]) for k1 = 1:sA[1], k2 = 1:sB[2]]...)
     result_type = FixedMatrix{R1, R2, T, (R1 * R2)}
     return quote
         @inbounds return $result_type($exprs)
