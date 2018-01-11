@@ -261,7 +261,7 @@ g = addgroup!(SUITE, "optimizations", ["Dict", "Set", "BitSet", "Vector"])
 
 for T in (Nothing, Bool, Int8, UInt16)
     local v
-    v::Vector{T} = T === Nothing ? Vector{Nothing}(100000) :
+    v::Vector{T} = T === Nothing ? Vector{Nothing}(uninitialized, 100000) :
                                    rand(MT, one(T):typemax(T), 100000)
     tstr = string(T)
     g["Dict", "abstract", tstr] = @benchmarkable Dict($(map(Pair, v, v)))
