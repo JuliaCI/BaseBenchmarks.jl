@@ -1,7 +1,7 @@
 if VERSION >= v"0.7.0-DEV.1660"
     _maxind(A) = indmax(A).I
 else
-    _maxind(A) = ind2sub(size(A), indmax(A))
+    _maxind(A) = CartesianIndices(Compat.axes(A))[indmax(A)].I
 end
 
 function perf_lucompletepivCopy!(A)

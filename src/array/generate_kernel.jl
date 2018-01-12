@@ -1,14 +1,14 @@
 # generate the spatial kernel for an n-dimensional wave equation solver
 include("generate_loops.jl")
 
-# This function generates code to solve the n-dimensional 
+# This function generates code to solve the n-dimensional
 # constant coefficient wave equation in first order form, for dimensions 1
 # to maxdim.  It uses 4th order accuate finite difference stencils.
-# The function perf_hdindexing5 loops over all dimensions and calls the 
+# The function perf_hdindexing5 loops over all dimensions and calls the
 # function kernel5 to evaluate the stencils at each point.  Dispatch on the
 # array dimension ties the n different solvers together.
 function make_stencil(fname, maxdim)
-# generate kernels and loops for arrays of dimension 2 to maxdim + 1 and write 
+# generate kernels and loops for arrays of dimension 2 to maxdim + 1 and write
 # to file named fname
 
   stencil = ["1/12", "-2/3", "0", "2/3", "-1/12"]
@@ -20,7 +20,7 @@ function make_stencil(fname, maxdim)
   str = generate_kernel(maxdim, stencil, neq)
   str *= "\n"
   str *= generate_loops(maxdim, npts)
-  
+
   f = open(fname, "w")
   println(f, str)
   close(f)
@@ -74,7 +74,7 @@ function generate_body(maxdim, stencil, neq)
       str *= string(var_name, " = ", stencil_dim)*"\n"
 
     end
-  
+
     # sum the results into the receiving arrays
     kernel_assembly = getKernelAssembly(maxdim, eq, neq - eq + 1)
     str *= kernel_assembly*"\n"
@@ -85,7 +85,7 @@ function generate_body(maxdim, stencil, neq)
 end
 
 
-function getStencil(maxdim::Integer, stencil, dim::Integer, src_eq::Integer, 
+function getStencil(maxdim::Integer, stencil, dim::Integer, src_eq::Integer,
                     second_line_indent::String="")
 
 # Generates a string that multiplies the given stencil coefficients by
@@ -141,7 +141,7 @@ function getStencil(maxdim::Integer, stencil, dim::Integer, src_eq::Integer,
     coeff_str = string( " "^padding, "(", stencil_pt, ")")
 
     str_pt = indentlevel*coeff_str*"*u_i[ "
-    
+
     # insert all indices before dim
     for i=1:(dim-1)
       idx_i = "d$i"
@@ -149,7 +149,7 @@ function getStencil(maxdim::Integer, stencil, dim::Integer, src_eq::Integer,
     end
 
     # insert index dim and modifier
-    
+
     # figure out if this should be a plus or minus
     stencil_offset_inner = abs(stencil_offset)
     if stencil_offset < 0
@@ -235,8 +235,8 @@ function getKernelSignature(dim::Integer, npts::Integer)
   kernel_name = string("kernel", npts)
   array_typetag = string("::AbstractArray{T,", dim+1, "}")
 
-  str = string("function ", kernel_name, "{T}(idx, ")
-  str *= string("u_i", array_typetag, ", u_ip1", array_typetag, ")\n")
+  str = string("function ", kernel_name, "(idx, ")
+  str *= string("u_i", array_typetag, ", u_ip1", array_typetag, ") where T\n")
 
   return str
 end

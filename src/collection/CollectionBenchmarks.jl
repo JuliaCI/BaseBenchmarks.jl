@@ -1,6 +1,7 @@
 module CollectionBenchmarks
 
 using BenchmarkTools
+using Compat
 
 # TODO: Remove once Compat has BitSet
 if !isdefined(Base, :BitSet)
@@ -258,15 +259,16 @@ set_tolerance!(g)
 # cf. issue #20903 and PR #21964
 g = addgroup!(SUITE, "optimizations", ["Dict", "Set", "BitSet", "Vector"])
 
-for T in (Void, Bool, Int8, UInt16)
-    v::Vector{T} = T === Void ? Vector{Void}(100000) :
-                                rand(MT, one(T):typemax(T), 100000)
+for T in (Nothing, Bool, Int8, UInt16)
+    local v
+    v::Vector{T} = T === Nothing ? Vector{Nothing}(uninitialized, 100000) :
+                                   rand(MT, one(T):typemax(T), 100000)
     tstr = string(T)
     g["Dict", "abstract", tstr] = @benchmarkable Dict($(map(Pair, v, v)))
     g["Dict", "concrete", tstr] = @benchmarkable Dict{$T,$T}($(map(Pair, v, v)))
     g["Set",  "abstract", tstr] = @benchmarkable Set($v)
     g["Set",  "concrete", tstr] = @benchmarkable Set{$T}($v)
-    if T === Void
+    if T === Nothing
         g["Vector", "abstract", tstr] = @benchmarkable Vector($v)
         g["Vector", "concrete", tstr] = @benchmarkable Vector{$T}($v)
     elseif T !== Bool && (!(T <: Unsigned) || VERSION >= v"0.7.0-")

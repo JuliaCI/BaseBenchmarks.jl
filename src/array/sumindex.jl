@@ -39,7 +39,7 @@ function perf_sumlinear(A)
 end
 function perf_sumcartesian(A)
     s = zero(eltype(A))
-    for I in CartesianRange(size(A))
+    for I in CartesianIndices(size(A))
         val = Base.unsafe_getindex(A, I)
         s += val
     end
@@ -115,7 +115,7 @@ function perf_sumlinear_view(A)
 end
 function perf_sumcartesian_view(A)
     s = zero(eltype(A))
-    @inbounds @simd for I in CartesianRange(size(A))
+    @inbounds @simd for I in CartesianIndices(size(A))
         val = view(A, I)
         s += val[]
     end
@@ -172,27 +172,21 @@ function perf_sumvector_view(A)
 end
 
 
-if VERSION >= v"0.7.0-DEV.3025"
-    _ind2sub(sz, l) = Tuple(CartesianIndices(sz)[l])
-    _sub2ind(sz, i, j, k) = LinearIndices(sz)[i, j, k]
-else
-    _ind2sub(sz, l) = ind2sub(sz, l)
-    _sub2ind(sz, i, j, k) = sub2ind(sz, i, j, k)
-end
-
 function perf_sub2ind(sz, irange, jrange, krange)
+    linear = LinearIndices(sz)
     s = 0
     for k in krange, j in jrange, i in irange
-        ind = _sub2ind(sz, i, j, k)
+        ind = linear[i, j, k]
         s += ind
     end
     s
 end
 
 function perf_ind2sub(sz, lrange)
+    cart = CartesianIndices(sz)
     si = sj = sk = 0
     for l in lrange
-        i, j, k = _ind2sub(sz, l)
+        i, j, k = cart[l].I  # TODO: change to Tuple(cart[l])
         si += i
         sj += j
         sk += k
