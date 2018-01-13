@@ -2,6 +2,10 @@ module SparseFEM
 
 using Compat
 
+if VERSION >= v"0.7.0-DEV.3389"
+    using SparseArrays
+end
+
 # assemble the finite-difference laplacian
 function fdlaplacian(N)
     # create a 1D laplacian and a sparse identity

@@ -2,6 +2,10 @@ module Laplacian
 
 using Compat
 
+if VERSION >= v"0.7.0-DEV.3389"
+    using SparseArrays
+end
+
 ################################
 # Sparse Matrix * Dense Vector #
 ################################
