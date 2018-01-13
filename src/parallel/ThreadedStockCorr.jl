@@ -5,13 +5,26 @@ module ThreadedStockCorr
 using Base.Threads
 
 # Run paths in parallel (has to be in its own function due to #10718)
-function runpath!(n, Wiener, CorrWiener, SA, SB, T, UpperTriangle, k11, k12, k21, k22, rngs)
-    @threads for i = 1:n
-        randn!(rngs[threadid()], Wiener)
-        A_mul_B!(CorrWiener, Wiener, UpperTriangle)
-        @simd for j = 2:T
-            @inbounds SA[j, i] = SA[j-1, i] * exp(k11 + k12*CorrWiener[j-1, 1])
-            @inbounds SB[j, i] = SB[j-1, i] * exp(k21 + k22*CorrWiener[j-1, 2])
+if VERSION >= v"0.7.0-DEV.3204"
+    function runpath!(n, Wiener, CorrWiener, SA, SB, T, UpperTriangle, k11, k12, k21, k22, rngs)
+        @threads for i = 1:n
+            randn!(rngs[threadid()], Wiener)
+            Base.LinAlg.mul!(CorrWiener, Wiener, UpperTriangle)
+            @simd for j = 2:T
+                @inbounds SA[j, i] = SA[j-1, i] * exp(k11 + k12*CorrWiener[j-1, 1])
+                @inbounds SB[j, i] = SB[j-1, i] * exp(k21 + k22*CorrWiener[j-1, 2])
+            end
+        end
+    end
+else
+    function runpath!(n, Wiener, CorrWiener, SA, SB, T, UpperTriangle, k11, k12, k21, k22, rngs)
+        @threads for i = 1:n
+            randn!(rngs[threadid()], Wiener)
+            A_mul_B!(CorrWiener, Wiener, UpperTriangle)
+            @simd for j = 2:T
+                @inbounds SA[j, i] = SA[j-1, i] * exp(k11 + k12*CorrWiener[j-1, 1])
+                @inbounds SB[j, i] = SB[j-1, i] * exp(k21 + k22*CorrWiener[j-1, 2])
+            end
         end
     end
 end

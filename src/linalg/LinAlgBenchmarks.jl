@@ -90,7 +90,11 @@ for s in SIZES
     C = zeros(Float32, s, s)
     A = randmat(s)
     B = randmat(s)
-    g["A_mul_B!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
+    if VERSION >= v"0.7.0-DEV.3204"
+        g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable Base.LinAlg.mul!($C, $A, $B)
+    else
+        g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
+    end
 
     for T in [Int32, Int64, Float32, Float64]
         arr = samerand(T, s)
