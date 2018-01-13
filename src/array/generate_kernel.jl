@@ -279,7 +279,7 @@ function indentString(indent::Integer, str::String)
   indent_str = " "^indent
   newline_indent = "\n"*indent_str
   str = indent_str*str
-  str = replace(str, "\n", newline_indent)
+  str = replace(str, "\n" => newline_indent)
 
   return str
 end

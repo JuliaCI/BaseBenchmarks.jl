@@ -104,10 +104,16 @@ function nestedexpr(n)
 end"""
 include_string(@__MODULE__, nestedexpr_str)
 
+if VERSION >= v"0.7.0-DEV.2437"
+    const _parse = Meta.parse
+else
+    const _parse = Base.parse
+end
+
 g = addgroup!(SUITE, "julia")
-g["parse", "array"] = @benchmarkable parse($("[" * "a + b, "^100 * "]"))
-g["parse", "nested"] = @benchmarkable parse($(string(nestedexpr(100))))
-g["parse", "function"] = @benchmarkable parse($nestedexpr_str)
+g["parse", "array"] = @benchmarkable _parse($("[" * "a + b, "^100 * "]"))
+g["parse", "nested"] = @benchmarkable _parse($(string(nestedexpr(100))))
+g["parse", "function"] = @benchmarkable _parse($nestedexpr_str)
 g["macroexpand", "evalpoly"] = @benchmarkable macroexpand(@__MODULE__, $(Expr(:macrocall, Symbol("@evalpoly"), 1:10...)))
 
 ###########################################################################
