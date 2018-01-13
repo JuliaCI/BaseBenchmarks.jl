@@ -2,6 +2,10 @@ module RandUtils
 
 using Compat
 
+if VERSION >= v"0.7.0-DEV.3389"
+    using SparseArrays
+end
+
 const SEED = MersenneTwister(1)
 const DEFAULT_ELTYPE = typeof(rand())
 

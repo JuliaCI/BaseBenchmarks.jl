@@ -6,6 +6,10 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 
+if VERSION >= v"0.7.0-DEV.3389"
+    using SparseArrays
+end
+
 const SUITE = BenchmarkGroup(["array"])
 
 #########
