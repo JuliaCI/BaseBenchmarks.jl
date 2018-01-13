@@ -1,6 +1,6 @@
 module JSONParse
 
-if VERSION >= v"0.7.0-DEV.2915"
+if v"0.7.0-DEV.2915" <= VERSION < v"0.7.0-DEV.3393"
     using Unicode
 end
 
