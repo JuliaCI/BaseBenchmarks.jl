@@ -14,7 +14,7 @@ const SUITE = BenchmarkGroup()
 g = addgroup!(SUITE, "isbitsunions", ["indexing", "simd", "union"])
 
 mutable struct UnionField
-    u::Union{Int64, Void}
+    u::Union{Int64, Nothing}
 end
 
 function getsetfield(A)
@@ -23,7 +23,7 @@ function getsetfield(A)
     end
 end
 
-function makeUnionFieldArray(N)
+function make_union_field_array(N)
     A = [UnionField(i) for i in rand(Int64, N)]
     for i in rand(1:N, div(N, 4))
         A[i].u = nothing
@@ -31,12 +31,12 @@ function makeUnionFieldArray(N)
     return A
 end
 
-g["getsetfield"] = @benchmarkable getsetfield($(makeUnionFieldArray(10000)))
+g["getsetfield"] = @benchmarkable getsetfield($(make_union_field_array(10000)))
 
 function getsetindex(A)
     for i = 1:length(A)-1
         # v = A[i + 1]
-        # if v isa Void
+        # if v isa Nothing
         #     A[i] = v
         # else
         #     A[i] = v
@@ -45,15 +45,15 @@ function getsetindex(A)
     end
 end
 
-function makeIsBitsUnionArray(N)
-    A = Union{Int64, Void}[i for i in rand(Int64, N)]
+function make_isbits_union_array(N)
+    A = Union{Int64, Nothing}[i for i in rand(Int64, N)]
     for i in rand(1:N, div(N, 4))
         A[i] = nothing
     end
     return A
 end
 
-g["getsetindex"] = @benchmarkable getsetindex($(makeIsBitsUnionArray(10000)))
+g["getsetindex"] = @benchmarkable getsetindex($(make_isbits_union_array(10000)))
 
 ###########################################################################
 # Splatting penalties (issue #13359)
