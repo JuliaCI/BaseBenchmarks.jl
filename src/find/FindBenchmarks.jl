@@ -47,36 +47,74 @@ gp = addgroup!(SUITE, "findprev")
 
 const VEC_LENGTH = 1000
 
-function perf_findnext(x)
-    s = findnext(x, first(linearindices(x)))
-    while s > 0
-        s = findnext(x, nextind(x, s))
-    end
-    s
-end
+if VERSION < v"0.7.0-DEV.3399"
 
-function perf_findprev(x)
-    s = findprev(x, last(linearindices(x)))
-    while s > 0
-        s = findprev(x, prevind(x, s))
+    function perf_findnext(x)
+        s = findnext(x, first(linearindices(x)))
+        while s > 0
+            s = findnext(x, nextind(x, s))
+        end
+        s
     end
-    s
-end
 
-function perf_findnext(pred, x)
-    s = findnext(pred, x, first(linearindices(x)))
-    while s > 0
-        s = findnext(pred, x, nextind(x, s))
+    function perf_findprev(x)
+        s = findprev(x, last(linearindices(x)))
+        while s > 0
+            s = findprev(x, prevind(x, s))
+        end
+        s
     end
-    s
-end
 
-function perf_findprev(pred, x)
-    s = findprev(pred, x, last(linearindices(x)))
-    while s > 0
-        s = findprev(pred, x, prevind(x, s))
+    function perf_findnext(pred, x)
+        s = findnext(pred, x, first(linearindices(x)))
+        while s > 0
+            s = findnext(pred, x, nextind(x, s))
+        end
+        s
     end
-    s
+
+    function perf_findprev(pred, x)
+        s = findprev(pred, x, last(linearindices(x)))
+        while s > 0
+            s = findprev(pred, x, prevind(x, s))
+        end
+        s
+    end
+
+else
+
+    function perf_findnext(x)
+        s = findnext(x, first(linearindices(x)))
+        while s !== nothing
+            s = findnext(x, nextind(x, s))
+        end
+        s
+    end
+
+    function perf_findprev(x)
+        s = findprev(x, last(linearindices(x)))
+        while s !== nothing
+            s = findprev(x, prevind(x, s))
+        end
+        s
+    end
+
+    function perf_findnext(pred, x)
+        s = findnext(pred, x, first(linearindices(x)))
+        while s !== nothing
+            s = findnext(pred, x, nextind(x, s))
+        end
+        s
+    end
+
+    function perf_findprev(pred, x)
+        s = findprev(pred, x, last(linearindices(x)))
+        while s !== nothing
+            s = findprev(pred, x, prevind(x, s))
+        end
+        s
+    end
+
 end
 
 for (name, x) in (("50-50", samerand(Bool, VEC_LENGTH)),
