@@ -3,6 +3,9 @@ module ThreadedStockCorr
 # Threaded implementation of test case from Issue #445
 
 using Base.Threads
+if VERSION >= v"0.7.0-DEV.3406"
+    using Random
+end
 
 # Run paths in parallel (has to be in its own function due to #10718)
 if VERSION >= v"0.7.0-DEV.3204"

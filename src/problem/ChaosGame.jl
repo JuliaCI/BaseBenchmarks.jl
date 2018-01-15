@@ -8,6 +8,9 @@ module ChaosGameFractals
 if VERSION >= v"0.7.0-DEV.3052"
     using Printf
 end
+if VERSION >= v"0.7.0-DEV.3406"
+    using Random
+end
 
 const DEFAULT_THICKNESS = 0.25
 const DEFAULT_WIDTH = 256
