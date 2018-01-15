@@ -3,9 +3,8 @@ module CollectionBenchmarks
 using BenchmarkTools
 using Compat
 
-# TODO: Remove once Compat has BitSet
-if !isdefined(Base, :BitSet)
-    const BitSet = IntSet
+if VERSION >= v"0.7.0-DEV.3406"
+    using Random
 end
 
 const SUITE = BenchmarkGroup()

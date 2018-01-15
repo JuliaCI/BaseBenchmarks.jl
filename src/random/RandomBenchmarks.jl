@@ -1,13 +1,13 @@
 module RandomBenchmarks
 
-using BenchmarkTools
-using Base.Random: RangeGenerator
-using Compat
-
-# TODO: Remove once Compat has BitSet
-if !isdefined(Base, :BitSet)
-    const BitSet = IntSet
+if VERSION >= v"0.7.0-DEV.3406"
+    using Random
+    using Random: RangeGenerator
+else
+    using Base.Random: RangeGenerator
 end
+using BenchmarkTools
+using Compat
 
 const SUITE = BenchmarkGroup()
 
