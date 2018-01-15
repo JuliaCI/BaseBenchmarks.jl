@@ -86,6 +86,12 @@ end
 # randmatstat #
 ###############
 
+if VERSION >= v"0.7.0-DEV.3204"
+    _at_mul_b(A, B) = transpose(A)*B
+else
+    _at_mul_b(A, B) = At_mul_B(A, B)
+end
+
 function perf_micro_randmatstat(t)
     n = 5
     v = zeros(t)
@@ -97,8 +103,8 @@ function perf_micro_randmatstat(t)
         d = randn(n,n)
         P = [a b c d]
         Q = [a b; c d]
-        v[i] = trace((P.'*P)^4)
-        w[i] = trace((Q.'*Q)^4)
+        v[i] = trace(_at_mul_b(P,P)^4)
+        w[i] = trace(_at_mul_b(Q,Q)^4)
     end
     return (std(v)/mean(v), std(w)/mean(w))
 end
