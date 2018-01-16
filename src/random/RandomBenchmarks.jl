@@ -2,9 +2,9 @@ module RandomBenchmarks
 
 if VERSION >= v"0.7.0-DEV.3406"
     using Random
-    using Random: RangeGenerator
+    using Random: RangeGenerator, GLOBAL_RNG
 else
-    using Base.Random: RangeGenerator
+    using Base.Random: RangeGenerator, GLOBAL_RNG
 end
 using BenchmarkTools
 using Compat
@@ -64,7 +64,7 @@ g = addgroup!(SUITE, "types", ["rand", "rand!", "randn", "randn!", "randexp", "r
 
 # these functions are used to interpolate values instead of Types in @benchmarkable,
 # to measure the best possible performance, cf. #124
-@inline _rand(        ::Val{T}) where {T} = rand(Base.GLOBAL_RNG, T)
+@inline _rand(        ::Val{T}) where {T} = rand(GLOBAL_RNG, T)
 @inline _rand(   rng, ::Val{T}) where {T} = rand(rng, T)
 @inline _randn(  rng, ::Val{T}) where {T} = randn(rng, T)
 @inline _randexp(rng, ::Val{T}) where {T} = randexp(rng, T)
