@@ -7,7 +7,14 @@ using BenchmarkTools
 using Compat
 using Compat.Iterators
 
-import Base.LinAlg: UnitUpperTriangular
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra
+    using LinearAlgebra: UnitUpperTriangular
+else
+    using Base.LinAlg
+    using Base.LinAlg: UnitUpperTriangular
+    const LinearAlgebra = Base.LinAlg
+end
 
 const SUITE = BenchmarkGroup(["array"])
 
@@ -91,7 +98,7 @@ for s in SIZES
     A = randmat(s)
     B = randmat(s)
     if VERSION >= v"0.7.0-DEV.3204"
-        g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable Base.LinAlg.mul!($C, $A, $B)
+        g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B)
     else
         g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
     end

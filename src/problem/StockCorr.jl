@@ -1,5 +1,9 @@
 module StockCorr
 
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra
+end
+
 # The original, unoptimised code that simulates two correlated assets
 function perf_stockcorr()
     ## Correlated asset information

@@ -10,6 +10,13 @@ if VERSION >= v"0.7.0-DEV.3389"
     using SparseArrays
 end
 
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra
+else
+    using Base.LinAlg
+    const LinearAlgebra = Base.LinAlg
+end
+
 const SUITE = BenchmarkGroup(["array"])
 
 #########
@@ -158,14 +165,16 @@ g = addgroup!(SUITE, "matmul")
 # mixed sparse-dense matmul #
 #---------------------------#
 
-if VERSION >= v"0.7.0-DEV.3204"
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra: *, mul!
+elseif VERSION >= v"0.7.0-DEV.3204"
     using Base.LinAlg: *, mul!
 else
     using Base.LinAlg: *, A_mul_B!,
         A_mul_Bt,  A_mul_Bc,  A_mul_Bt!,  A_mul_Bc!,
         At_mul_B,  Ac_mul_B,  At_mul_B!,  Ac_mul_B!,
         At_mul_Bt, Ac_mul_Bc, At_mul_Bt!, Ac_mul_Bc!
-end    
+end
 
 if VERSION >= v"0.7.0-DEV.3204"
     function allocmats_ds(om, ok, on, s, nnzc, T)
