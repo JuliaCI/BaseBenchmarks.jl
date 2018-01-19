@@ -6,13 +6,19 @@ using Base.Threads
 if VERSION >= v"0.7.0-DEV.3406"
     using Random
 end
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra
+else
+    using Base.LinAlg
+    const LinearAlgebra = Base.LinAlg
+end
 
 # Run paths in parallel (has to be in its own function due to #10718)
 if VERSION >= v"0.7.0-DEV.3204"
     function runpath!(n, Wiener, CorrWiener, SA, SB, T, UpperTriangle, k11, k12, k21, k22, rngs)
         @threads for i = 1:n
             randn!(rngs[threadid()], Wiener)
-            Base.LinAlg.mul!(CorrWiener, Wiener, UpperTriangle)
+            LinearAlgebra.mul!(CorrWiener, Wiener, UpperTriangle)
             @simd for j = 2:T
                 @inbounds SA[j, i] = SA[j-1, i] * exp(k11 + k12*CorrWiener[j-1, 1])
                 @inbounds SB[j, i] = SB[j-1, i] * exp(k21 + k22*CorrWiener[j-1, 2])

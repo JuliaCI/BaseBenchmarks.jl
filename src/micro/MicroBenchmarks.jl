@@ -1,14 +1,18 @@
 module MicroBenchmarks
 
+using BenchmarkTools
+using Compat
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra
+end
+
 # This module contains the Julia microbenchmarks shown in the language
 # comparison table at http://julialang.org/.
 
 include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
-include("methods.jl")
-
 using .RandUtils
-using BenchmarkTools
-using Compat
+
+include("methods.jl")
 
 const SUITE = BenchmarkGroup(["recursion", "fibonacci", "fib",  "parse", "parseint",
                               "mandel", "mandelbrot", "sort", "quicksort", "pi", "π", "sum",

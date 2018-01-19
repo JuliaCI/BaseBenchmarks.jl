@@ -2,6 +2,13 @@ module Raytracer
 
 using Compat
 
+if VERSION >= v"0.7.0-DEV.3449"
+    using LinearAlgebra
+    import LinearAlgebra.dot
+else
+    import Base.dot
+end
+
 # This is a translation from Java/C++ of the raytracer located at
 #   http://www.ffconsultancy.com/languages/tracerayr/
 # This code was discussed at
@@ -21,7 +28,7 @@ Base.:-(a::Vec, b::Vec) = Vec(a.x-b.x, a.y-b.y, a.z-b.z)
 Base.:*(a::Float64, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
 Base.:*(a::Int, b::Vec) = Vec(a*b.x, a*b.y, a*b.z)
 Base.:*(a::Vec, b::Float64) = *(b,a)
-Base.dot(a::Vec, b::Vec) = (a.x*b.x + a.y*b.y + a.z*b.z)
+dot(a::Vec, b::Vec) = (a.x*b.x + a.y*b.y + a.z*b.z)
 
 unitize(a::Vec) = (1. / sqrt(dot(a, a)) * a)
 
