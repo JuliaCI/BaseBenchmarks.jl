@@ -9,6 +9,9 @@ using Compat
 if VERSION >= v"0.7.0-DEV.3406"
     using Random
 end
+if VERSION >= v"0.7.0-DEV.3476"
+    using Serialization
+end
 
 const SUITE = BenchmarkGroup()
 
