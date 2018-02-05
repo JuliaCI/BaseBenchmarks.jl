@@ -9,10 +9,10 @@ using Compat
 const SUITE = BenchmarkGroup()
 
 ########################
-# find                 #
+# findall              #
 ########################
 
-g = addgroup!(SUITE, "find")
+g = addgroup!(SUITE, "findall")
 
 const VEC_LENGTH = 1000
 
@@ -22,9 +22,9 @@ for (name, x) in (("50-50", samerand(Bool, VEC_LENGTH)),
     bx = BitArray(x)
     gx = (v for v in x)
 
-    g[string(typeof(x)), name] = @benchmarkable find($x)
-    g[string(typeof(bx)), name] = @benchmarkable find($bx)
-    g[string(typeof(gx)), name] = @benchmarkable find($gx)
+    g[string(typeof(x)), name] = @benchmarkable findall($x)
+    g[string(typeof(bx)), name] = @benchmarkable findall($bx)
+    g[string(typeof(gx)), name] = @benchmarkable findall($gx)
 end
 
 
@@ -34,8 +34,8 @@ for T in (Bool, Int8, Int, UInt8, UInt, Float32, Float64)
     y = samerand(T, VEC_LENGTH)
     gy = (v for v in y)
 
-    g["ispos", string(typeof(y))] = @benchmarkable find($ispos, $y)
-    g["ispos", string(typeof(gy))] = @benchmarkable find($ispos, $gy)
+    g["ispos", string(typeof(y))] = @benchmarkable findall($ispos, $y)
+    g["ispos", string(typeof(gy))] = @benchmarkable findall($ispos, $gy)
 end
 
 ########################
