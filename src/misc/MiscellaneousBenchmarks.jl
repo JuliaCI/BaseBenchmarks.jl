@@ -71,7 +71,7 @@ g["UInt32", "UInt32"] = @benchmarkable perf_bitshift($(UInt32(1):UInt32(1000)), 
 ###########################################################################
 # Integer, Float64, and Date (#18000) parsing
 
-if !method_exists(parse, Tuple{Type{DateTime}, AbstractString})
+if !hasmethod(parse, Tuple{Type{DateTime}, AbstractString})
     Base.parse(::Type{DateTime}, s::AbstractString) = DateTime(s)
 end
 
