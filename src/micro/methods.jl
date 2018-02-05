@@ -8,12 +8,18 @@ perf_micro_fib(n) = n < 2 ? n : perf_micro_fib(n-1) + perf_micro_fib(n-2)
 # parseint #
 ############
 
+if VERSION >= v"0.7.0-DEV.3526"
+    _parse16(s) = parse(Int64, s, base=16)
+else
+    _parse16(s) = parse(Int64, s, 16)
+end
+
 function perf_micro_parseint(t)
     local n, m
     for i=1:t
         n = rand(UInt32)
         s = hex(n)
-        m = UInt32(parse(Int64,s,16))
+        m = UInt32(_parse16(s))
     end
     @assert m == n
     return n

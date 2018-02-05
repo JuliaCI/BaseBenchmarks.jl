@@ -469,7 +469,7 @@ end
 
 g = addgroup!(SUITE, "rem_pio2")
 const _rem = try
-    method_exists(Base.Math.ieee754_rem_pio2, Tuple{Float64})
+    hasmethod(Base.Math.ieee754_rem_pio2, Tuple{Float64})
     Base.Math.ieee754_rem_pio2
 catch
     Base.Math.rem_pio2_kernel
