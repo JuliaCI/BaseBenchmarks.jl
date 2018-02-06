@@ -16,9 +16,9 @@ g = addgroup!(SUITE, "findall")
 
 const VEC_LENGTH = 1000
 
-for (name, x) in (("50-50", samerand(Bool, VEC_LENGTH)),
-                  ("10-90", samerand(VEC_LENGTH) .> .9),
-                  ("90-10", samerand(VEC_LENGTH) .> .1))
+for (name, x) in (("50-50", Vector{Bool}(samerand(Bool, VEC_LENGTH))),
+                  ("10-90", Vector{Bool}(samerand(VEC_LENGTH) .> .9)),
+                  ("90-10", Vector{Bool}(samerand(VEC_LENGTH) .> .1)))
     bx = BitArray(x)
     gx = (v for v in x)
 
