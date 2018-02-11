@@ -777,4 +777,78 @@ for T in (Float32, Float64)
     g["0.5 <= abs(x) < 1", "positive argument", _arg_string] = @benchmarkable atanh($(T(0.75)))
     g["0.5 <= abs(x) < 1", "negative argument", _arg_string] = @benchmarkable atanh($(-T(0.75)))
 end
+
+#########
+# cbrt #
+#########
+
+g = addgroup!(SUITE, "cbrt")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable cbrt($(zero(T)))
+    g["one", _arg_string] = @benchmarkable cbrt($(one(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable cbrt($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable cbrt($(prevfloat(zero(T))))
+    g["small", "positive argument", _arg_string] = @benchmarkable cbrt($(T(0.25)))
+    g["small", "negative argument", _arg_string] = @benchmarkable cbrt($(-T(0.25)))
+    g["medium", "positive argument", _arg_string] = @benchmarkable cbrt($(T(95.75)))
+    g["medium", "negative argument", _arg_string] = @benchmarkable cbrt($(-T(95.75)))
+    g["large", "positive argument", _arg_string] = @benchmarkable cbrt($(T(3.0)^84))
+    g["large", "negative argument", _arg_string] = @benchmarkable cbrt($(-T(3.0)^84))
+end
+#########
+# exp2 #
+#########
+
+g = addgroup!(SUITE, "exp2")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable exp2($(zero(T)))
+    g["one", _arg_string] = @benchmarkable exp2($(one(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable exp2($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable exp2($(prevfloat(zero(T))))
+    g["small", "positive argument", _arg_string] = @benchmarkable exp2($(T(0.25)))
+    g["small", "negative argument", _arg_string] = @benchmarkable exp2($(-T(0.25)))
+    g["2pow3", "positive argument", _arg_string] = @benchmarkable exp2($(T(2)^3))
+    g["2pow3", "negative argument", _arg_string] = @benchmarkable exp2($(-T(2)^3))
+    g["2pow35", "positive argument", _arg_string] = @benchmarkable exp2($(T(2.0)^35))
+    g["2pow35", "negative argument", _arg_string] = @benchmarkable exp2($(-T(2.0)^35))
+end
+g["2pow1023", "positive argument", Float64] = @benchmarkable exp2($((2.0)^1023))
+g["2pow1023", "negative argument", Float64] = @benchmarkable exp2($(-(2.0)^1023))
+g["2pow127", "positive argument", Float32] = @benchmarkable exp2($((2.0f0)^127))
+g["2pow127", "negative argument", Float32] = @benchmarkable exp2($(-(2.0f0)^127))
+
+#########
+# expm1 #
+#########
+
+g = addgroup!(SUITE, "expm1")
+for T in (Float32, Float64)
+    _arg_string = arg_string(T)
+    g["zero", _arg_string] = @benchmarkable expm1($(zero(T)))
+    g["one", _arg_string] = @benchmarkable expm1($(one(T)))
+    g["very small", "positive argument", _arg_string] = @benchmarkable expm1($(nextfloat(zero(T))))
+    g["very small", "negative argument", _arg_string] = @benchmarkable expm1($(prevfloat(zero(T))))
+    g["small", "positive argument", _arg_string] = @benchmarkable expm1($(T(0.25)))
+    g["small", "negative argument", _arg_string] = @benchmarkable expm1($(-T(0.25)))
+    g["medium", "positive argument", _arg_string] = @benchmarkable expm1($(T(95.75)))
+    g["medium", "negative argument", _arg_string] = @benchmarkable expm1($(-T(95.75)))
+    g["large", "positive argument", _arg_string] = @benchmarkable expm1($(T(2.0)^20))
+    g["large", "negative argument", _arg_string] = @benchmarkable expm1($(-T(2.0)^20))
+    g["large", "positive argument", _arg_string] = @benchmarkable expm1($(T(2.0)^40))
+    g["large", "negative argument", _arg_string] = @benchmarkable expm1($(-T(2.0)^40))
+end
+
+g["huge", "positive argument", "Float64"] = @benchmarkable expm1($(-56.0*0.6931471805599453-10))
+g["arg reduction I", "positive argument", "Float64"] = @benchmarkable expm1($(0.5*0.6931471805599453+0.1))
+g["arg reduction I", "negative argument", "Float64"] = @benchmarkable expm1($(0.5*0.6931471805599453+0.1))
+g["arg reduction II", "positive argument", "Float64"] = @benchmarkable expm1($(1.5*0.6931471805599453-0.1))
+g["arg reduction II", "negative argument", "Float64"] = @benchmarkable expm1($(1.5*0.6931471805599453-0.1))
+g["huge", "positive argument", "Float3"] = @benchmarkable expm1($(-18.714973f0-10f0))
+g["arg reduction I", "positive argument", "Float32"] = @benchmarkable expm1($(0.5f0*0.6931472f0+0.1f0))
+g["arg reduction I", "negative argument", "Float32"] = @benchmarkable expm1($(0.5f0*0.6931472f0+0.1f0))
+g["arg reduction II", "positive argument", "Float32"] = @benchmarkable expm1($(1.5f0*0.6931472f0-0.1f0))
+g["arg reduction II", "negative argument", "Float32"] = @benchmarkable expm1($(1.5f0*0.6931472f0-0.1f0))
+
 end # module
