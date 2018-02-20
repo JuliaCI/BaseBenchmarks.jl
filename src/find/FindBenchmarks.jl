@@ -19,12 +19,15 @@ const VEC_LENGTH = 1000
 for (name, x) in (("50-50", Vector{Bool}(samerand(Bool, VEC_LENGTH))),
                   ("10-90", Vector{Bool}(samerand(VEC_LENGTH) .> .9)),
                   ("90-10", Vector{Bool}(samerand(VEC_LENGTH) .> .1)))
-    bx = BitArray(x)
-    gx = (v for v in x)
-
     g[string(typeof(x)), name] = @benchmarkable findall($x)
+
+    bx = BitArray(x)
     g[string(typeof(bx)), name] = @benchmarkable findall($bx)
-    g[string(typeof(gx)), name] = @benchmarkable findall($gx)
+
+    if VERSION < v"0.7.0-DEV.4017"
+        gx = (v for v in x)
+        g[string(typeof(gx)), name] = @benchmarkable findall($gx)
+    end
 end
 
 
@@ -32,10 +35,12 @@ ispos(x) = x > 0
 
 for T in (Bool, Int8, Int, UInt8, UInt, Float32, Float64)
     y = samerand(T, VEC_LENGTH)
-    gy = (v for v in y)
-
     g["ispos", string(typeof(y))] = @benchmarkable findall($ispos, $y)
-    g["ispos", string(typeof(gy))] = @benchmarkable findall($ispos, $gy)
+
+    if VERSION < v"0.7.0-DEV.4017"
+        gy = (v for v in y)
+        g["ispos", string(typeof(gy))] = @benchmarkable findall($ispos, $gy)
+    end
 end
 
 ########################
