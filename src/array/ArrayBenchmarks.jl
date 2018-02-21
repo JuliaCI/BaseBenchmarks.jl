@@ -47,7 +47,7 @@ include("sumindex.jl")
 A3d = samerand(11,11,11)
 S3d = view(A3d, 1:10, 1:10, 1:10)
 arrays = (makearrays(Int32, σ, σ)..., makearrays(Float32, σ, σ)..., trues(σ, σ), A3d, S3d)
-ranges = (1:10^5, 10^5:-1:1, 1.0:1e5, linspace(1,2,10^4))
+ranges = (1:10^5, 10^5:-1:1, 1.0:1e5, range(1,stop=2,length=10^4))
 arrays_iter = map(x -> (x, string(typeof(x))), arrays)
 ranges_iter = map(x -> (x, repr(x)), ranges)
 g = addgroup!(SUITE, "index", ["sum", "simd"])
@@ -211,7 +211,7 @@ perf_compr_collect(X) = [x for x in X]
 perf_compr_iter(X) = [sin(x) + x^2 - 3 for x in X]
 perf_compr_index(X) = [sin(X[i]) + (X[i])^2 - 3 for i in eachindex(X)]
 
-ls = linspace(0,1,10^7)
+ls = range(0,stop=1,length=10^7)
 rg = 0.0:(10.0^(-7)):1.0
 arr = collect(ls)
 
@@ -243,8 +243,8 @@ function perf_true_load!(result)
     return result
 end
 
-n, range = 10^6, -3:3
-a, b = samerand(range, n), samerand(range)
+n, vals = 10^6, -3:3
+a, b = samerand(vals, n), samerand(vals)
 
 boolarr = Vector{Bool}(uninitialized, n)
 if VERSION >= v"0.7.0-DEV.2687"
