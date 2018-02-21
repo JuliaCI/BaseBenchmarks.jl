@@ -84,7 +84,7 @@ function perf_parse(result::AbstractVector{T}, strings::AbstractVector) where T
 end
 
 g = addgroup!(SUITE, "parse", ["DateTime"])
-datestr = map(string,range(DateTime("2016-02-19T12:34:56"),step=Dates.Millisecond(123),length=200))
+datestr = map(string,range(DateTime("2016-02-19T12:34:56"),Dates.Millisecond(123),200))
 g["DateTime"] = @benchmarkable perf_parse($(similar(datestr, DateTime)), $datestr)
 g["Int"] = @benchmarkable perf_parse($(Vector{Int}(uninitialized, 1000)), $(map(string, 1:1000)))
 g["Float64"] = @benchmarkable perf_parse($(Vector{Float64}(uninitialized, 1000)), $(map(string, 1:1000)))
