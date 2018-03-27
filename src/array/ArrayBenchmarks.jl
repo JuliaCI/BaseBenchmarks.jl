@@ -352,7 +352,7 @@ g["cumsum", "Float64"] = @benchmarkable cumsum($afloat)
 g["cumsum", "Int"] = @benchmarkable cumsum($aint)
 
 resafloat = similar(afloat)
-resaint = similar(bint)
+resaint = similar(aint)
 
 g["accumulate!", "Float64"] = @benchmarkable accumulate!(+, $resafloat, $afloat)
 g["accumulate!", "Int"] = @benchmarkable accumulate!(+, $resaint, $aint)
