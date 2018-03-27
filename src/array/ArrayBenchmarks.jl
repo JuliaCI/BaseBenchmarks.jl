@@ -339,4 +339,33 @@ for x in (x_range, collect(x_range), Int16.(x_range), Float64.(x_range), Float32
     g["all", string(typeof(x), " generator")] = @benchmarkable all(v -> v > 0, $gen)
 end
 
+###########
+# accumulate
+###########
+
+g = addgroup!(SUITE, "accumulate", ["accumulate","cumsum"])
+
+g["accumulate", "Float64"] = @benchmarkable accumulate(+, $afloat)
+g["accumulate", "Int"] = @benchmarkable accumulate(+, $int)
+
+g["cumsum", "Float64"] = @benchmarkable cumsum($afloat)
+g["cumsum", "Int"] = @benchmarkable cumsum($aint)
+
+resafloat = similar(afloat)
+resaint = similar(bint)
+
+g["accumulate!", "Float64"] = @benchmarkable accumulate!(+, $resafloat, $afloat)
+g["accumulate!", "Int"] = @benchmarkable accumulate!(+, $resaint, $aint)
+
+g["cumsum!", "Float64"] = @benchmarkable cumsum!($resafloat, $afloat)
+g["cumsum!", "Int"] = @benchmarkable cumsum!($resaint, $aint)
+
+mfloat = samerand(10^3,10^3)
+g["cumsum", "Float64", "dim1"] = @benchmarkable cumsum($mfloat, dims=1)
+g["cumsum", "Float64", "dim2"] = @benchmarkable cumsum($mfloat, dims=2)
+
+resmfloat = similar(mfloat)
+g["cumsum!", "Float64", "dim1"] = @benchmarkable cumsum!($resmfloat, $mfloat, dims=1)
+g["cumsum!", "Float64", "dim2"] = @benchmarkable cumsum!($resmfloat, $mfloat, dims=2)
+
 end # module
