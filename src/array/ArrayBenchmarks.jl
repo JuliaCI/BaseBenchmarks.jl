@@ -246,9 +246,9 @@ end
 n, vals = 10^6, -3:3
 a, b = samerand(vals, n), samerand(vals)
 
-boolarr = Vector{Bool}(uninitialized, n)
+boolarr = Vector{Bool}(undef, n)
 if VERSION >= v"0.7.0-DEV.2687"
-    bitarr = BitArray(uninitialized, n)
+    bitarr = BitArray(undef, n)
 else
     bitarr = BitArray(n)
 end
@@ -338,5 +338,34 @@ for x in (x_range, collect(x_range), Int16.(x_range), Float64.(x_range), Float32
     g["any", string(typeof(x), " generator")] = @benchmarkable any(v -> v < 0, $gen)
     g["all", string(typeof(x), " generator")] = @benchmarkable all(v -> v > 0, $gen)
 end
+
+###########
+# accumulate
+###########
+
+g = addgroup!(SUITE, "accumulate", ["accumulate","cumsum"])
+
+g["accumulate", "Float64"] = @benchmarkable accumulate(+, $afloat)
+g["accumulate", "Int"] = @benchmarkable accumulate(+, $aint)
+
+g["cumsum", "Float64"] = @benchmarkable cumsum($afloat)
+g["cumsum", "Int"] = @benchmarkable cumsum($aint)
+
+resafloat = similar(afloat)
+resaint = similar(aint)
+
+g["accumulate!", "Float64"] = @benchmarkable accumulate!(+, $resafloat, $afloat)
+g["accumulate!", "Int"] = @benchmarkable accumulate!(+, $resaint, $aint)
+
+g["cumsum!", "Float64"] = @benchmarkable cumsum!($resafloat, $afloat)
+g["cumsum!", "Int"] = @benchmarkable cumsum!($resaint, $aint)
+
+mfloat = samerand(10^3,10^3)
+g["cumsum", "Float64", "dim1"] = @benchmarkable Compat.cumsum($mfloat, dims=1)
+g["cumsum", "Float64", "dim2"] = @benchmarkable Compat.cumsum($mfloat, dims=2)
+
+resmfloat = similar(mfloat)
+g["cumsum!", "Float64", "dim1"] = @benchmarkable Compat.cumsum!($resmfloat, $mfloat, dims=1)
+g["cumsum!", "Float64", "dim2"] = @benchmarkable Compat.cumsum!($resmfloat, $mfloat, dims=2)
 
 end # module
