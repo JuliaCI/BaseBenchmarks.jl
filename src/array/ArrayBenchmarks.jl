@@ -243,8 +243,8 @@ function perf_true_load!(result)
     return result
 end
 
-n, range = 10^6, -3:3
-a, b = samerand(range, n), samerand(range)
+n, vals = 10^6, -3:3
+a, b = samerand(vals, n), samerand(vals)
 
 boolarr = Vector{Bool}(undef, n)
 if VERSION >= v"0.7.0-DEV.2687"
