@@ -13,13 +13,13 @@ function perf_lucompletepivCopy!(A)
         μ, λ = _maxind(As)
         μ += k-1; λ += k-1
         rowpiv[k] = μ
-        A[[k,μ], 1:n] .= A[[μ,k], 1:n]
+        A[[k,μ], 1:n] = A[[μ,k], 1:n]
         colpiv[k] = λ
-        A[1:n, [k,λ]] .= A[1:n, [λ,k]]
+        A[1:n, [k,λ]] = A[1:n, [λ,k]]
         if A[k,k] ≠ 0
             ρ = k+1:n
-            A[ρ, k] ./= A[k, k]
-            A[ρ, ρ] .-= A[ρ, k:k] .* A[k:k, ρ]
+            A[ρ, k] = A[ρ, k]/A[k, k]
+            A[ρ, ρ] = A[ρ, ρ] - A[ρ, k:k] * A[k:k, ρ]
         end
     end
     return (A, rowpiv, colpiv)
@@ -34,13 +34,13 @@ function perf_lucompletepivSub!(A)
         μ, λ = _maxind(As)
         μ += k-1; λ += k-1
         rowpiv[k] = μ
-        A[[k,μ], 1:n] .= view(A, [μ,k], 1:n)
+        A[[k,μ], 1:n] = view(A, [μ,k], 1:n)
         colpiv[k] = λ
-        A[1:n, [k,λ]] .= view(A, 1:n, [λ,k])
+        A[1:n, [k,λ]] = view(A, 1:n, [λ,k])
         if A[k,k] ≠ 0
             ρ = k+1:n
-            A[ρ, k] ./= A[k, k]
-            A[ρ, ρ] .-= view(A, ρ, k:k) .* view(A, k:k, ρ)
+            A[ρ, k] = view(A, ρ, k)/A[k, k]
+            A[ρ, ρ] = view(A, ρ, ρ) - view(A, ρ, k:k) * view(A, k:k, ρ)
         end
     end
     return (A, rowpiv, colpiv)

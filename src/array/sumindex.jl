@@ -287,7 +287,7 @@ end
 function makearrays(::Type{T}, r::Integer, c::Integer) where T
     A = samerand(T, r, c)
     B = similar(A, r+1, c+1)
-    B[1:r, 1:c] .= A
+    B[1:r, 1:c] = A
     AS = ArrayLS(B)
     ASS = ArrayLSLS(B)
     AF = ArrayLF(A)
