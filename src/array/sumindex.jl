@@ -75,7 +75,7 @@ function perf_sumlogical(A)
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = falses(nrows)
-    r[1:4:end] = true
+    r[1:4:end] .= true
     @simd for i = 1:ncols
         val = Base.unsafe_getindex(A, r, i)
         s += first(val)
@@ -151,7 +151,7 @@ function perf_sumlogical_view(A)
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = falses(nrows)
-    r[1:4:end] = true
+    r[1:4:end] .= true
     @inbounds for i = 1:ncols
         val = view(A, r, i)
         s += first(val)

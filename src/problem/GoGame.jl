@@ -297,7 +297,7 @@ end
 #          that will not happen.
 #
 function compute_final_status!(board::Board)
-    board.final_status[:] = UNKNOWN
+    fill!(board.final_status, UNKNOWN)
     for i = 1:board.size, j = 1:board.size
         if board[i, j] == EMPTY
             for k = 1:4
@@ -415,7 +415,7 @@ function perf_go_game(num_games_per_point::Int)
             passes = 0
             num_moves = 1
             color = WHITE
-            board.board[:] = EMPTY # clear board
+            fill!(board.board, EMPTY) # clear board
             play_move!(board, i, j, BLACK)
             while passes < 3 && num_moves < 600
                 (movei, movej) = generate_move(board, color)
