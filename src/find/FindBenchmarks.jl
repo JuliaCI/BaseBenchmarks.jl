@@ -55,7 +55,7 @@ const VEC_LENGTH = 1000
 if VERSION < v"0.7.0-DEV.3399"
 
     function perf_findnext(x)
-        s = findnext(x, first(linearindices(x)))
+        s = findfirst(x)
         while s > 0
             s = findnext(x, nextind(x, s))
         end
@@ -63,7 +63,7 @@ if VERSION < v"0.7.0-DEV.3399"
     end
 
     function perf_findprev(x)
-        s = findprev(x, last(linearindices(x)))
+        s = findlast(x)
         while s > 0
             s = findprev(x, prevind(x, s))
         end
@@ -71,7 +71,7 @@ if VERSION < v"0.7.0-DEV.3399"
     end
 
     function perf_findnext(pred, x)
-        s = findnext(pred, x, first(linearindices(x)))
+        s = findfirst(pred, x)
         while s > 0
             s = findnext(pred, x, nextind(x, s))
         end
@@ -79,7 +79,7 @@ if VERSION < v"0.7.0-DEV.3399"
     end
 
     function perf_findprev(pred, x)
-        s = findprev(pred, x, last(linearindices(x)))
+        s = findlast(pred, x)
         while s > 0
             s = findprev(pred, x, prevind(x, s))
         end
@@ -89,7 +89,7 @@ if VERSION < v"0.7.0-DEV.3399"
 else
 
     function perf_findnext(x)
-        s = findnext(x, first(linearindices(x)))
+        s = findfirst(x)
         while s !== nothing
             s = findnext(x, nextind(x, s))
         end
@@ -97,7 +97,7 @@ else
     end
 
     function perf_findprev(x)
-        s = findprev(x, last(linearindices(x)))
+        s = findlast(x)
         while s !== nothing
             s = findprev(x, prevind(x, s))
         end
@@ -105,7 +105,7 @@ else
     end
 
     function perf_findnext(pred, x)
-        s = findnext(pred, x, first(linearindices(x)))
+        s = findfirst(pred, x)
         while s !== nothing
             s = findnext(pred, x, nextind(x, s))
         end
@@ -113,7 +113,7 @@ else
     end
 
     function perf_findprev(pred, x)
-        s = findprev(pred, x, last(linearindices(x)))
+        s = findlast(pred, x)
         while s !== nothing
             s = findprev(pred, x, prevind(x, s))
         end
