@@ -105,7 +105,7 @@ for s in SIZES
 
     for T in [Int32, Int64, Float32, Float64]
         arr = samerand(T, s)
-        g["cumsum!", T, s] = @benchmarkable cumsum!($arr, $arr)
+        g["cumsum!", T, s] = @benchmarkable cumsum!($arr, $(arr.÷length(arr)))
     end
 
     for M in (UpperTriangular, UnitUpperTriangular, NPDUpperTriangular, Hermitian)
