@@ -297,7 +297,7 @@ end
 #          that will not happen.
 #
 function compute_final_status!(board::Board)
-    board.final_status[:] = UNKNOWN
+    fill!(board.final_status, UNKNOWN)
     for i = 1:board.size, j = 1:board.size
         if board[i, j] == EMPTY
             for k = 1:4
@@ -351,7 +351,7 @@ function generate_move(board::Board, color::Int)
             # Further require the move not to be suicide for the opponent...
             if !suicide(board, ai, aj, other_color(color))
                 num_moves += 1
-                moves[:,num_moves] .= (ai, aj)
+                moves[:,num_moves] = [ai, aj]
             else
                 # ...however, if the move captures at least one stone,
                 # consider it anyway.
@@ -359,7 +359,7 @@ function generate_move(board::Board, color::Int)
                     (bi, bj) = neighbor(ai, aj, k)
                     if on_board(board, bi, bj) && board[bi, bj] == other_color(color)
                         num_moves += 1
-                        moves[:,num_moves] .= (ai, aj)
+                        moves[:,num_moves] = [ai, aj]
                         break
                     end
                 end
@@ -415,7 +415,7 @@ function perf_go_game(num_games_per_point::Int)
             passes = 0
             num_moves = 1
             color = WHITE
-            board.board[:] = EMPTY # clear board
+            fill!(board.board, EMPTY) # clear board
             play_move!(board, i, j, BLACK)
             while passes < 3 && num_moves < 600
                 (movei, movej) = generate_move(board, color)

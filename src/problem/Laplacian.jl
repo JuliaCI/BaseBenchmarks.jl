@@ -33,7 +33,7 @@ function ddx_spdiags(m)
     # Append new d[k]-th diagonal to compact form
     for k = 1:p
         i = max(1,1-d[k]):min(m,n-d[k])
-        a[(len[k]+1):len[k+1],:] .= [i i.+d[k] B[i.+(m>=n)*d[k],k]]
+        a[(len[k]+1):len[k+1],:] = [i i.+d[k] B[i.+(m>=n)*d[k],k]]
     end
 
     return sparse(a[:,1], a[:,2], a[:,3], m, n)
@@ -62,7 +62,7 @@ end
 
 function perf_laplace_iter_devec(N)
     u = zeros(N, N)
-    u[1, :] = 1
+    u[1, :] .= 1
     Niter = 2^10
     dx2 = 0.1*0.1
     dy2 = dx2
@@ -80,7 +80,7 @@ end
 
 function perf_laplace_iter_vec(N)
     u = zeros(N, N)
-    u[1,:] = 1
+    u[1,:] .= 1
     Niter = 2^10
     dx2 = dy2 = 0.1*0.1
     for i = 1:Niter
@@ -91,7 +91,7 @@ end
 
 function perf_laplace_iter_sub(N)
     u = zeros(N, N)
-    u[1,:] = 1
+    u[1,:] .= 1
     Niter = 2^10
     dx2 = dy2 = 0.1*0.1
     u0 = view(u, 2:N-1, 2:N-1)

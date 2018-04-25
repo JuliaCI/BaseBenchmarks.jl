@@ -20,9 +20,9 @@ function perf_stockcorr()
 
     ## Define storages
     SimulPriceA = zeros(T,n) # Simulated Price of Asset A
-    SimulPriceA[1,:] = CurrentPrice[1]
+    SimulPriceA[1,:] .= CurrentPrice[1]
     SimulPriceB = zeros(T,n) # Simulated Price of Asset B
-    SimulPriceB[1,:] = CurrentPrice[2]
+    SimulPriceB[1,:] .= CurrentPrice[2]
 
     ## Generating the paths of stock prices by Geometric Brownian Motion
     UpperTriangle=chol(Corr) # UpperTriangle Matrix by Cholesky decomposition

@@ -75,7 +75,7 @@ function perf_sumlogical(A)
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = falses(nrows)
-    r[1:4:end] = true
+    r[1:4:end] .= true
     @simd for i = 1:ncols
         val = Base.unsafe_getindex(A, r, i)
         s += first(val)
@@ -151,7 +151,7 @@ function perf_sumlogical_view(A)
     nrows = size(A, 1)
     ncols = size(A, 2)
     r = falses(nrows)
-    r[1:4:end] = true
+    r[1:4:end] .= true
     @inbounds for i = 1:ncols
         val = view(A, r, i)
         s += first(val)
@@ -287,7 +287,7 @@ end
 function makearrays(::Type{T}, r::Integer, c::Integer) where T
     A = samerand(T, r, c)
     B = similar(A, r+1, c+1)
-    B[1:r, 1:c] .= A
+    B[1:r, 1:c] = A
     AS = ArrayLS(B)
     ASS = ArrayLSLS(B)
     AF = ArrayLF(A)
