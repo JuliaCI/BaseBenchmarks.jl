@@ -358,7 +358,7 @@ g["accumulate!", "Float64"] = @benchmarkable accumulate!(+, $resafloat, $afloat)
 g["accumulate!", "Int"] = @benchmarkable accumulate!(+, $resaint, $aint)
 
 g["cumsum!", "Float64"] = @benchmarkable cumsum!($resafloat, $afloat)
-g["cumsum!", "Int"] = @benchmarkable cumsum!($resaint, $aint)
+g["cumsum!", "Int"] = @benchmarkable cumsum!($resaint, $(aint.÷length(aint)))
 
 mfloat = samerand(10^3,10^3)
 g["cumsum", "Float64", "dim1"] = @benchmarkable Compat.cumsum($mfloat, dims=1)
