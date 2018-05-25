@@ -38,7 +38,7 @@ function perf_euro_option_vec(npaths)
     S = fill(100.0, npaths)
     t1 = (r - 0.5*sigma^2)*dt
     t2 = sigma*sqrt(dt)
-    R = Array{Float64}(uninitialized, npaths)
+    R = Array{Float64}(undef, npaths)
 
     for i=1:steps
         S .*= exp.(t2 .* randn!(R) .+ t1)
