@@ -5,10 +5,8 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 using .RandUtils
 using BenchmarkTools
 using Compat
-
-if VERSION >= v"0.7.0-DEV.3449"
-    using LinearAlgebra
-end
+using Compat.LinearAlgebra
+using StatsBase
 
 const SUITE = BenchmarkGroup()
 
