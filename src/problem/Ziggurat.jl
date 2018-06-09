@@ -144,7 +144,7 @@ end
 randn_zig(sigma::Number) = sigma*randn_zig()
 
 function perf_ziggurat(n)
-    A = Vector{Float64}(uninitialized, n)
+    A = Vector{Float64}(undef, n)
     for i=1:length(A)
         A[i] = randn_zig()
     end
