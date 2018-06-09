@@ -114,6 +114,18 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
         g["broadcast", *, T, M] =
             @benchmarkable broadcast(_mul, $A, $B)
     end
+
+    if VERSION >= v"0.7.0-DEV.2971"
+        for (M, A) in ((false, X), (true, X2))
+            A2 = [x === nothing ? missing : x for x in A]
+
+            g["skipmissing", collect, T, M] =
+                @benchmarkable collect(skipmissing($A2))
+
+            g["skipmissing", sum, T, M] =
+                @benchmarkable sum(skipmissing($A2))
+        end
+    end
 end
 
 end # module
