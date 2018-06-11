@@ -92,6 +92,17 @@ else
     _at_mul_b(A, B) = At_mul_B(A, B)
 end
 
+if VERSION >= v"0.7.0-DEV.5238"
+    # std in StatsBase instead of in Base
+    function stdmean(x)
+        n = length(x)
+        m = mean(x)
+        sqrt(sum(xi->abs2(xi - m), x) / (n - 1)) / m
+    end
+else
+    stdmean(x) = std(x) / mean(x)
+end
+
 function perf_micro_randmatstat(t)
     n = 5
     v = zeros(t)
@@ -106,7 +117,7 @@ function perf_micro_randmatstat(t)
         v[i] = trace(_at_mul_b(P,P)^4)
         w[i] = trace(_at_mul_b(Q,Q)^4)
     end
-    return (std(v)/mean(v), std(w)/mean(w))
+    return (stdmean(v), stdmean(w))
 end
 
 ##############
