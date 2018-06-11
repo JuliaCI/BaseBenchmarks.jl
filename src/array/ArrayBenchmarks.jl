@@ -6,7 +6,6 @@ using .RandUtils
 using BenchmarkTools
 using Compat
 using Compat.LinearAlgebra
-using StatsBase
 
 const SUITE = BenchmarkGroup()
 
@@ -22,8 +21,11 @@ norminf(x) = norm(x, Inf)
 perf_reduce(x) = reduce((x,y) -> x + 2y, real(zero(eltype(x))), x)
 perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, real(zero(eltype(x))), x)
 for a in (afloat, aint)
-    for fun in (sum, norm, norm1, norminf, mean, var, perf_reduce, perf_mapreduce)
+    for fun in (sum, norm, norm1, norminf, mean, perf_reduce, perf_mapreduce)
         g[string(fun), string(eltype(a))] = @benchmarkable $fun($a)
+    end
+    @static if VERSION < v"0.7.0-DEV.5238"
+        g["var", string(eltype(a))] = @benchmarkable var($a)
     end
     g["sumabs2", string(eltype(a))] = @benchmarkable sum(abs2, $a)
     g["sumabs", string(eltype(a))] = @benchmarkable sum(abs, $a)
