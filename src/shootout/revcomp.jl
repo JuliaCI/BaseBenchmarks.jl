@@ -52,7 +52,9 @@ function perf_revcomp()
     #            write(line)
             else
                 l = length(line)-1
-                append!(buff, [UInt8(revcompdata[Char(line[i])]) for i=1:l])
+                let line = line # Workaround for julia#15276
+                    append!(buff, [UInt8(revcompdata[Char(line[i])]) for i=1:l])
+                end
             end
         end
     end
