@@ -76,7 +76,7 @@ end
 
 struct Group <: Scene
     bound::Sphere
-    objs::Array{Scene}
+    objs::Vector{Scene}
 end
 
 Group(b::Sphere) = Group(b, Scene[])
