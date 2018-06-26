@@ -161,6 +161,10 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
 
             g["skipmissing", sum, T, M] =
                 @benchmarkable sum(skipmissing($A2))
+
+            if hasmethod(isless, Tuple{T, T})
+                g["sort", T, M] = @benchmarkable sort($A2)
+            end
         end
     end
 end
