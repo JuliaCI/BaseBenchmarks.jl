@@ -27,7 +27,40 @@ _mul(::Nothing, ::Any) = nothing
 _mul(::Any, ::Nothing) = nothing
 _mul(::Nothing, ::Nothing) = nothing
 
+_isnothing(x) = false
+_isnothing(::Nothing) = true
+
 function perf_sum(X::AbstractArray{T}) where T
+    s = _zero(T) + _zero(T)
+    @inbounds @simd for x in X
+        if x !== nothing
+            s += x
+        end
+    end
+    s
+end
+
+function perf_sum2(X::AbstractArray{T}) where T
+    s = _zero(T) + _zero(T)
+    @inbounds @simd for x in X
+        if !_isnothing(x)
+            s += x
+        end
+    end
+    s
+end
+
+function perf_sum3(X::AbstractArray{T}) where T
+    s = _zero(T) + _zero(T)
+    @inbounds for x in X
+        if !_isnothing(x)
+            s += x
+        end
+    end
+    s
+end
+
+function perf_sum4(X::AbstractArray{T}) where T
     s = _zero(T) + _zero(T)
     @inbounds @simd for x in X
         s += ifelse(x === nothing, _zero(T), x)
@@ -86,6 +119,10 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
 
     for (M, A) in ((false, X), (true, X2))
         g["perf_sum", T, M] = @benchmarkable perf_sum($A)
+        g["perf_sum2", T, M] = @benchmarkable perf_sum2($A)
+        g["perf_sum3", T, M] = @benchmarkable perf_sum3($A)
+        g["perf_sum4", T, M] = @benchmarkable perf_sum4($A)
+
         g["perf_countnothing", T, M] = @benchmarkable perf_countnothing($A)
 
         g["perf_simplecopy", T, M] =
