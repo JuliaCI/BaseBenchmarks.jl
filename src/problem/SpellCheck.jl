@@ -24,6 +24,7 @@ const ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 words(text) = eachmatch(r"[a-z]+", lowercase(text))
 
 function train(features)
+    features.regex.match_options = Base.PCRE.NO_UTF_CHECK
     model = Dict{AbstractString, Int}()
     for f in features
         model[f.match] = 2
