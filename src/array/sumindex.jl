@@ -201,11 +201,20 @@ function setup_mapr_access(A)
     B = Vector{typeof(zz)}(undef, n)
     B, zz, n
 end
-function perf_mapr_access(A, B, zz, n) #20517
-    @inbounds for j in 1:n
-        B[j] = mapreduce(k -> A[j,k]*A[k,j], +, zz, 1:j)
+if VERSION < v"0.7.0-beta-81"
+    function perf_mapr_access(A, B, zz, n) #20517
+        @inbounds for j in 1:n
+            B[j] = mapreduce(k -> A[j,k]*A[k,j], +, zz, 1:j)
+        end
+        B
     end
-    B
+else
+    function perf_mapr_access(A, B, zz, n) #20517
+        @inbounds for j in 1:n
+            B[j] = mapreduce(k -> A[j,k]*A[k,j], +, 1:j; init=zz)
+        end
+        B
+    end
 end
 
 ##########################
