@@ -32,7 +32,7 @@ g[(3,3,3)] = @benchmarkable perf_splatting($(samerand(3,3,3)), 100, 1, 2, 3)
 
 function perf_afoldl(n, k)
     s = zero(eltype(k))
-    assert(length(k) >= 12)
+    @assert length(k) >= 12
     for i = 1:n
         s += k[1] + k[2] + k[3] + k[4] + k[5] + 2 * k[6] + k[7] + k[8] + k[9] + k[10] + k[11] + k[12]
     end
@@ -76,7 +76,7 @@ if !hasmethod(parse, Tuple{Type{DateTime}, AbstractString})
 end
 
 function perf_parse(result::AbstractVector{T}, strings::AbstractVector) where T
-    assert(length(result) == length(strings))
+    @assert length(result) == length(strings)
     for i = 1:length(strings)
         @inbounds result[i] = parse(T, strings[i])
     end
