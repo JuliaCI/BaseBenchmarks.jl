@@ -41,7 +41,11 @@ end
 function perf_catnd(n)
     A = samerand(1, n, n, 1)
     B = samerand(1, n, n)
-    return cat(3, A, B, B, A)
+    @static if VERSION >= v"0.7.0-DEV.5165"
+        return cat(A, B, B, A; dims = 3)
+    else
+        return cat(3, A, B, B, A)
+    end
 end
 
 function perf_catnd_setind(n)
