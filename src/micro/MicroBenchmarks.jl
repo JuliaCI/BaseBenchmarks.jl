@@ -5,6 +5,9 @@ using Compat
 if VERSION >= v"0.7.0-DEV.3449"
     using LinearAlgebra
 end
+if VERSION >= v"0.7.0-beta.85"
+    using Statistics
+end
 
 # This module contains the Julia microbenchmarks shown in the language
 # comparison table at http://julialang.org/.

@@ -14,11 +14,18 @@ else
     _parse16(s) = parse(Int64, s, 16)
 end
 
+if VERSION >= v"0.7.0-DEV.4446"
+    _hex(s) = string(s, base=16)
+else
+    _hex(s) = hex(s)
+end
+
+
 function perf_micro_parseint(t)
     local n, m
     for i=1:t
         n = rand(UInt32)
-        s = hex(n)
+        s = _hex(n)
         m = UInt32(_parse16(s))
     end
     @assert m == n
@@ -103,6 +110,11 @@ else
     stdmean(x) = std(x) / mean(x)
 end
 
+if VERSION < v"0.7.0-DEV.4591"
+    _tr(x) = trace(x)
+else
+    _tr(x) = tr(x)
+end
 function perf_micro_randmatstat(t)
     n = 5
     v = zeros(t)
@@ -114,8 +126,8 @@ function perf_micro_randmatstat(t)
         d = randn(n,n)
         P = [a b c d]
         Q = [a b; c d]
-        v[i] = trace(_at_mul_b(P,P)^4)
-        w[i] = trace(_at_mul_b(Q,Q)^4)
+        v[i] = _tr(_at_mul_b(P,P)^4)
+        w[i] = _tr(_at_mul_b(Q,Q)^4)
     end
     return (stdmean(v), stdmean(w))
 end

@@ -31,7 +31,11 @@ else
     # The searchindex deprecation target makes the updated searchindex group
     # redundant with the updated search group, so they've been combined here
     g = addgroup!(SUITE, "findfirst")
-    g["Char"] = @benchmarkable findfirst(equalto($('x')), $str)
+    if VERSION < v"0.7.0-DEV.4592"
+        g["Char"] = @benchmarkable findfirst(equalto($('x')), $str)
+    else
+        g["Char"] = @benchmarkable findfirst(isequal($('x')), $str)
+    end
     g["String"] = @benchmarkable findfirst($("x"), $str)
 end
 
