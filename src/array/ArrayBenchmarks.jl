@@ -18,8 +18,13 @@ acomplex = samerand(Complex{Float64}, 10^3)
 g = addgroup!(SUITE, "reductions", ["sum", "array", "reduce"])
 norm1(x) = norm(x, 1)
 norminf(x) = norm(x, Inf)
-perf_reduce(x) = reduce((x,y) -> x + 2y, real(zero(eltype(x))), x)
-perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, real(zero(eltype(x))), x)
+if VERSION < v"0.7.0-beta-81"
+    perf_reduce(x) = reduce((x,y) -> x + 2y, real(zero(eltype(x))), x)
+    perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, real(zero(eltype(x))), x)
+else
+    perf_reduce(x) = reduce((x,y) -> x + 2y, x; init=real(zero(eltype(x))))
+    perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, x; init=real(zero(eltype(x))))
+end
 for a in (afloat, aint)
     for fun in (sum, norm, norm1, norminf, mean, perf_reduce, perf_mapreduce)
         g[string(fun), string(eltype(a))] = @benchmarkable $fun($a)
