@@ -14,11 +14,18 @@ else
     _parse16(s) = parse(Int64, s, 16)
 end
 
+if VERSION >= v"0.7.0-DEV.4446"
+    _hex(s) = string(s, base=16)
+else
+    _hex(s) = hex(s)
+end
+
+
 function perf_micro_parseint(t)
     local n, m
     for i=1:t
         n = rand(UInt32)
-        s = hex(n)
+        s = _hex(n)
         m = UInt32(_parse16(s))
     end
     @assert m == n
