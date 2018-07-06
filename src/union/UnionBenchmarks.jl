@@ -14,7 +14,7 @@ const SUITE = BenchmarkGroup()
 
 g = addgroup!(SUITE, "array")
 
-const VEC_LENGTH = 1000
+const VEC_LENGTH = 10000
 
 _zero(::Type{T}) where {T} = zero(T)
 _zero(::Type{Union{T, Nothing}}) where {T} = zero(T)
