@@ -19,7 +19,7 @@ const SUITE = BenchmarkGroup()
 # read (#12364) #
 #################
 
-function perf_read!(io, ::Type{T}) where T
+function perf_read!(io, ::Type{T}) where T<:Number
     seekstart(io)
     x = zero(T)
     while !(eof(io))
@@ -28,11 +28,17 @@ function perf_read!(io, ::Type{T}) where T
     return x
 end
 
+function perf_read!(io, ::Type{String})
+    seekstart(io)
+    read(io, String)
+end
+
 g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 
-g["read"] = @benchmarkable perf_read!(testbuf, UInt8) setup = testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
-g["readfloat64"] = @benchmarkable perf_read!(testbuf, Float64) setup = testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
-g["readstring"] = @benchmarkable read(testbuf, String) setup = testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
+testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
+g["read"] = @benchmarkable perf_read!($testbuf, UInt8)
+g["readfloat64"] = @benchmarkable perf_read!($testbuf, Float64)
+g["readstring"] = @benchmarkable perf_read!($testbuf, String)
 
 #################################
 # serialization (#18633, #7893) #
