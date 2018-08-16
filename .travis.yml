@@ -4,9 +4,7 @@ os:
   - linux
 julia:
   - 0.6
+  - 1.0
   - nightly
 notifications:
   email: false
-script:
-    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-    - julia -e 'Pkg.clone(pwd()); Pkg.build("BaseBenchmarks"); Pkg.test("BaseBenchmarks")'

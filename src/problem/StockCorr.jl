@@ -25,7 +25,11 @@ function perf_stockcorr()
     SimulPriceB[1,:] .= CurrentPrice[2]
 
     ## Generating the paths of stock prices by Geometric Brownian Motion
-    UpperTriangle=chol(Corr) # UpperTriangle Matrix by Cholesky decomposition
+    @static if VERSION <= v"0.7.0-DEV.5211"
+        UpperTriangle = chol(Corr) # UpperTriangle Matrix by Cholesky decomposition
+    else
+        UpperTriangle = cholesky(Corr).U
+    end
 
     for i = 1:n
        Wiener = randn(T-1,2)

@@ -33,7 +33,11 @@ function perf_sparse_fem(N)
     # boundary condition
     B = A[Ifree, Ifree]
     # solver
-    return lufact(B)
+    @static if VERSION <= v"0.7.0-DEV.5211"
+        return lufact(B)
+    else
+        return lu(B)
+    end
 end
 
 end # module
