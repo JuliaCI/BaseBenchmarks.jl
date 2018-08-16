@@ -206,7 +206,12 @@ end
 function create_image_chaos(game::ChaosGame, w = DEFAULT_HEIGHT,
                             h = DEFAULT_WIDTH, iterations = DEFAULT_ITERATIONS;
                             filename = nothing, seed=DEFAULT_RNG_SEED)
-    srand(seed)
+
+    if VERSION <= v"0.7.0-beta2.171"
+        srand(seed)
+    else
+        Random.seed!(seed)
+    end
     im = ones(Int, h, w)
     point = GVector((game.maxx + game.minx) / 2, (game.maxy + game.miny) / 2, 0.0)
     for _ in 1:iterations

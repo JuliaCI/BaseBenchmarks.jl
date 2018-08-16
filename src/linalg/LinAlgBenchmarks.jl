@@ -155,8 +155,11 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["eig", mstr, s]     = @benchmarkable eig($m)
-        g["eigfact", mstr, s] = @benchmarkable eigfact($m)
+        if VERSION < v"0.7.0-DEV.5211"
+            g["eigen", mstr, s] = @benchmarkable eigfact($m)
+        else
+            g["eigen", mstr, s] = @benchmarkable eigen($m)
+        end
     end
 end
 
@@ -164,8 +167,11 @@ for M in (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["svd", mstr, s]     = @benchmarkable svd($m)
-        g["svdfact", mstr, s] = @benchmarkable svdfact($m)
+        if VERSION < v"0.7.0-DEV.5211"
+            g["svd", mstr, s] = @benchmarkable svdfact($m)
+        else
+            g["svd", mstr, s] = @benchmarkable svd($m)
+        end
     end
 end
 
@@ -173,8 +179,11 @@ for M in (Matrix, Tridiagonal)
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        g["lu", mstr, s]     = @benchmarkable lu($m)
-        g["lufact", mstr, s] = @benchmarkable lufact($m)
+        if VERSION < v"0.7.0-DEV.5211"
+            g["lu", mstr, s] = @benchmarkable lufact($m)
+        else
+            g["lu", mstr, s] = @benchmarkable lu($m)
+        end
     end
 end
 
@@ -182,12 +191,15 @@ for s in SIZES
     mstr = typename(Matrix)
     m = randmat(s)
     arr = m' * m
-    g["chol", mstr, s]      = @benchmarkable chol($arr)
-    g["cholfact", mstr, s]  = @benchmarkable cholfact($arr)
-    g["schur", mstr, s]     = @benchmarkable schur($m)
-    g["schurfact", mstr, s] = @benchmarkable schurfact($m)
-    g["qr", mstr, s]        = @benchmarkable qr($m)
-    g["qrfact", mstr, s]    = @benchmarkable qrfact($m)
+    if VERSION < v"0.7.0-DEV.5211"
+        g["cholesky", mstr, s] = @benchmarkable cholfact($arr)
+        g["schur",    mstr, s] = @benchmarkable schurfact($m)
+        g["qr",       mstr, s] = @benchmarkable qrfact($m)
+    else
+        g["cholesky", mstr, s] = @benchmarkable cholesky($arr)
+        g["schur",    mstr, s] = @benchmarkable schur($m)
+        g["qr",       mstr, s] = @benchmarkable qr($m)
+    end
 end
 
 for b in values(g)

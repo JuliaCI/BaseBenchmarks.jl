@@ -137,3 +137,20 @@ end
 ##############
 
 perf_micro_randmatmul(t) = rand(t,t)*rand(t,t)
+
+
+#################
+# print_to_file #
+#################
+
+if VERSION > v"0.7.0-DEV.3026"
+    using Printf
+end
+
+function perf_printfd(n)
+    open("/dev/null", "w") do io
+        for i = 1:n
+            @printf(io, "%d %d\n", i, i + 1)
+        end
+    end
+end

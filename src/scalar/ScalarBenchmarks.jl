@@ -193,15 +193,24 @@ end
 
 g = addgroup!(SUITE, "intfuncs", ["prevpow2", "nextpow2"])
 
+if VERSION <= v"0.7.0-beta2.195"
+    __prevpow2(x) = prevpow2(x)
+    __nextpow2(x) = nextpow2(x)
+else
+    __prevpow2(x) = prevpow(2, x)
+    __nextpow2(x) = nextpow(2, x)
+end
+
+
 for T in INTS
-    x = T[0, 1, 2, 3, 4, 10, 100, 1024, 10000, 2^30, 2^30-1]
+    x = T[1, 2, 3, 4, 10, 100, 1024, 10000, 2^30, 2^30-1]
     if T == BigInt
         push!(x, big(2)^3000, big(2)^3000-1)
     end
     y = similar(x)
     tol = in(T, BIGNUMS) ? 0.40 : 0.25
     tstr = string(T)
-    for funpow2 = (prevpow2, nextpow2), sgn = (+, -)
+    for funpow2 = (__prevpow2, __nextpow2), sgn = (+,)
         g[string(funpow2), tstr, string(sgn)] = @benchmarkable map!($funpow2, $y, $(sgn(x))) time_tolerance=tol
     end
 end

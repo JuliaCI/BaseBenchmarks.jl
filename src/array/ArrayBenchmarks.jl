@@ -9,6 +9,10 @@ using Compat.LinearAlgebra
 
 const SUITE = BenchmarkGroup()
 
+if VERSION >= v"0.7.0-beta.85"
+    using Statistics
+end
+
 #############################################################################
 # basic array-math reduction-like functions
 
@@ -47,6 +51,10 @@ end
 #--------#
 
 include("sumindex.jl")
+
+if VERSION > v"0.7.0-DEV.3986"
+    linspace(start, stop, length) = range(start; stop=stop, length=length)
+end
 
 σ = 500
 A3d = samerand(11,11,11)

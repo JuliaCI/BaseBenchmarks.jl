@@ -28,5 +28,8 @@ SUITE["quicksort"] = @benchmarkable perf_micro_quicksort(5000)
 SUITE["pisum"] = @benchmarkable perf_micro_pisum()
 SUITE["randmatstat"] = @benchmarkable perf_micro_randmatstat(1000)
 SUITE["randmatmul"] = @benchmarkable perf_micro_randmatmul(1000)
+if (VERSION <= v"0.7.0-DEV.914" ? is_unix() : Sys.isunix())
+    SUITE["printfd"] = @benchmarkable perf_printfd(10000)
+end
 
 end # module

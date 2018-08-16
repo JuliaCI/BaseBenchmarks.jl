@@ -117,15 +117,17 @@ set_tolerance!(g)
 # Iteration #
 #############
 
-g = addgroup!(SUITE, "iteration", ["AbstractVector", "AbstractSet", "Associative"])
 
-foreach_container() do C, cstr, T, tstr, c
-    g[cstr, tstr, "start"] = @benchmarkable start($c)
-    g[cstr, tstr, "next"]  = @benchmarkable next($c, $(start(c)))
-    g[cstr, tstr, "done"]  = @benchmarkable done($c, $(start(c)))
+if VERSION > v"0.7.0-DEV.5126"
+    g = addgroup!(SUITE, "iteration", ["AbstractVector", "AbstractSet", "Associative"])
+
+    foreach_container() do C, cstr, T, tstr, c
+        g[cstr, tstr, "iterate"] = @benchmarkable iterate($c)
+        g[cstr, tstr, "iterate second"]  = @benchmarkable iterate($c, $(iterate(c)[2]))
+    end
+
+    set_tolerance!(g)
 end
-
-set_tolerance!(g)
 
 ############
 # Deletion #
