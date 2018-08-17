@@ -122,4 +122,178 @@ g["macroexpand", "evalpoly"] = @benchmarkable macroexpand(@__MODULE__, $(Expr(:m
 
 ###########################################################################
 
+# Issue #12165
+
+struct FloatingPointDatatype
+    class::UInt8
+    bitfield1::UInt8
+    bitfield2::UInt8
+    bitfield3::UInt8
+    size::UInt32
+    bitoffset::UInt16
+    bitprecision::UInt16
+    exponentlocation::UInt8
+    exponentsize::UInt8
+    mantissalocation::UInt8
+    mantissasize::UInt8
+    exponentbias::UInt32
+end
+
+h5type(::Type{Float16}) =
+    FloatingPointDatatype(0x00, 0x20, 0x0f, 0x00, UInt32(2), 0x0000, UInt16(16), UInt8(10), 0x05, 0x00, UInt32(10), 0x0000000f)
+h5type(::Type{Float32}) =
+    FloatingPointDatatype(0x00, 0x20, 0x1f, 0x00, UInt32(4), 0x0000, UInt16(32), UInt8(23), 0x08, 0x00, UInt32(23), 0x0000007f)
+h5type(::Type{Float64}) =
+    FloatingPointDatatype(0x00, 0x20, 0x3f, 0x00, UInt32(8), 0x0000, UInt16(64), UInt8(52), 0x0b, 0x00, UInt32(52), 0x000003ff)
+
+struct UnsupportedFeatureException <: Exception end
+
+function jltype(dt::FloatingPointDatatype)
+    if dt == h5type(Float64)
+        return 64
+    elseif dt == h5type(Float32)
+        return 32
+    elseif dt == h5type(Float16)
+        return 16
+    else
+        throw(UnsupportedFeatureException())
+    end
+end
+
+x_16 = fill(h5type(Float16), 1000000)
+x_32 = fill(h5type(Float32), 1000000)
+x_64 = fill(h5type(Float64), 1000000)
+
+function perf_jltype(x)
+    y = 0
+    for i = 1:length(x)
+        y += jltype(x[i])
+    end
+    y
+end
+
+g = addgroup!(SUITE, "issue 12165")
+g["Float16"] = @benchmarkable perf_jltype($x_16)
+g["Float32"] = @benchmarkable perf_jltype($x_32)
+g["Float64"] = @benchmarkable perf_jltype($x_64)
+
+
+#########################################################################
+# issue #18129
+
+function perf_cheapest_insertion_18129(distmat::Matrix{T}, initpath::Vector{Int}) where {T<:Real}
+    check_square(distmat, "Distance matrix passed to cheapest_insertion must be square.")
+
+    n = size(distmat, 1)
+    path = copy(initpath)
+
+    # collect cities to visited
+    visitus = setdiff(collect(1:n), initpath)
+
+    # helper for insertion cost
+    # tour cost change for inserting node k after the node at index after in the path
+    function inscost(k, after)
+        return distmat[path[after], k] +
+              distmat[k, path[after + 1]] -
+              distmat[path[after], path[after + 1]]
+    end
+
+    counter = 0
+    while !isempty(visitus)
+        bestCost = Inf
+        bestInsertion = (-1, -1)
+        for k in visitus
+            for after in 1:(length(path) - 1) # can't insert after end of path
+                counter += 1
+                c = inscost(k, after)
+                if c < bestCost
+                    bestCost = c
+                    bestInsertion = (k, after)
+                end
+            end
+        end
+        # bestInsertion now holds (k, after)
+        # insert into path, remove from to-do list
+        k, after = bestInsertion
+        insert!(path, after + 1, k)
+        visitus = setdiff(visitus, k)
+    end
+
+    return (path, pathcost(distmat, path))
+end
+
+###
+# helpers
+###
+
+# make sure a passed distance matrix is a square
+function check_square(m, msg)
+    if size(m, 1) != size(m, 2)
+        error(msg)
+    end
+end
+
+# helper for readable one-line path costs
+# optionally specify the bounds for the subpath we want the cost of
+# defaults to the whole path
+# but when calculating reversed path costs can help to have subpath costs
+function pathcost(distmat::Matrix{T}, path::Vector{Int}, lb::Int = 1, ub::Int = length(path)) where {T<:Real}
+    cost = zero(T)
+    for i in lb:(ub - 1)
+        @inbounds cost += distmat[path[i], path[i+1]]
+    end
+    return cost
+end
+
+dm = samerand(Float64, 300, 300)
+SUITE["18129"] = @benchmarkable perf_cheapest_insertion_18129($dm, $([1, 1]))
+
+
+###############################################################################
+# issue #20517
+
+function perf_dsum_20517(A::Matrix)
+    z = zero(A[1,1])
+    n = size(A,1)
+    B = Vector{typeof(z)}(undef, n)
+
+    @inbounds for j in 1:n
+        @static if VERSION < v"0.7.0-beta.81"
+            B[j] = mapreduce(k -> A[j,k]*A[k,j], +, z, 1:j)
+        else
+            B[j] = mapreduce(k -> A[j,k]*A[k,j], +, 1:j; init=z)
+        end
+    end
+    B
+end
+
+A = samerand(127,127)
+SUITE["20517"] = @benchmarkable perf_dsum_20517($A)
+
+
+###############################################
+# issue # 23042
+
+struct Foo_23042{T<:Number, A<:AbstractMatrix{T}}
+    data::A
+end
+
+Foo_23042(data::AbstractMatrix) = Foo_23042{eltype(data), typeof(data)}(data)
+
+
+function perf_copy_23042(a, b)
+    for i in 1:length(a.data)
+        @inbounds a.data[i] = b.data[i]
+    end
+    a
+end
+
+g = addgroup!(SUITE, "23042")
+
+for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
+    b = samerand(T, 128, 128)
+    a = similar(b)
+    g[string(T)] = @benchmarkable perf_copy_23042($(Foo_23042(a)), $(Foo_23042(b)))
+end
+
 end

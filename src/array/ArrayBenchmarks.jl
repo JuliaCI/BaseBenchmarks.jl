@@ -195,6 +195,8 @@ for s in (5, 500)
     g["catnd_setind", s] = @benchmarkable perf_catnd_setind($s)
 end
 
+g["4467"] = @benchmarkable perf_cat_4467()
+
 ############################
 # in-place growth (#13977) #
 ############################

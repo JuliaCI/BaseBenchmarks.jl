@@ -59,4 +59,27 @@ testdata_buf = serialized_buf(testdata)
 g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, $testdata) setup=(io=IOBuffer())
 g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek($testdata_buf, 0); deserialize($testdata_buf))
 
+function perf_skipchars_21109()
+    mktemp() do _, file
+        println(file, "G")
+        flush(file)
+        seek(file, 0)
+        @static if VERSION <= v"0.7.0-DEV.3495"
+            skipchars(file, islowercase)
+        else
+            skipchars(islowercase, file)
+        end
+
+        for i in 1:1000000
+            @static if VERSION <= v"0.7.0-DEV.3495"
+                skipchars(file, islowercase)
+            else
+                skipchars(islowercase, file)
+            end
+        end
+    end
+end
+
+SUITE["skipchars"] = @benchmarkable perf_skipchars_21109()
+
 end # module

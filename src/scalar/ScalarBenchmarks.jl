@@ -83,6 +83,87 @@ for X in (INTS..., Char, Bool)
     end
 end
 
+
+function perf_13786(k::Float64,τ::Float64,twopiN::Float64)
+    W = getW(k,twopiN)
+    y = 1.00-k*τ
+    sqy = y>0.0 ? sqrt(y) : 0.0
+    tof::Float64 = sqy * (W*y + τ)
+    return tof
+end
+
+function getW(k::Float64,twopiN::Float64)
+    local sqrt2l= sqrt(2.0)
+    local K2c0  = 0.7542472332656508
+    local K2c1 = -0.2
+    local K2c2 = 0.08081220356417687
+    local K2c3 = -0.031746031746031744
+    local K2c4  = 0.012244273267299524
+    local K2c5 = -2.0/429.0
+    local K2c6 = 8.0 * sqrt(2.0)/6435.0
+    local K2c7 = -8.0/12155.0
+    local K2c8 = 8.0*sqrt(2.0)/46189.0
+    local k00 =0.3535533905932738
+    local k02  =3.00*k00*0.25
+    local k03  =-2.00/3.0
+    local k04  =15.0*sqrt(2.0)/128.0
+    local k05  =-2.0/5.0
+    local k06  =35.0*sqrt(2.0)/512.0
+    local k07  =-8/35.0
+    local k08  =315.0*sqrt(2.0)/8192.0
+    local twopi = 2.0*π
+
+    W = 0.0
+
+    @fastmath begin
+        if k<=-0.02
+            t2 = (k*k)
+            t3 = acos(t2 - 1.0)
+            t4 = 2.0 - t2
+            t6 = twopi - t3   + twopiN
+            t5 = 1.0/t4
+            W  = (t6 * sqrt(t5) - k)*t5
+        elseif (k>=0.02) & (k < (sqrt2l-0.02+twopiN))
+            t2 = (k*k)
+            t3 = acos(t2 - 1.00)
+            t4 = 2.00 - t2
+            t6 = (t3  + twopiN)
+            t5 = 1.00/t4
+            W  = (t6 * sqrt(t5) - k)*t5
+        elseif k<0.02 # then!series to k ~= 0 improve convergence
+            xt = twopiN+π
+            t2 = k*k
+            t3 = t2*k
+            t4 = t2*t2
+            t5 = t4*k
+            t6 = t3*t3
+            t7 = t5*t2
+            t8 = t4*t4
+            W  = xt*k00 - k + (xt*k02)*t2 + k03*t3 + (xt*k04)*t4 + k05*t5 + (xt*k06)*t6  + k07*t7 + (xt*k08)*t8
+        elseif (k> (sqrt2l-0.02) && k< (sqrt2l+0.02))
+            xt = k-sqrt2l
+            t2 = xt*xt
+            t3 = t2*xt
+            t4 = t3*xt
+            t5 = t4*xt
+            t6 = t5*xt
+            t7 = t6*xt
+            t8 = t7*xt
+            W  = K2c0 + K2c1*k + K2c2*t2 + K2c3*t3 + K2c4*t4 + K2c5*t5 + K2c6*t6 + K2c7*t7 + K2c8*t8
+        elseif k >= (sqrt2l+0.02)
+            t7 = (k+1.0) * (k-1.00)
+            t3 = log(t7 + sqrt(t7*t7-1.0))
+            t4 = t7-1.0
+            t5 = 1.0/t4
+            W  = (-t3 * sqrt(t5) + k)*t5
+        end
+    end
+
+    return W
+end
+
+fstmth["13786"] = @benchmarkable perf_13786(0.4, 0.5, 0.0)
+
 #############
 # iteration #
 #############
