@@ -164,6 +164,13 @@ for mv in (v2, v4, v8, v16, m2x2, m4x4, m8x8, m16x16)
     g["minimum", size(mv)] = @benchmarkable perf_minimum($mv)
 end
 
+#PR 23659
+@btime map($(ints = rand(1:10, 1000)), 
+           $(floats = rand(1000)), 
+           $(string.(rand(97:122, 1000)))) do anint, afloat, astring
+    reduce(string, (anint, afloat, astring, anint, afloat, astring))
+end
+
 # Linear algebra
 
 g = addgroup!(SUITE, "linear algebra", ["tuple"])
