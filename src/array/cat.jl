@@ -58,3 +58,8 @@ function perf_catnd_setind(n)
     C[1, :, (3n+1):4n, 1] = A
     return C
 end
+
+function perf_cat_4467()
+    a, b, c, d, e = 1.0, 2.0, 3.0, 4.0, 5
+    return [a, b, c, d, e]
+end

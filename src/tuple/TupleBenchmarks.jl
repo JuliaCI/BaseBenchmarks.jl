@@ -174,4 +174,22 @@ for (m, v) in zip((m2x2, m4x4, m8x8, m16x16), (v2, v4, v8, v16 ))
 end
 
 
+function _add( a::NTuple{4,Float32}, b::NTuple{4,Float32} )
+    (a[1]+b[1],a[2]+b[2],a[3]+b[3],a[4]+b[4])
+end
+
+function _mul( a::NTuple{4,Float32}, b::NTuple{4,Float32} )
+   (a[1]*b[1],a[2]*b[2],a[3]*b[3],a[4]*b[4])
+end
+
+function _madd( a::NTuple{4,Float32}, b::NTuple{4,Float32}, c::NTuple{4,Float32} )
+   _add(_mul(a,b),c)
+end
+
+perf_tuple_11899(t) = _madd(t, t, t)
+g = addgroup!(SUITE, "misc", ["tuple"])
+t = (Float32(1.0), Float32(2.0), Float32(3.0), Float32(4.0))
+g["11899"] = @benchmarkable perf_tuple_11899($t)
+
+
 end # module
