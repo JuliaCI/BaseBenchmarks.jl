@@ -45,3 +45,15 @@ function perf_lucompletepivSub!(A)
     end
     return (A, rowpiv, colpiv)
 end
+
+function perf_gramschmidt!(U)
+    m = size(U, 2)
+    @inbounds for k = 1:m
+        uk = view(U,:,k)
+        for j = 1:k-1
+            uj = view(U,:,j)
+            uk .-= (uj ⋅ uk) .* uj
+        end
+        uk ./= norm(uk)
+    end
+end
