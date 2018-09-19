@@ -10,6 +10,9 @@ end
 addprocs(1)
 
 BaseBenchmarks.loadall!()
+for group in BaseBenchmarks.NOT_INCLUDED_IN_ALL
+    BaseBenchmarks.load!(group)
+end
 
 @test begin
     run(BaseBenchmarks.SUITE, verbose = true, samples = 1,
