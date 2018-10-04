@@ -296,4 +296,13 @@ for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
     g[string(T)] = @benchmarkable perf_copy_23042($(Foo_23042(a)), $(Foo_23042(b)))
 end
 
+###############################################
+# zip iterator
+
+g = addgroup!(SUITE, "iterators", ["zip"])
+for N in (1,1000), M in 1:4
+    X = zip(Iterators.repeated(1:N, M)...)
+    g["zip($(join(fill("1:$N", M), ", ")))"] = @benchmarkable collect($X)
+end
+
 end
