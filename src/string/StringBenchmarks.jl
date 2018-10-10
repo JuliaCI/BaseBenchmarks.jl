@@ -69,7 +69,9 @@ g["barbarian backtrack"] = @benchmarkable readuntil(seekstart($buffer), $target)
 g = addgroup!(SUITE, "repeat")
 g["repeat str len 1"] = @benchmarkable repeat(" ", 500)
 g["repeat str len 16"] = @benchmarkable repeat("repeatmerepeatme", 500)
-g["repeat char 1"] = @benchmarkable repeat(' ', 500)
-g["repeat char 2"] = @benchmarkable repeat('α', 500)
+if VERSION >= v"v0.7"
+    g["repeat char 1"] = @benchmarkable repeat(' ', 500)
+    g["repeat char 2"] = @benchmarkable repeat('α', 500)
+end
 
 end # module
