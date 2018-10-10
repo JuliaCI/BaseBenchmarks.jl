@@ -82,4 +82,22 @@ for t in (t1, t2, t3)
     g[length(t), "scal_tup_x3"] = @benchmarkable broadcast(+, 1, $t, 1, $t, 1, $t)
 end
 
+###########################################################################
+
+xset= 10:15
+yset= 12:14
+f(x,y) = sqrt( x^2 + y^2 )
+
+function perf_loop3(xset, yset)
+    m = Matrix{Float64}(undef, 3, length(xset)*length(yset))
+    i = 1
+    @inbounds for x in xset, y in yset
+        m[:,i] .= (Float64(x), Float64(y), f(x,y))
+        i += 1
+    end
+    return m
+end
+
+SUITE["26942"] = @benchmarkable perf_loop3($xset, $yset)
+
 end # module

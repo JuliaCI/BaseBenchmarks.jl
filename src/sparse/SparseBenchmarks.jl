@@ -258,7 +258,7 @@ for (om, ok, on) in (# order of matmul dimensions m, k, and n
         g["A_mul_Bt",  "dense $(m)x$(k), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable A_mul_Bt($densemat, $tsparsemat)
         g["At_mul_B",  "dense $(k)x$(m), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable At_mul_B($tdensemat, $sparsemat)
         g["At_mul_Bt", "dense $(k)x$(m), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable At_mul_Bt($tdensemat, $tsparsemat)
-    end    
+    end
     # in-place dense-sparse -> dense ops, transpose variants, i.e. A[t]_mul[t]!(dense, dense, sparse)
     m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_ds(om, ok, on, 4, 12, Float64)
     if VERSION >= v"0.7.0-DEV.3204"
@@ -282,7 +282,7 @@ for (om, ok, on) in (# order of matmul dimensions m, k, and n
         g["A_mul_Bc",  "dense $(m)x$(k), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable A_mul_Bc($densemat, $tsparsemat)
         g["Ac_mul_B",  "dense $(k)x$(m), sparse $(k)x$(n) -> dense $(m)x$(n)"] = @benchmarkable Ac_mul_B($tdensemat, $sparsemat)
         g["Ac_mul_Bc", "dense $(k)x$(m), sparse $(n)x$(k) -> dense $(m)x$(n)"] = @benchmarkable Ac_mul_Bc($tdensemat, $tsparsemat)
-    end        
+    end
     # in-place dense-sparse -> dense ops, adjoint variants, i.e. A[c]_mul[c]!(dense, dense, sparse)
     m, k, n, destmat, densemat, sparsemat, tdensemat, tsparsemat = allocmats_ds(om, ok, on, 2, 8, Complex{Float64})
     if VERSION >= v"0.7.0-DEV.3204"
@@ -353,6 +353,21 @@ end
 
 for b in values(g)
     b.params.time_tolerance = 0.3
+end
+
+
+#################
+# sparse matvec #
+#################
+g = addgroup!(SUITE, "sparse matvec")
+B = randn(100000, 100)
+A = sprand(100000, 100000, 0.00001)
+if VERSION >= v"0.7.0-DEV.3204"
+    g["non-adjoint"] = @benchmarkable A * B
+    g["adjoint"] = @benchmarkable A' * B
+else
+    g["non-adjoint"] = @benchmarkable A * B
+    g["adjoint"] = @benchmarkable At_mul_B(A, B)
 end
 
 end # module

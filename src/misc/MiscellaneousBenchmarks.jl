@@ -305,4 +305,89 @@ for N in (1,1000), M in 1:4
     g["zip($(join(fill("1:$N", M), ", ")))"] = @benchmarkable collect($X)
 end
 
+####################################################
+# Allocation elision stumped by conditional #28226 #
+# Note, not fixed when this benchmark was written  #
+####################################################
+
+function perf_colwise_alloc!(r, a, b)
+    @inbounds for j = 1:size(a,2)
+        r[j] = evaluate_cond(view(a, :, j), view(b, :, j))
+    end
+    r
+end
+
+@inline function evaluate_cond(a, b)
+    length(a) == 0 && return 0.0 # comment out and 0.7 is super fast
+    @inbounds begin
+        s = 0.0
+        @simd for I in eachindex(a, b)
+            ai = a[I]
+            bi = b[I]
+            s += abs2(ai - bi)
+        end
+        return s
+    end
+end
+
+function perf_colwise_noalloc!(r, a, b)
+    @inbounds for j = 1:size(a,2)
+        r[j] = evaluate_nocond(view(a, :, j), view(b, :, j))
+    end
+    r
+end
+
+@inline function evaluate_nocond(a, b)
+    @inbounds begin
+        s = 0.0
+        @simd for I in eachindex(a, b)
+            ai = a[I]
+            bi = b[I]
+            s += abs2(ai - bi)
+        end
+        return s
+    end
+end
+
+z = zeros(41); A = rand(2, 41); B = rand(2, 41);
+g = addgroup!(SUITE, "allocation elision view")
+g["conditional"] = @benchmarkable perf_colwise_alloc!($z, $A, $B)
+g["no conditional"] = @benchmarkable perf_colwise_noalloc!($z, $A, $B)
+
+
+####################################################
+# Fastmath infererence large number of args #22275 #
+####################################################
+
+function f2(a,b,c,d,e,f,g,h,j,k,l,m,n,o,p)
+    aidx = eachindex(a)
+    @fastmath for i in aidx
+        @inbounds a[i] = b[i]+c*(d*e[i]+f*g[i]+h*j[i]+k*l[i]+m*n[i]+o*p[i])
+    end
+end
+a = rand(10)
+b = rand(10)
+c = 0.1
+d = 0.1
+e = rand(10)
+f = 0.1
+g = rand(10)
+h = 0.1
+j = rand(10)
+k = 0.1
+l = rand(10)
+m = 0.1
+n = rand(10)
+o = 0.1
+p = rand(10)
+
+SUITE["fastmath many args"] = @benchmarkable f2($a,$b,$c,$d,$e,$f,$g,$h,$j,$k,$l,$m,$n,$o,$p)
+
+##############################################################
+# Performance and typing of 6+ dimensional generators #21058 #
+##############################################################
+perf_g6() = sum([+(a,b,c,d,e,f) for a in 1:4, b in 1:4, c in 1:4, d in 1:4, e in 1:4, f in 1:4])
+
+SUITE["perf highdim generator"] = @benchmarkable perf_g6()
+
 end
