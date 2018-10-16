@@ -262,4 +262,11 @@ for b in values(g)
     b.params.time_tolerance = 0.40
 end
 
+#############
+# small exp #
+#############
+
+SUITE["small exp #29116"] = @benchmarkable exp([1. 0; 2 0])
+
+
 end # module
