@@ -297,12 +297,22 @@ for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
 end
 
 ###############################################
-# zip iterator
+# iterators
 
-g = addgroup!(SUITE, "iterators", ["zip"])
+g = addgroup!(SUITE, "iterators", ["zip", "flatten"])
+
+# zip
 for N in (1,1000), M in 1:4
     X = zip(Iterators.repeated(1:N, M)...)
     g["zip($(join(fill("1:$N", M), ", ")))"] = @benchmarkable collect($X)
+end
+
+# flatten
+let X = Base.Iterators.flatten(fill(rand(50), 100))
+    g["sum(flatten(fill(rand(50), 100))))"] = @benchmarkable sum($X)
+end
+let X = Base.Iterators.flatten(collect((i,i+1) for i in 1:1000))
+    g["sum(flatten(collect((i,i+1) for i in 1:1000))"] = @benchmarkable sum($X)
 end
 
 ####################################################
