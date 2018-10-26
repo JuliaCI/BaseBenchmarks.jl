@@ -24,8 +24,7 @@ const ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 words(text) = eachmatch(r"[a-z]+", lowercase(text))
 
 function train(features)
-    features.regex.match_options = Base.PCRE.NO_UTF_CHECK
-    model = Dict{AbstractString, Int}()
+    model = Dict{String, Int}()
     for f in features
         model[f.match] = 2
     end
@@ -44,7 +43,7 @@ function edits(word::AbstractString)
 end
 
 function known_edits(word::AbstractString)
-    xs = Set{AbstractString}()
+    xs = Set{String}()
     for e1 in edits(word)
         for e2 in edits(e1)
             haskey(NWORDS, e2) && push!(xs, e2)
@@ -54,7 +53,7 @@ function known_edits(word::AbstractString)
 end
 
 function known(words)
-    xs = Set{AbstractString}()
+    xs = Set{String}()
     for word in words
         haskey(NWORDS, word) && push!(xs, word)
     end
