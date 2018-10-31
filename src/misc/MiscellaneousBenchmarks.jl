@@ -305,17 +305,6 @@ for N in (1,1000), M in 1:4
     g["zip($(join(fill("1:$N", M), ", ")))"] = @benchmarkable collect($X)
 end
 
-###############################################
-# flatten iterator
-
-g = addgroup!(SUITE, "iterators", ["flatten"])
-let X = Base.Iterators.flatten(fill(rand(50), 100))
-    g["sum(flatten(fill(rand(50), 100))))"] = @benchmarkable sum($X)
-end
-let X = Base.Iterators.flatten(collect((i,i+1) for i in 1:1000))
-    g["sum(flatten(collect((i,i+1) for i in 1:1000))"] = @benchmarkable sum($X)
-end
-
 ####################################################
 # Allocation elision stumped by conditional #28226 #
 # Note, not fixed when this benchmark was written  #
