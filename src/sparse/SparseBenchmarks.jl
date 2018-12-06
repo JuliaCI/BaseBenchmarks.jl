@@ -370,4 +370,44 @@ else
     g["adjoint"] = @benchmarkable At_mul_B(A, B)
 end
 
+#################
+# sparse solves #
+#################
+g = addgroup!(SUITE, "sparse solves")
+# Problem similar to issue #30288
+let m = 10000, n = 9000
+    A = spdiagm(0 => fill(2.0, m),
+               -1 => fill(1.0, m - 1),
+                1 => fill(1.0, m - 1),
+              360 => fill(1.0, m - 360))[:, 1:n]
+    AtA = A'A
+    b   = ones(m)
+    B   = ones(m, 2)
+    Atb = A'b
+    AtB = A'B
+
+    g["least squares (default), vector rhs"]  = @benchmarkable         $A\$b
+    g["least squares (default), matrix rhs"]  = @benchmarkable         $A\$B
+    if VERSION >= v"0.7.0-DEV.5211"
+        g["least squares (qr), vector rhs"]   = @benchmarkable     qr($A)\$b
+        g["least squares (qr), matrix rhs"]   = @benchmarkable     qr($A)\$B
+    else
+        g["least squares (qr), vector rhs"]   = @benchmarkable qrfact($A)\$b
+        g["least squares (qr), matrix rhs"]   = @benchmarkable qrfact($A)\$B
+    end
+    g["square system (default), vector rhs"]  = @benchmarkable       $AtA\$Atb
+    g["square system (default), matrix rhs"]  = @benchmarkable       $AtA\$AtB
+    if VERSION >= v"0.7.0-DEV.5211"
+        g["square system (ldlt), vector rhs"] = @benchmarkable ldlt($AtA)\$Atb
+        g["square system (ldlt), matrix rhs"] = @benchmarkable ldlt($AtA)\$AtB
+        g["square system (lu), vector rhs"]   = @benchmarkable   lu($AtA)\$Atb
+        g["square system (lu), matrix rhs"]   = @benchmarkable   lu($AtA)\$AtB
+    else
+        g["square system (ldlt), vector rhs"] = @benchmarkable ldltfact($AtA)\$Atb
+        g["square system (ldlt), matrix rhs"] = @benchmarkable ldltfact($AtA)\$AtB
+        g["square system (lu), vector rhs"]   = @benchmarkable   lufact($AtA)\$Atb
+        g["square system (lu), matrix rhs"]   = @benchmarkable   lufact($AtA)\$AtB
+    end
+end
+
 end # module
