@@ -28,8 +28,11 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "simd" => :SIMDBenchmarks,
                      "sort" => :SortBenchmarks,
                      "sparse" => :SparseBenchmarks,
+                     "specialfunction" => :SpecialFunctionBenchmarks,
                      "string" => :StringBenchmarks,
                      "tuple" => :TupleBenchmarks)
+
+const NOT_INCLUDED_IN_ALL = ["specialfunction",]
 
 load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 
@@ -50,6 +53,12 @@ loadall!(; kwargs...) = loadall!(SUITE; kwargs...)
 
 function loadall!(group::BenchmarkGroup; verbose::Bool = true, tune::Bool = true)
     for id in keys(MODULES)
+        if id in NOT_INCLUDED_IN_ALL
+            if verbose
+                println("skipping loading group $(repr(id))")
+            end
+            continue
+        end
         if verbose
             print("loading group $(repr(id))... ")
             time = @elapsed load!(group, id, tune=false)
