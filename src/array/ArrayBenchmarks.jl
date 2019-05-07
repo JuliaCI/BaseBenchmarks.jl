@@ -219,7 +219,7 @@ g = addgroup!(SUITE, "growth", ["push!", "append!", "prepend!"])
 
 for s in (8, 256, 2048)
     vs = samerand(s)
-    g["push_single!", s]   = @benchmarkable push!(x, samerand())        setup=(x = copy($vs))
+    g["push_single!", s]   = @benchmarkable push!(x, $(samerand()))     setup=(x = copy($vs))
     g["push_multiple!", s] = @benchmarkable perf_push_multiple!(x, $vs) setup=(x = copy($vs))
     g["append!", s]        = @benchmarkable append!(x, $vs)             setup=(x = copy($vs))
     g["prerend!", s]       = @benchmarkable prepend!(x, $vs)            setup=(x = copy($vs))
