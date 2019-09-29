@@ -1,11 +1,7 @@
 using BaseBenchmarks
 using BenchmarkTools
-using Compat
-using Compat.Test
-
-if VERSION >= v"0.7.0-DEV.2954"
-    using Distributed
-end
+using Test
+using Distributed
 
 addprocs(1)
 

@@ -4,7 +4,6 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
 
 const SUITE = BenchmarkGroup()
 
@@ -152,19 +151,17 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
             @benchmarkable broadcast(_mul, $A, $B)
     end
 
-    if VERSION >= v"0.7.0-DEV.2971"
-        for (M, A) in ((false, Vector{T}(X)),
-                       (false, X),
-                       (true, replace(X2, nothing=>missing)))
-            g["skipmissing", collect, eltype(A), M] =
-                @benchmarkable collect(skipmissing($A))
+    for (M, A) in ((false, Vector{T}(X)),
+                   (false, X),
+                   (true, replace(X2, nothing=>missing)))
+        g["skipmissing", collect, eltype(A), M] =
+            @benchmarkable collect(skipmissing($A))
 
-            g["skipmissing", sum, eltype(A), M] =
-                @benchmarkable sum(skipmissing($A))
+        g["skipmissing", sum, eltype(A), M] =
+            @benchmarkable sum(skipmissing($A))
 
-            if hasmethod(isless, Tuple{T, T})
-                g["sort", eltype(A), M] = @benchmarkable sort($A)
-            end
+        if hasmethod(isless, Tuple{T, T})
+            g["sort", eltype(A), M] = @benchmarkable sort($A)
         end
     end
 end

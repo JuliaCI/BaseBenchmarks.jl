@@ -3,7 +3,7 @@ uuid = "d7f09723-0a21-57e2-b9ef-316b714b6879"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -11,15 +11,13 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [compat]
 BenchmarkTools = "≥ 0.2.1"
-Compat = "≥ 0.60.0"
-julia = "≥ 0.6.0"
 
 [extras]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Distributed"]
+test = ["Distributed", "Test"]

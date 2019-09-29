@@ -4,7 +4,6 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
 
 const SUITE = BenchmarkGroup()
 
@@ -19,25 +18,11 @@ SUITE["join"] = @benchmarkable join($str, $str) time_tolerance=0.40
 
 str = "Gf6FPPWevqer3di13haDSzrRrSiThqmV3k02dALLu7OHdYRR0dfrKf4iCMcDvgZBawx"
 
-if VERSION < v"0.7.0-DEV.3272"
-    g = addgroup!(SUITE, "search")
-    g["Char"] = @benchmarkable search($str,  $('x'))
-    g["String"] = @benchmarkable search($str, $("x"))
-
-    g = addgroup!(SUITE, "searchindex")
-    g["Char"] = @benchmarkable searchindex($str,  $('x'))
-    g["String"] = @benchmarkable searchindex($str, $("x"))
-else
-    # The searchindex deprecation target makes the updated searchindex group
-    # redundant with the updated search group, so they've been combined here
-    g = addgroup!(SUITE, "findfirst")
-    if VERSION < v"0.7.0-DEV.4592"
-        g["Char"] = @benchmarkable findfirst(equalto($('x')), $str)
-    else
-        g["Char"] = @benchmarkable findfirst(isequal($('x')), $str)
-    end
-    g["String"] = @benchmarkable findfirst($("x"), $str)
-end
+# The searchindex deprecation target makes the updated searchindex group
+# redundant with the updated search group, so they've been combined here
+g = addgroup!(SUITE, "findfirst")
+g["Char"] = @benchmarkable findfirst(isequal($('x')), $str)
+g["String"] = @benchmarkable findfirst($("x"), $str)
 
 ######################
 # readuntil (#20621) #
@@ -69,9 +54,7 @@ g["barbarian backtrack"] = @benchmarkable readuntil(seekstart($buffer), $target)
 g = addgroup!(SUITE, "repeat")
 g["repeat str len 1"] = @benchmarkable repeat(" ", 500)
 g["repeat str len 16"] = @benchmarkable repeat("repeatmerepeatme", 500)
-if VERSION >= v"v0.7"
-    g["repeat char 1"] = @benchmarkable repeat(' ', 500)
-    g["repeat char 2"] = @benchmarkable repeat('α', 500)
-end
+g["repeat char 1"] = @benchmarkable repeat(' ', 500)
+g["repeat char 2"] = @benchmarkable repeat('α', 500)
 
 end # module

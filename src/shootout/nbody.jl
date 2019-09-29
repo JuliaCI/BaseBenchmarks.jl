@@ -6,9 +6,7 @@
 
 module NBody
 
-if VERSION >= v"0.7.0-DEV.3052"
-    using Printf
-end
+using Printf
 
 # Constants
 const solar_mass = 4 * pi * pi

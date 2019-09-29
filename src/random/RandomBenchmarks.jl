@@ -1,13 +1,8 @@
 module RandomBenchmarks
 
-if VERSION >= v"0.7.0-DEV.3406"
-    using Random
-    using Random: RangeGenerator, GLOBAL_RNG
-else
-    using Base.Random: RangeGenerator, GLOBAL_RNG
-end
+using Random
+using Random: RangeGenerator, GLOBAL_RNG
 using BenchmarkTools
-using Compat
 
 const SUITE = BenchmarkGroup()
 
@@ -86,7 +81,7 @@ for T = [Int, Float64]
     g["rand",     "RandomDevice", tstr] = @benchmarkable _rand($RD, $(Val{T}()))
     g["rand!",    "ImplicitRNG",  tstr] = @benchmarkable rand!($dst)
     g["rand!",    "RandomDevice", tstr] = @benchmarkable rand!($RD, $dst)
-    T === Float64 && VERSION >= v"0.5.0-pre+5657" || continue
+    T === Float64 || continue
     g["randn",    "ImplicitRNG",  tstr] = @benchmarkable randn(Float64)
     g["randn",    "RandomDevice", tstr] = @benchmarkable randn($RD, Float64)
     g["randn!",   "ImplicitRNG",  tstr] = @benchmarkable randn!($dst)
@@ -103,8 +98,7 @@ for T in NUMS
     dst = Vector{T}(undef, 1000)
     g["rand",     "MersenneTwister", tstr] = @benchmarkable _rand($MT, $(Val{T}()))
     g["rand!",    "MersenneTwister", tstr] = @benchmarkable rand!($MT, $dst)
-    VERSION >= v"0.5.0-pre+5657" || continue
-    T <: AbstractFloat || T in CFLOATS && VERSION >= v"0.7.0-DEV.973" || continue
+    T <: AbstractFloat || T in CFLOATS || continue
     g["randn",    "MersenneTwister", tstr] = @benchmarkable _randn($MT, $(Val{T}()))
     g["randn!",   "MersenneTwister", tstr] = @benchmarkable randn!($MT, $dst)
     T <: AbstractFloat || continue
@@ -123,18 +117,15 @@ g = addgroup!(SUITE, "collections", ["rand", "rand!"])
 collections = Pair[[1:3;]   => "small Vector",
                    [1:900;] => "large Vector",
                    'a':'z'  => "'a':'z'"]
-
-if VERSION >= v"0.7.0-DEV.973"
-    push!(collections,
-          Dict(1=>2, 3=>4, 5=>6)  => "small Dict",
-          Dict(zip(1:900, 1:900)) => "large Dict",
-          Set(1:3)                => "small Set",
-          Set(1:900)              => "large Set",
-          BitSet(1:3)             => "small BitSet",
-          BitSet(1:900)           => "large BitSet",
-          "qwèrtï"                => "small String",
-          randstring(900)         => "large String")
-end
+push!(collections,
+      Dict(1=>2, 3=>4, 5=>6)  => "small Dict",
+      Dict(zip(1:900, 1:900)) => "large Dict",
+      Set(1:3)                => "small Set",
+      Set(1:900)              => "large Set",
+      BitSet(1:3)             => "small BitSet",
+      BitSet(1:900)           => "large BitSet",
+      "qwèrtï"                => "small String",
+      randstring(900)         => "large String")
 
 for (collection, collstr) in collections
     dst = Vector{eltype(collection)}(undef, 1000)
@@ -157,12 +148,10 @@ g = addgroup!(SUITE, "randstring")
 qwerty, qwertystr = collect(UInt8, "qwerty"), "collect(UInt8, \"qwerty\""
 g["randstring", "MersenneTwister"]                        = @benchmarkable randstring($MT)
 g["randstring", "MersenneTwister", 100]                   = @benchmarkable randstring($MT, 100)
-if VERSION >= v"0.7.0-DEV.973"
-    g["randstring", "MersenneTwister", "\"qwèrtï\""]      = @benchmarkable randstring($MT, "qwèrtï")
-    g["randstring", "MersenneTwister", "\"qwèrtï\"", 100] = @benchmarkable randstring($MT, "qwèrtï", 100)
-    g["randstring", "MersenneTwister", qwertystr]         = @benchmarkable randstring($MT, $qwerty)
-    g["randstring", "MersenneTwister", qwertystr, 100]    = @benchmarkable randstring($MT, $qwerty, 100)
-end
+g["randstring", "MersenneTwister", "\"qwèrtï\""]      = @benchmarkable randstring($MT, "qwèrtï")
+g["randstring", "MersenneTwister", "\"qwèrtï\"", 100] = @benchmarkable randstring($MT, "qwèrtï", 100)
+g["randstring", "MersenneTwister", qwertystr]         = @benchmarkable randstring($MT, $qwerty)
+g["randstring", "MersenneTwister", qwertystr, 100]    = @benchmarkable randstring($MT, $qwerty, 100)
 
 set_tolerance!(g)
 
