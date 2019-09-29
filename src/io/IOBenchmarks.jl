@@ -4,14 +4,8 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
-
-if VERSION >= v"0.7.0-DEV.3406"
-    using Random
-end
-if VERSION >= v"0.7.0-DEV.3476"
-    using Serialization
-end
+using Random
+using Serialization
 
 const SUITE = BenchmarkGroup()
 
@@ -81,18 +75,10 @@ function perf_skipchars_21109()
         println(file, "G")
         flush(file)
         seek(file, 0)
-        @static if VERSION <= v"0.7.0-DEV.3495"
-            skipchars(file, islowercase)
-        else
-            skipchars(islowercase, file)
-        end
+        skipchars(islowercase, file)
 
         for i in 1:1000000
-            @static if VERSION <= v"0.7.0-DEV.3495"
-                skipchars(file, islowercase)
-            else
-                skipchars(islowercase, file)
-            end
+            skipchars(islowercase, file)
         end
     end
 end

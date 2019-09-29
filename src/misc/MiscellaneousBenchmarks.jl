@@ -4,8 +4,7 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
-using Compat.Dates
+using Dates
 
 const SUITE = BenchmarkGroup()
 
@@ -84,12 +83,7 @@ function perf_parse(result::AbstractVector{T}, strings::AbstractVector) where T
 end
 
 g = addgroup!(SUITE, "parse", ["DateTime"])
-if VERSION <= v"0.7.0-DEV.3986"
-    datestr = map(string, range(DateTime("2016-02-19T12:34:56"),Dates.Millisecond(123),200))
-else
-    datestr = map(string, range(DateTime("2016-02-19T12:34:56"), step = Dates.Millisecond(123), length = 200))
-end
-g["DateTime"] = @benchmarkable perf_parse($(similar(datestr, DateTime)), $datestr)
+datestr = map(string, range(DateTime("2016-02-19T12:34:56"), step = Dates.Millisecond(123), length = 200))
 g["Int"] = @benchmarkable perf_parse($(Vector{Int}(undef, 1000)), $(map(string, 1:1000)))
 g["Float64"] = @benchmarkable perf_parse($(Vector{Float64}(undef, 1000)), $(map(string, 1:1000)))
 
@@ -108,16 +102,10 @@ function nestedexpr(n)
 end"""
 include_string(@__MODULE__, nestedexpr_str)
 
-if VERSION >= v"0.7.0-DEV.2437"
-    const _parse = Meta.parse
-else
-    const _parse = Base.parse
-end
-
 g = addgroup!(SUITE, "julia")
-g["parse", "array"] = @benchmarkable _parse($("[" * "a + b, "^100 * "]"))
-g["parse", "nested"] = @benchmarkable _parse($(string(nestedexpr(100))))
-g["parse", "function"] = @benchmarkable _parse($nestedexpr_str)
+g["parse", "array"] = @benchmarkable Meta.parse($("[" * "a + b, "^100 * "]"))
+g["parse", "nested"] = @benchmarkable Meta.parse($(string(nestedexpr(100))))
+g["parse", "function"] = @benchmarkable Meta.parse($nestedexpr_str)
 g["macroexpand", "evalpoly"] = @benchmarkable macroexpand(@__MODULE__, $(Expr(:macrocall, Symbol("@evalpoly"), 1:10...)))
 
 ###########################################################################
@@ -258,11 +246,7 @@ function perf_dsum_20517(A::Matrix)
     B = Vector{typeof(z)}(undef, n)
 
     @inbounds for j in 1:n
-        @static if VERSION < v"0.7.0-beta.81"
-            B[j] = mapreduce(k -> A[j,k]*A[k,j], +, z, 1:j)
-        else
-            B[j] = mapreduce(k -> A[j,k]*A[k,j], +, 1:j; init=z)
-        end
+        B[j] = mapreduce(k -> A[j,k]*A[k,j], +, 1:j; init=z)
     end
     B
 end

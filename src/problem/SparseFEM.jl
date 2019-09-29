@@ -1,13 +1,7 @@
 module SparseFEM
 
-using Compat
-
-if VERSION >= v"0.7.0-DEV.3389"
-    using SparseArrays
-end
-if VERSION >= v"0.7.0-DEV.3449"
-    using LinearAlgebra
-end
+using SparseArrays
+using LinearAlgebra
 
 # assemble the finite-difference laplacian
 function fdlaplacian(N)
@@ -33,11 +27,7 @@ function perf_sparse_fem(N)
     # boundary condition
     B = A[Ifree, Ifree]
     # solver
-    @static if VERSION <= v"0.7.0-DEV.5211"
-        return lufact(B)
-    else
-        return lu(B)
-    end
+    return lu(B)
 end
 
 end # module

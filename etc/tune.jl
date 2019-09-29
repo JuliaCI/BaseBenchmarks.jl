@@ -1,8 +1,6 @@
 using BaseBenchmarks
 using BenchmarkTools
-if VERSION >= v"0.7.0-DEV.2954"
-    using Distributed
-end
+using Distributed
 
 addprocs(1)
 

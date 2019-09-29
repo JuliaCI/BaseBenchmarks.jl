@@ -1,12 +1,8 @@
 module IMDBGraphs
 
 using ..ProblemBenchmarks: PROBLEM_DATA_DIR
-using Compat
 using Base.Iterators
-
-if VERSION >= v"0.7.0-beta.85"
-    using Statistics
-end
+using Statistics
 
 mutable struct IMDBNode
     name::String # actor//film name

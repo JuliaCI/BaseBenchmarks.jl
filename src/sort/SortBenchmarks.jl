@@ -4,7 +4,6 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
 
 const SUITE = BenchmarkGroup()
 const LIST_SIZE = 50000

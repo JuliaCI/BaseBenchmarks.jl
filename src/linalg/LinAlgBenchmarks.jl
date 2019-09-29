@@ -4,17 +4,9 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
-using Compat.Iterators
-
-if VERSION >= v"0.7.0-DEV.3449"
-    using LinearAlgebra
-    using LinearAlgebra: UnitUpperTriangular
-else
-    using Base.LinAlg
-    using Base.LinAlg: UnitUpperTriangular
-    const LinearAlgebra = Base.LinAlg
-end
+using Base.Iterators
+using LinearAlgebra
+using LinearAlgebra: UnitUpperTriangular
 
 const SUITE = BenchmarkGroup(["array"])
 
@@ -26,7 +18,7 @@ typename(::Type{T}) where {T} = string(isa(T,DataType) ? T.name : Base.unwrap_un
 typename(::Type{M}) where {M<:Matrix} = "Matrix"
 typename(::Type{V}) where {V<:Vector} = "Vector"
 
-const UPLO = VERSION >= v"0.7.0-DEV.884" ? :U : true
+const UPLO = :U 
 
 linalgmat(::Type{Matrix}, s) = randmat(s)
 linalgmat(::Type{Diagonal}, s) = Diagonal(randvec(s))
@@ -97,11 +89,7 @@ for s in SIZES
     C = zeros(Float32, s, s)
     A = randmat(s)
     B = randmat(s)
-    if VERSION >= v"0.7.0-DEV.3204"
-        g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B)
-    else
-        g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable A_mul_B!($C, $A, $B)
-    end
+    g["mul!", "Matrix{Float32}", "Matrix{Float64}", "Matrix{Float64}", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B)
 
     for T in [Int32, Int64, Float32, Float64]
         arr = samerand(T, s)
@@ -111,22 +99,10 @@ for s in SIZES
     for M in (UpperTriangular, UnitUpperTriangular, NPDUpperTriangular, Hermitian)
         mstr = typename(M)
         m = linalgmat(M, s)
-        if VERSION >= v"0.7.0-DEV.1599"
-            g["sqrt", mstr, s] = @benchmarkable sqrt($m)
-        else
-            g["sqrt", mstr, s] = @benchmarkable sqrtm($m)
-        end
+        g["sqrt", mstr, s] = @benchmarkable sqrt($m)
         if M == Hermitian
-            if VERSION >= v"0.7.0-DEV.1597"
-                g["log", mstr, s] = @benchmarkable log($m)
-            else
-                g["log", mstr, s] = @benchmarkable logm($m)
-            end
-            if VERSION >= v"0.7.0-DEV.1486"
-                g["exp", mstr, s] = @benchmarkable exp($m)
-            else
-                g["exp", mstr, s] = @benchmarkable expm($m)
-            end
+            g["log", mstr, s] = @benchmarkable log($m)
+            g["exp", mstr, s] = @benchmarkable exp($m)
         end
     end
 
@@ -155,11 +131,7 @@ for M in (Matrix, Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, LowerTr
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        if VERSION < v"0.7.0-DEV.5211"
-            g["eigen", mstr, s] = @benchmarkable eigfact($m)
-        else
-            g["eigen", mstr, s] = @benchmarkable eigen($m)
-        end
+        g["eigen", mstr, s] = @benchmarkable eigen($m)
     end
 end
 
@@ -167,11 +139,7 @@ for M in (Matrix, Diagonal, Bidiagonal, UpperTriangular, LowerTriangular)
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        if VERSION < v"0.7.0-DEV.5211"
-            g["svd", mstr, s] = @benchmarkable svdfact($m)
-        else
-            g["svd", mstr, s] = @benchmarkable svd($m)
-        end
+        g["svd", mstr, s] = @benchmarkable svd($m)
     end
 end
 
@@ -179,11 +147,7 @@ for M in (Matrix, Tridiagonal)
     mstr = typename(M)
     for s in SIZES
         m = linalgmat(M, s)
-        if VERSION < v"0.7.0-DEV.5211"
-            g["lu", mstr, s] = @benchmarkable lufact($m)
-        else
-            g["lu", mstr, s] = @benchmarkable lu($m)
-        end
+        g["lu", mstr, s] = @benchmarkable lu($m)
     end
 end
 
@@ -191,15 +155,9 @@ for s in SIZES
     mstr = typename(Matrix)
     m = randmat(s)
     arr = m' * m
-    if VERSION < v"0.7.0-DEV.5211"
-        g["cholesky", mstr, s] = @benchmarkable cholfact($arr)
-        g["schur",    mstr, s] = @benchmarkable schurfact($m)
-        g["qr",       mstr, s] = @benchmarkable qrfact($m)
-    else
-        g["cholesky", mstr, s] = @benchmarkable cholesky($arr)
-        g["schur",    mstr, s] = @benchmarkable schur($m)
-        g["qr",       mstr, s] = @benchmarkable qr($m)
-    end
+    g["cholesky", mstr, s] = @benchmarkable cholesky($arr)
+    g["schur",    mstr, s] = @benchmarkable schur($m)
+    g["qr",       mstr, s] = @benchmarkable qr($m)
 end
 
 for b in values(g)

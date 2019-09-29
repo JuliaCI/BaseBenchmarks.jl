@@ -10,14 +10,8 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
 
-if v"0.7.0-DEV.2915" <= VERSION < v"0.7.0-DEV.3393"
-    using Unicode
-end
-if VERSION >= v"0.7.0-DEV.3052"
-    using Printf
-end
+using Printf
 
 const SUITE = BenchmarkGroup(["example", "regex", "pi", "π", "tree"])
 const SHOOTOUT_DATA_PATH = joinpath(dirname(@__FILE__), "data")

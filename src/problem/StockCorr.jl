@@ -1,8 +1,6 @@
 module StockCorr
 
-if VERSION >= v"0.7.0-DEV.3449"
-    using LinearAlgebra
-end
+using LinearAlgebra
 
 # The original, unoptimised code that simulates two correlated assets
 function perf_stockcorr()
@@ -25,11 +23,7 @@ function perf_stockcorr()
     SimulPriceB[1,:] .= CurrentPrice[2]
 
     ## Generating the paths of stock prices by Geometric Brownian Motion
-    @static if VERSION <= v"0.7.0-DEV.5211"
-        UpperTriangle = chol(Corr) # UpperTriangle Matrix by Cholesky decomposition
-    else
-        UpperTriangle = cholesky(Corr).U
-    end
+    UpperTriangle = cholesky(Corr).U # UpperTriangle Matrix by Cholesky decomposition
 
     for i = 1:n
        Wiener = randn(T-1,2)

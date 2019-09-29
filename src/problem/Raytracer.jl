@@ -1,13 +1,7 @@
 module Raytracer
 
-using Compat
-
-if VERSION >= v"0.7.0-DEV.3449"
-    using LinearAlgebra
-    import LinearAlgebra.dot
-else
-    import Base.dot
-end
+using LinearAlgebra
+import LinearAlgebra.dot
 
 # This is a translation from Java/C++ of the raytracer located at
 #   http://www.ffconsultancy.com/languages/tracerayr/

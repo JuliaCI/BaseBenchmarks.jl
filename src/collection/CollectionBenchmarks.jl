@@ -1,18 +1,7 @@
 module CollectionBenchmarks
 
 using BenchmarkTools
-using Compat
-
-if VERSION >= v"0.7.0-DEV.3406"
-    using Random
-end
-if VERSION < v"0.7.0-DEV.3439"
-    # This maybe needs updating if Compat.jl is updated for IdDict.
-    struct IdDict end
-    const IDD = false
-else
-    const IDD = true
-end
+using Random
 
 const SUITE = BenchmarkGroup()
 
@@ -26,7 +15,7 @@ const sortedints = sort(ints)
 
 # random element, in the collections iff 2nd parameter is true
 let anyshuffled = shuffle(MT, anys),
-    filter = VERSION >= v"0.5.0" ? Iterators.filter : Base.filter
+    filter = Iterators.filter
     d = Dict((Int,    true ) => first(filter(i->isa(i, Int),    anyshuffled))::Int,
              (String, true ) => first(filter(i->isa(i, String), anyshuffled))::String,
              (Int,    false) => first(filter(i->!in(i, ints), rand(MT, 1:iterlen) for _ in 1:typemax(Int)))::Int,
@@ -52,8 +41,7 @@ initcoll(C, T) = let initmap = Dict(Vector => Vector,
     coll[initmap[C], T]
 end
 
-for C in ( IDD ? (Dict, IdDict, Set) : (Dict, Set) ),
-        T in (Int, String, Any)
+for C in (Dict, IdDict, Set), T in (Int, String, Any)
     coll[C, T] = C(initcoll(C, T))
 end
 
@@ -68,7 +56,7 @@ askey(::Type{IdDict}, elt) = first(elt)
 
 objstr(T) = T === Int ? "Int" : T === Vector ? "Vector" : string(T)
 
-function foreach_container(bench; T = (Int, String, Any), C = IDD ? (Vector, Dict, IdDict, Set, BitSet) : (Vector, Dict, Set, BitSet))
+function foreach_container(bench; T = (Int, String, Any), C = (Vector, Dict, IdDict, Set, BitSet))
     for _C in C
         cstr = objstr(_C)
         for _T in T
@@ -97,7 +85,7 @@ function perf_push!(c, elts)
     end
 end
 
-foreach_container(C = IDD ? (Vector, Dict, IdDict, Set) : (Vector, Dict, Set)) do C, cstr, T, tstr, c
+foreach_container(C = (Vector, Dict, IdDict, Set)) do C, cstr, T, tstr, c
     g[cstr, tstr, "iterator"] = @benchmarkable $C($(initcoll(C, T)))
     g[cstr, tstr, "loop"]     = @benchmarkable perf_push!(newcoll($C, $T), $(initcoll(C, T)))
     g[cstr, tstr, "loop", "sizehint!"] =
@@ -118,16 +106,14 @@ set_tolerance!(g)
 #############
 
 
-if VERSION > v"0.7.0-DEV.5126"
-    g = addgroup!(SUITE, "iteration", ["AbstractVector", "AbstractSet", "Associative"])
+g = addgroup!(SUITE, "iteration", ["AbstractVector", "AbstractSet", "Associative"])
 
-    foreach_container() do C, cstr, T, tstr, c
-        g[cstr, tstr, "iterate"] = @benchmarkable iterate($c)
-        g[cstr, tstr, "iterate second"]  = @benchmarkable iterate($c, $(iterate(c)[2]))
-    end
-
-    set_tolerance!(g)
+foreach_container() do C, cstr, T, tstr, c
+    g[cstr, tstr, "iterate"] = @benchmarkable iterate($c)
+    g[cstr, tstr, "iterate second"]  = @benchmarkable iterate($c, $(iterate(c)[2]))
 end
+
+set_tolerance!(g)
 
 ############
 # Deletion #
@@ -146,11 +132,11 @@ pred(::Type{C}, ::Type{String}) where {C} = x -> Int(askey(C, x)[1]) < 90
 pred(::Type{C}, ::Type{Int})    where {C} = x -> iseven(askey(C, x))
 
 foreach_container() do C, cstr, T, tstr, c
-    if C !== IdDict && (VERSION >= v"0.7.0-" || C !== Dict)
+    if C !== IdDict
         g[cstr, tstr, "pop!"] = @benchmarkable perf_pop!(d) setup=(d=copy($c)) evals=1
     end
     C === BitSet && return
-    if VERSION >= v"0.7.0-" || C !== Dict
+    if C !== Dict
         g[cstr, tstr, "filter!"] = @benchmarkable filter!($(pred(C, T)), d) setup=(d=copy($c)) evals=1
         g[cstr, tstr, "filter"] =  @benchmarkable filter( $(pred(C, T)), $c)
     end
@@ -196,7 +182,7 @@ foreach_container() do C, cstr, T, tstr, c
         g[cstr, tstr, "pop!",  "specified"] = @benchmarkable  pop!(push!(d, $eltin), $(askey(C, eltin))) setup=(d=copy($c))
 
     end
-    if C !== IdDict && (VERSION >= v"0.7.0-" || C !== Dict)
+    if C !== IdDict
         # same remark as above, we need to push! a value to avoid ending up with an empty container
         g[cstr, tstr, "pop!", "unspecified"] = @benchmarkable push!(d, pop!(d)) setup=(d=copy($c))
     end
@@ -268,7 +254,7 @@ set_tolerance!(g)
 #############################################
 
 # cf. issue #20903 and PR #21964
-g = addgroup!(SUITE, "optimizations", IDD ? ["Dict", "IdDict", "Set", "BitSet", "Vector"] : ["Dict", "Set", "BitSet", "Vector"])
+g = addgroup!(SUITE, "optimizations", ["Dict", "IdDict", "Set", "BitSet", "Vector"])
 
 for T in (Nothing, Bool, Int8, UInt16)
     local v
@@ -277,8 +263,8 @@ for T in (Nothing, Bool, Int8, UInt16)
     tstr = string(T)
     g["Dict", "abstract", tstr] = @benchmarkable Dict($(map(Pair, v, v)))
     g["Dict", "concrete", tstr] = @benchmarkable Dict{$T,$T}($(map(Pair, v, v)))
-    IDD && (g["IdDict", "abstract", tstr] = @benchmarkable IdDict($(map(Pair, v, v))))
-    IDD && (g["IdDict", "concrete", tstr] = @benchmarkable IdDict{$T,$T}($(map(Pair, v, v))))
+    g["IdDict", "abstract", tstr] = @benchmarkable IdDict($(map(Pair, v, v)))
+    g["IdDict", "concrete", tstr] = @benchmarkable IdDict{$T,$T}($(map(Pair, v, v)))
     g["Set",  "abstract", tstr] = @benchmarkable Set($v)
     g["Set",  "concrete", tstr] = @benchmarkable Set{$T}($v)
     if T === Nothing

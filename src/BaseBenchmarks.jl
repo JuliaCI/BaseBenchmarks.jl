@@ -1,7 +1,6 @@
 module BaseBenchmarks
 
 using BenchmarkTools
-using Compat
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 1.0
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 10000
