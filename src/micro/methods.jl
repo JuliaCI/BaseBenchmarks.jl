@@ -8,25 +8,12 @@ perf_micro_fib(n) = n < 2 ? n : perf_micro_fib(n-1) + perf_micro_fib(n-2)
 # parseint #
 ############
 
-if VERSION >= v"0.7.0-DEV.3526"
-    _parse16(s) = parse(Int64, s, base=16)
-else
-    _parse16(s) = parse(Int64, s, 16)
-end
-
-if VERSION >= v"0.7.0-DEV.4446"
-    _hex(s) = string(s, base=16)
-else
-    _hex(s) = hex(s)
-end
-
-
 function perf_micro_parseint(t)
     local n, m
     for i=1:t
         n = rand(UInt32)
-        s = _hex(n)
-        m = UInt32(_parse16(s))
+        s = string(n, base=16)
+        m = UInt32(parse(Int64, s, base=16))
     end
     @assert m == n
     return n
@@ -93,28 +80,12 @@ end
 # randmatstat #
 ###############
 
-if VERSION >= v"0.7.0-DEV.3204"
-    _at_mul_b(A, B) = transpose(A)*B
-else
-    _at_mul_b(A, B) = At_mul_B(A, B)
+function stdmean(x)
+    n = length(x)
+    m = mean(x)
+    sqrt(sum(xi->abs2(xi - m), x) / (n - 1)) / m
 end
 
-if VERSION >= v"0.7.0-DEV.5238"
-    # std in StatsBase instead of in Base
-    function stdmean(x)
-        n = length(x)
-        m = mean(x)
-        sqrt(sum(xi->abs2(xi - m), x) / (n - 1)) / m
-    end
-else
-    stdmean(x) = std(x) / mean(x)
-end
-
-if VERSION < v"0.7.0-DEV.4591"
-    _tr(x) = trace(x)
-else
-    _tr(x) = tr(x)
-end
 function perf_micro_randmatstat(t)
     n = 5
     v = zeros(t)
@@ -126,8 +97,8 @@ function perf_micro_randmatstat(t)
         d = randn(n,n)
         P = [a b c d]
         Q = [a b; c d]
-        v[i] = _tr(_at_mul_b(P,P)^4)
-        w[i] = _tr(_at_mul_b(Q,Q)^4)
+        v[i] = tr((P' * P)^4)
+        w[i] = tr((Q' * Q)^4)
     end
     return (stdmean(v), stdmean(w))
 end
@@ -143,9 +114,7 @@ perf_micro_randmatmul(t) = rand(t,t)*rand(t,t)
 # print_to_file #
 #################
 
-if VERSION > v"0.7.0-DEV.3026"
-    using Printf
-end
+using Printf
 
 function perf_printfd(n)
     open("/dev/null", "w") do io

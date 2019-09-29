@@ -5,12 +5,8 @@ module ChaosGameFractals
 # to Julia
 # Original Copyright (C) 2005 Carl Friedrich Bolz
 
-if VERSION >= v"0.7.0-DEV.3052"
-    using Printf
-end
-if VERSION >= v"0.7.0-DEV.3406"
-    using Random
-end
+using Printf
+using Random
 
 const DEFAULT_THICKNESS = 0.25
 const DEFAULT_WIDTH = 256
@@ -207,11 +203,7 @@ function create_image_chaos(game::ChaosGame, w = DEFAULT_HEIGHT,
                             h = DEFAULT_WIDTH, iterations = DEFAULT_ITERATIONS;
                             filename = nothing, seed=DEFAULT_RNG_SEED)
 
-    if VERSION <= v"0.7.0-beta2.171"
-        srand(seed)
-    else
-        Random.seed!(seed)
-    end
+    Random.seed!(seed)
     im = ones(Int, h, w)
     point = GVector((game.maxx + game.minx) / 2, (game.maxy + game.miny) / 2, 0.0)
     for _ in 1:iterations

@@ -1,12 +1,7 @@
 module MonteCarlo
 
-using Compat
-if VERSION >= v"0.7.0-DEV.3406"
-    using Random
-end
-if VERSION >= v"0.7.0-beta.85"
-    using Statistics
-end
+using Random
+using Statistics
 
 # European Option Calculation from
 # https://groups.google.com/forum/?hl=en&fromgroups=#!topic/julia-dev/ImhGsqX_IHc

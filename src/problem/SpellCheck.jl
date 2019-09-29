@@ -1,14 +1,7 @@
 module SpellCheck
 
 using ..ProblemBenchmarks: PROBLEM_DATA_DIR
-using Compat
-
-if v"0.7.0-DEV.2915" <= VERSION < v"0.7.0-DEV.3393"
-    using Unicode
-end
-if VERSION >= v"0.7.0-DEV.3052"
-    using Printf
-end
+using Printf
 
 # Peter Norvig's Spelling Corrector (http://norvig.com/spell-correct.html)
 

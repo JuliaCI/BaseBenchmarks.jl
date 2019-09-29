@@ -77,7 +77,6 @@ for X in (INTS..., Char, Bool)
     x = X(1) # one(X) is not valid for X==Char
     xstr = string(X)
     for Y in (INTS..., Bool)
-        VERSION < v"0.6" && Y == BigInt && continue
         tol = (X != Y || X == BigInt || Y == BigInt) ? 0.40 : 0.25
         arith["rem type", xstr, string(Y)] = @benchmarkable %($x, $Y) time_tolerance=tol
     end
@@ -274,15 +273,6 @@ end
 
 g = addgroup!(SUITE, "intfuncs", ["prevpow2", "nextpow2"])
 
-if VERSION <= v"0.7.0-beta2.195"
-    __prevpow2(x) = prevpow2(x)
-    __nextpow2(x) = nextpow2(x)
-else
-    __prevpow2(x) = prevpow(2, x)
-    __nextpow2(x) = nextpow(2, x)
-end
-
-
 for T in INTS
     x = T[1, 2, 3, 4, 10, 100, 1024, 10000, 2^30, 2^30-1]
     if T == BigInt
@@ -291,7 +281,7 @@ for T in INTS
     y = similar(x)
     tol = in(T, BIGNUMS) ? 0.40 : 0.25
     tstr = string(T)
-    for funpow2 = (__prevpow2, __nextpow2), sgn = (+,)
+    for funpow2 = (x -> prevpow(2, x), x -> nextpow(2, x)), sgn = (+,)
         g[string(funpow2), tstr, string(sgn)] = @benchmarkable map!($funpow2, $y, $(sgn(x))) time_tolerance=tol
     end
 end
@@ -480,7 +470,6 @@ end
 ##########
 # sincos #
 ##########
-if VERSION >= v"0.7.0-DEV.337"
 g = addgroup!(SUITE, "sincos")
 for T in (Float32, Float64)
     _arg_string = arg_string(T)
@@ -530,7 +519,6 @@ for T in (Float32, Float64)
     # idx > 0
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable sincos($(T(2.0)^80*pi/4-1.2))
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable sincos($(-T(2.0)^80*pi/4+1.2))
-end
 end
 
 ########
@@ -684,9 +672,6 @@ end
 #########
 
 g = addgroup!(SUITE, "atan2")
-if VERSION < v"0.7.0-alpha.44"
-    Base.atan(x, y) = atan2(x,y)
-end   
 for T in (Float32, Float64)
     # when referring to y and x we refer to y and x in atan(y, x)
     _arg_string = arg_string(T)

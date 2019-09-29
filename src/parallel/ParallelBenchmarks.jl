@@ -4,11 +4,7 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
-
-if VERSION >= v"0.7.0-DEV.2954"
-    using Distributed
-end
+using Distributed
 
 const SUITE = BenchmarkGroup()
 
@@ -34,14 +30,12 @@ end
 ##################
 
 # Threading is broken for now, so we don't have tuned parameters for this yet
-# if VERSION >= v"0.5.0-dev+923" && Base.Threads.nthreads() > 1
-#     include("Laplace3D.jl")
-#     include("ThreadedStockCorr.jl")
-#     include("LatticeBoltzmann.jl")
-#     g = addgroup!(SUITE, "multithread", ["thread", "laplace", "laplacian"])
-#     g["laplace3d"] = @benchmarkable Laplace3D.perf_laplace3d()
-#     g["pstockcorr"] = @benchmarkable ThreadedStockCorr.perf_pstockcorr(10^4)
-#     g["lattice_boltzmann"] = @benchmarkable LatticeBoltzmann.perf_lattice_boltzmann(36)
-# end
+# include("Laplace3D.jl")
+# include("ThreadedStockCorr.jl")
+# include("LatticeBoltzmann.jl")
+# g = addgroup!(SUITE, "multithread", ["thread", "laplace", "laplacian"])
+# g["laplace3d"] = @benchmarkable Laplace3D.perf_laplace3d()
+# g["pstockcorr"] = @benchmarkable ThreadedStockCorr.perf_pstockcorr(10^4)
+# g["lattice_boltzmann"] = @benchmarkable LatticeBoltzmann.perf_lattice_boltzmann(36)
 
 end # module

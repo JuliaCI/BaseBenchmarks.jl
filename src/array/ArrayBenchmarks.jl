@@ -4,14 +4,11 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
-using Compat.LinearAlgebra
 
 const SUITE = BenchmarkGroup()
 
-if VERSION >= v"0.7.0-beta.85"
-    using Statistics
-end
+using LinearAlgebra
+using Statistics
 
 #############################################################################
 # basic array-math reduction-like functions
@@ -22,19 +19,11 @@ acomplex = samerand(Complex{Float64}, 10^3)
 g = addgroup!(SUITE, "reductions", ["sum", "array", "reduce"])
 norm1(x) = norm(x, 1)
 norminf(x) = norm(x, Inf)
-if VERSION < v"0.7.0-beta-81"
-    perf_reduce(x) = reduce((x,y) -> x + 2y, real(zero(eltype(x))), x)
-    perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, real(zero(eltype(x))), x)
-else
-    perf_reduce(x) = reduce((x,y) -> x + 2y, x; init=real(zero(eltype(x))))
-    perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, x; init=real(zero(eltype(x))))
-end
+perf_reduce(x) = reduce((x,y) -> x + 2y, x; init=real(zero(eltype(x))))
+perf_mapreduce(x) = mapreduce(x -> real(x)+imag(x), (x,y) -> x + 2y, x; init=real(zero(eltype(x))))
 for a in (afloat, aint)
     for fun in (sum, norm, norm1, norminf, mean, perf_reduce, perf_mapreduce)
         g[string(fun), string(eltype(a))] = @benchmarkable $fun($a)
-    end
-    @static if VERSION < v"0.7.0-DEV.5238"
-        g["var", string(eltype(a))] = @benchmarkable var($a)
     end
     g["sumabs2", string(eltype(a))] = @benchmarkable sum(abs2, $a)
     g["sumabs", string(eltype(a))] = @benchmarkable sum(abs, $a)
@@ -52,15 +41,11 @@ end
 
 include("sumindex.jl")
 
-if VERSION > v"0.7.0-DEV.3986"
-    linspace(start, stop, length) = range(start; stop=stop, length=length)
-end
-
 σ = 500
 A3d = samerand(11,11,11)
 S3d = view(A3d, 1:10, 1:10, 1:10)
 arrays = (makearrays(Int32, σ, σ)..., makearrays(Float32, σ, σ)..., trues(σ, σ), A3d, S3d)
-ranges = (1:10^5, 10^5:-1:1, 1.0:1e5, linspace(1,2,10^4))
+ranges = (1:10^5, 10^5:-1:1, 1.0:1e5, range(1, stop=2, length=10^4))
 arrays_iter = map(x -> (x, string(typeof(x))), arrays)
 ranges_iter = map(x -> (x, repr(x)), ranges)
 g = addgroup!(SUITE, "index", ["sum", "simd"])
@@ -233,11 +218,11 @@ perf_compr_collect(X) = [x for x in X]
 perf_compr_iter(X) = [sin(x) + x^2 - 3 for x in X]
 perf_compr_index(X) = [sin(X[i]) + (X[i])^2 - 3 for i in eachindex(X)]
 
-ls = linspace(0,1,10^7)
+ls = range(0, stop=1, length=10^7)
 rg = 0.0:(10.0^(-7)):1.0
 arr = collect(ls)
 
-g = addgroup!(SUITE, "comprehension", ["iteration", "index", "linspace", "collect", "range"])
+g = addgroup!(SUITE, "comprehension", ["iteration", "index", "collect", "range"])
 
 for X in (ls, rg, arr)
     T = string(typeof(X))
@@ -269,11 +254,7 @@ n, vals = 10^6, -3:3
 a, b = samerand(vals, n), samerand(vals)
 
 boolarr = Vector{Bool}(undef, n)
-if VERSION >= v"0.7.0-DEV.2687"
-    bitarr = BitArray(undef, n)
-else
-    bitarr = BitArray(n)
-end
+bitarr = BitArray(undef, n)
 
 g = addgroup!(SUITE, "bool", ["index", "bitarray", "fill!"])
 
