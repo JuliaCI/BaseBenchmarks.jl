@@ -1,7 +1,6 @@
 module GrigoriadisKhachiyan
 
 using ..RandUtils
-using Compat
 
 # Code from Dilys Thomas <dilys@cs.stanford.edu>
 

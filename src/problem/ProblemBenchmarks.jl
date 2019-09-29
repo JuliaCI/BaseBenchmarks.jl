@@ -12,7 +12,6 @@ include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
 
 const SUITE = BenchmarkGroup(["example", "kernel"])
 const PROBLEM_DATA_DIR = joinpath(dirname(@__FILE__), "data")

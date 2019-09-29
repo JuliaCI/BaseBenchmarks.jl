@@ -4,7 +4,6 @@ include(joinpath("..", "utils", "RandUtils.jl"))
 
 using .RandUtils
 using BenchmarkTools
-using Compat
 
 const SUITE = BenchmarkGroup()
 
