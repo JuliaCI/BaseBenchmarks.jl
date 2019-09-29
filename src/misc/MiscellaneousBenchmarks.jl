@@ -84,7 +84,6 @@ end
 
 g = addgroup!(SUITE, "parse", ["DateTime"])
 datestr = map(string, range(DateTime("2016-02-19T12:34:56"), step = Dates.Millisecond(123), length = 200))
-end
 g["Int"] = @benchmarkable perf_parse($(Vector{Int}(undef, 1000)), $(map(string, 1:1000)))
 g["Float64"] = @benchmarkable perf_parse($(Vector{Float64}(undef, 1000)), $(map(string, 1:1000)))
 

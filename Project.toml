@@ -3,7 +3,7 @@ uuid = "d7f09723-0a21-57e2-b9ef-316b714b6879"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -15,8 +15,6 @@ Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [compat]
 BenchmarkTools = "≥ 0.2.1"
-Compat = "≥ 0.60.0"
-julia = "≥ 0.6.0"
 
 [extras]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
