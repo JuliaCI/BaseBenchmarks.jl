@@ -6,11 +6,12 @@ using Pkg
 
 const SUITE = BenchmarkGroup()
 
-pwd = @__DIR__
+# Interpolating @__DIR__ into commands is finicky
+__dir__ = @__DIR__
 
 function julia_cmd()
     julia_path = joinpath(Sys.BINDIR, Base.julia_exename())
-    cmd = `$julia_path --startup-file=no --project=$pwd`
+    cmd = `$julia_path --startup-file=no --project=$__dir__`
 end
 
 temp_depot = nothing
@@ -66,7 +67,9 @@ end
 
 SUITE["first plot"] = @benchmarkable run(`$(julia_cmd()) -e 'using Plots; p = plot(rand(5)); 
     savefig(p, tempname() *  ".png")'`) setup=(clean_env(); compile_if_stale("Plots"))
-SUITE["first csv"] = @benchmarkable run(`$(julia_cmd()) -e 'using CSV;
-    CSV.read("test.csv", silencewarnings=true)'`) setup=(clean_env(); compile_if_stale("CSV"))
+
+csv_file = joinpath(__dir__, "test.csv")
+cmd = "using CSV; CSV.read($(repr(csv_file)), silencewarnings=true)"
+SUITE["first csv"] = @benchmarkable run(`$(julia_cmd()) -e $cmd`) setup=(clean_env(); compile_if_stale("CSV"))
 
 end
