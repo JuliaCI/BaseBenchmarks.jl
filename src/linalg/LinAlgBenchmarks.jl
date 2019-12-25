@@ -115,6 +115,20 @@ for s in SIZES
 
 end
 
+# Julia PR 31100
+begin
+    mf4 = randmat(4)
+    mc4 = randmat(Complex{Float64}, 4)
+
+    if VERSION >= v"0.7.0-DEV.1599"
+        g["sqrt", "LinearAlgebra.UpperTriangular{Float64} (#31100)", 4] = @benchmarkable sqrt($mf4)
+        g["sqrt", "LinearAlgebra.UpperTriangular{ComplexF64} (#31100)", 4] = @benchmarkable sqrt($mc4)
+    else
+        g["sqrt", "LinearAlgebra.UpperTriangular{Float64} (#31100)", 4] = @benchmarkable sqrtm($mf4)
+        g["sqrt", "LinearAlgebra.UpperTriangular{ComplexF64} (#31100)", 4] = @benchmarkable sqrtm($mc4)
+    end
+end
+
 for b in values(g)
     b.params.time_tolerance = 0.45
     b.params.samples = 100
