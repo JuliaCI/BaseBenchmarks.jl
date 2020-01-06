@@ -281,6 +281,20 @@ for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
 end
 
 ###############################################
+# foldl
+
+g = addgroup!(SUITE, "foldl", ["filter", "flatten"])
+
+let xs = [abs(x) < 1 ? x : missing for x in randn(1000)]
+    g["foldl(+, filter(...))"] = @benchmarkable foldl(+, (x for x in $xs if x !== missing))
+    g["foldl(+, filter(...); init = 0.0)"] =
+        @benchmarkable foldl(+, (x for x in $xs if x !== missing); init = 0.0)
+end
+
+g["foldl(+, flatten(filter(...)))"] =
+    @benchmarkable foldl(+, (y for x in 1:1000 for y in 1:x if y % 2 == 0))
+
+###############################################
 # iterators
 
 g = addgroup!(SUITE, "iterators", ["zip", "flatten"])
