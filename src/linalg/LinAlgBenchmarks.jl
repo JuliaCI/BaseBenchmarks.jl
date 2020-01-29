@@ -115,6 +115,17 @@ for s in SIZES
 
 end
 
+# Issue #34013: mul! for 2x2 or 3x3 matrices
+for s in (2, 3)
+    A = randmat(s)
+    B = randmat(s)
+    C = randmat(s)
+    (α, β) = rand(2)
+    g["3-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B)
+    g["5-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B, $α, $β)
+end
+
+
 for b in values(g)
     b.params.time_tolerance = 0.45
     b.params.samples = 100
