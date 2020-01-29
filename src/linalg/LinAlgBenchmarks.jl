@@ -18,7 +18,7 @@ typename(::Type{T}) where {T} = string(isa(T,DataType) ? T.name : Base.unwrap_un
 typename(::Type{M}) where {M<:Matrix} = "Matrix"
 typename(::Type{V}) where {V<:Vector} = "Vector"
 
-const UPLO = :U 
+const UPLO = :U
 
 linalgmat(::Type{Matrix}, s) = randmat(s)
 linalgmat(::Type{Diagonal}, s) = Diagonal(randvec(s))
@@ -120,9 +120,12 @@ for s in (2, 3)
     A = randmat(s)
     B = randmat(s)
     C = randmat(s)
-    (α, β) = rand(2)
     g["3-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B)
-    g["5-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B, $α, $β)
+    
+    if VERSION >= v"1.3"
+        (α, β) = rand(2)
+        g["5-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B, $α, $β)
+    end
 end
 
 
