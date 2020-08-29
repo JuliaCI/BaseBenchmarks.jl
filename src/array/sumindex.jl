@@ -284,6 +284,14 @@ if !applicable(Base.unsafe_getindex, [1 2], 1:1, 2)
     Base.@propagate_inbounds Base.unsafe_getindex(A::BitArray, I1::BitArray, I2::Int) = Base.unsafe_getindex(A, Base.to_index(I1), I2)
 end
 
+struct PairVals{T}
+    a::T
+    b::T
+end
+Base.zero(::Type{PairVals{T}}) where T = PairVals(zero(T), zero(T))
+Base.:(+)(p1::PairVals, p2::PairVals) = PairVals(p1.a + p2.a, p1.b + p2.b)
+Base.:(*)(p1::PairVals, p2::PairVals) = PairVals(p1.a * p2.a, p1.b * p2.b)
+
 function makearrays(::Type{T}, r::Integer, c::Integer) where T
     A = samerand(T, r, c)
     B = similar(A, r+1, c+1)
@@ -303,6 +311,20 @@ function makearrays(::Type{T}, r::Integer, c::Integer) where T
     Asub5 = view(ArrayLS(C), 1, :, :)
     Asub6 = view(reshape(view(C, :, :, :), Val(2)), :, 2:c+1)
     Asub7 = view(reshape(view(ArrayLS(C), :, :, :), Val(2)), :, 2:c+1)
+    arrays = (A, AF, AS, ASS, Asub, Asub2, Asub3, Asub4, Asub5, Asub6, Asub7)
+    # ReinterpretArrays
+    if sizeof(T) < 8
+        Tw = widen(T)
+        Aw = samerand(Tw, r, c)
+        Awr = reinterpret(PairVals{T}, Aw)  # same size, with fields
+        arrays = (arrays..., Aw, Awr)
+    end
+    if iseven(r)
+        arrays = (arrays..., reinterpret(PairVals{T}, A))  # twice the size, with fields
+    end
+    if T === Int32
+        arrays = (arrays..., reinterpret(Float32, A))  # same size, no fields
+    end
 
-    return (A, AF, AS, ASS, Asub, Asub2, Asub3, Asub4, Asub5, Asub6, Asub7)
+    return arrays
 end
