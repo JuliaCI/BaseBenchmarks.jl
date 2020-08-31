@@ -130,6 +130,10 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
             @benchmarkable map(identity, $A)
         g["broadcast", identity, T, M] =
             @benchmarkable broadcast(identity, $A)
+        g["collect", "all", T, M] =
+            @benchmarkable collect($(x for x in A))
+        g["collect", "filter", T, M] =
+            @benchmarkable collect($(x for x in A if x !== 1.0))
 
         g["map", abs, T, M] =
             @benchmarkable map(_abs, $A)
