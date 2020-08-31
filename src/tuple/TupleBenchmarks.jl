@@ -190,5 +190,9 @@ g = addgroup!(SUITE, "misc", ["tuple"])
 t = (Float32(1.0), Float32(2.0), Float32(3.0), Float32(4.0))
 g["11899"] = @benchmarkable perf_tuple_11899($t)
 
+# converting iterators to long tuples
+let a = rand(150)
+    g["longtuple"] = @benchmarkable NTuple{150,Float64}($a)
+end
 
 end # module
