@@ -44,7 +44,8 @@ include("sumindex.jl")
 σ = 500
 A3d = samerand(11,11,11)
 S3d = view(A3d, 1:10, 1:10, 1:10)
-arrays = (makearrays(Int32, σ, σ)..., makearrays(Float32, σ, σ)..., trues(σ, σ), A3d, S3d)
+A3i = reinterpret(Int32, A3d)  # half-size, no fields
+arrays = (makearrays(Int32, σ, σ)..., makearrays(Float32, σ, σ)..., trues(σ, σ), A3d, S3d, A3i)
 ranges = (1:10^5, 10^5:-1:1, 1.0:1e5, range(1, stop=2, length=10^4))
 arrays_iter = map(x -> (x, string(typeof(x))), arrays)
 ranges_iter = map(x -> (x, repr(x)), ranges)
