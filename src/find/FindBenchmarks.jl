@@ -3,7 +3,7 @@ module FindBenchmarks
 include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
 
 using .RandUtils
-using BenchmarkTools
+using BenchmarkTools, Statistics
 
 const SUITE = BenchmarkGroup()
 
@@ -30,7 +30,15 @@ ispos(x) = x > 0
 for T in (Bool, Int8, Int, UInt8, UInt, Float32, Float64)
     y = samerand(T, VEC_LENGTH)
     g["ispos", string(typeof(y))] = @benchmarkable findall($ispos, $y)
+
+    # vary the proportion of returned elements (i.e size of returned array)
+    ps = [0.5, 0.8, 0.95, 0.99]
+    qs = quantile(y, ps)
+    for (p, q) in zip(ps, qs)
+        g["> q$p", string(typeof(y))] = @benchmarkable findall($(x -> x > q), $y)
+    end
 end
+
 
 ########################
 # findnext/findprev    #
