@@ -58,17 +58,15 @@ g["repeat char 1"] = @benchmarkable repeat(' ', 500)
 g["repeat char 2"] = @benchmarkable repeat('α', 500)
 
 ###################################################
-# ==(::AbstractString, ::AbstractString) (#37192) #
+# ==(::AbstractString, ::AbstractString) (#37467) #
 ###################################################
 
-str = "A" ^ 1000
-
+str = String('A':'Z') ^ 100
 g = addgroup!(SUITE, "==(::AbstractString, ::AbstractString)")
 
-g["identical"] = @benchmarkable invoke(==, Tuple{AbstractString, AbstractString}, $"ABC", $"ABC")
-g["different length"] = @benchmarkable $(SubString("ABC")) == $"ABCD"
-g["equal"] = @benchmarkable $(SubString("ABC")) == $"ABC"
-g["different"] = @benchmarkable $(SubString("ABC")) == $"DEF"
-g["long equal"] = @benchmarkable $(SubString(str)) == $str
+g["identical"] = @benchmarkable invoke(==, Tuple{AbstractString, AbstractString}, $str, $str)
+g["equal"] = @benchmarkable invoke(==, Tuple{AbstractString, AbstractString}, $(SubString(str)), $str)
+g["different length"] = @benchmarkable invoke(==, Tuple{AbstractString, AbstractString}, $(SubString(str)), $(str * 'Z'))
+g["different"] = @benchmarkable invoke(==, Tuple{AbstractString, AbstractString}, $(SubString(str)), $(reverse(str)))
 
 end # module
