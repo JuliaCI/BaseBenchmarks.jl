@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+      - retune
+jobs:
+  PullRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Retune parameters',
+              head: 'retune',
+              base: 'master',
+            })
