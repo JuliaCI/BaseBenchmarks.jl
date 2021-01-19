@@ -28,7 +28,8 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "sort" => :SortBenchmarks,
                      "sparse" => :SparseBenchmarks,
                      "string" => :StringBenchmarks,
-                     "tuple" => :TupleBenchmarks)
+                     "tuple" => :TupleBenchmarks,
+                     "latency" => :LatencyBenchmarks)
 
 load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 
