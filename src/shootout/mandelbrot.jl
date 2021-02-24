@@ -36,7 +36,7 @@ function perf_mandelbrot(n::Int=200)
     M = zeros(UInt8, div(n, 8), n)
     draw_mandel(M, n)
 
-    mktemp(pwd()) do path, output
+    sprint() do output
         write(output, "P4\n$n $n\n")
         write(output, M)
     end
