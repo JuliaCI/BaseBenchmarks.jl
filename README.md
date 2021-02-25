@@ -1,14 +1,23 @@
 # BaseBenchmarks.jl
 
-[![Build Status](https://travis-ci.org/JuliaCI/BaseBenchmarks.jl.svg?branch=master)](https://travis-ci.org/JuliaCI/BaseBenchmarks.jl)
+[![Build Status](https://github.com/JuliaCI/BaseBenchmarks.jl/workflows/CI/badge.svg)](https://github.com/JuliaCI/BaseBenchmarks.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![codecov](https://codecov.io/gh/JuliaCI/BaseBenchmarks.jl/branch/master/graph/badge.svg?label=codecov&token=ZETWYEXlbE)](https://codecov.io/gh/JuliaCI/BaseBenchmarks.jl)
 
 This package is a collection of Julia benchmarks using to track the performance of [the Julia language](https://github.com/JuliaLang/julia).
 
-BaseBenchmarks is written using the [BenchmarkTools](https://github.com/JuliaCI/BenchmarkTools.jl) package. I highly suggest at least skimming the [BenchmarkTools manual](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md) before using BaseBenchmarks locally.
+BaseBenchmarks is written using the
+[BenchmarkTools](https://github.com/JuliaCI/BenchmarkTools.jl) package. I
+highly suggest at least skimming the [BenchmarkTools
+manual](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md)
+before using BaseBenchmarks locally.
 
 #### Loading and running benchmarks
 
-BaseBenchmarks contains a large amount of code, not all of which is suitable for precompilation. Loading all of this code at once can take an annoyingly long time if you only need to run one or two benchmarks. To solve this problem, BaseBenchmarks allows you to dynamically load benchmark suites when you need them:
+BaseBenchmarks contains a large amount of code, not all of which is suitable
+for precompilation. Loading all of this code at once can take an annoyingly
+long time if you only need to run one or two benchmarks. To solve this problem,
+BaseBenchmarks allows you to dynamically load benchmark suites when you need
+them:
 
 ```julia
 julia> using BaseBenchmarks
@@ -62,7 +71,10 @@ run(BaseBenchmarks.SUITE["scalar"]["fastmath"]["add", "Complex{Float64}"])
 run(BaseBenchmarks.SUITE[["scalar", "fastmath", ("add", "Complex{Float64}")]]);
 ```
 
-See the [`BenchmarkTools`]((https://github.com/JuliaCI/BenchmarkTools.jl)) repository for documentation of `BenchmarkTools.BenchmarkGroup` features (e.g. regression classification and filtering, parameter tuning, leaf iteration, higher order mapping/filtering, etc.).
+See the [`BenchmarkTools`]((https://github.com/JuliaCI/BenchmarkTools.jl))
+repository for documentation of `BenchmarkTools.BenchmarkGroup` features (e.g.
+regression classification and filtering, parameter tuning, leaf iteration,
+higher order mapping/filtering, etc.).
 
 #### Recipe for testing a Julia PR locally
 
@@ -145,7 +157,9 @@ analyze the bottlenecks that led to that regression.
 
 #### Contributing
 
-Our performance tracker could always benefit from more benchmarks! If you have a benchmark that depends only on `Base` Julia code, it is welcome here - just open a PR against the master branch.
+Our performance tracker could always benefit from more benchmarks! If you have
+a benchmark that depends only on `Base` Julia code, it is welcome here - just
+open a PR against the master branch.
 
 Here are some contribution tips and guidelines:
 
@@ -157,4 +171,13 @@ Here are some contribution tips and guidelines:
 
 #### Which version of BaseBenchmarks is being used in CI?
 
-New benchmarks added to BaseBenchmarks won't be present via CI right away, as their execution parameters must be [tuned and cached](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md#caching-parameters) on [Nanosoldier](https://github.com/JuliaCI/Nanosoldier.jl) (our benchmark cluster) before they are suitable for running. This process is performed periodically and upon request, after which the `master` branch is merged into the [`nanosoldier`](https://github.com/JuliaCI/BaseBenchmarks.jl/tree/nanosoldier) branch. Nanosoldier pulls down the `nanosoldier` branch before running every benchmark job, so whatever's currently on the `nanosoldier` branch is what's being used in CI.
+New benchmarks added to BaseBenchmarks won't be present via CI right away, as
+their execution parameters must be [tuned and
+cached](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md#caching-parameters)
+on [Nanosoldier](https://github.com/JuliaCI/Nanosoldier.jl) (our benchmark
+cluster) before they are suitable for running. This process is performed
+periodically and upon request, after which the `master` branch is merged into
+the [`nanosoldier`](https://github.com/JuliaCI/BaseBenchmarks.jl/tree/nanosoldier)
+branch. Nanosoldier pulls down the `nanosoldier` branch before running every
+benchmark job, so whatever's currently on the `nanosoldier` branch is what's
+being used in CI.
