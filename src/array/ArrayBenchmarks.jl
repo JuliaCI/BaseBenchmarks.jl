@@ -89,10 +89,12 @@ end
 include("generate_kernel.jl")
 
 nmax = 6  # maximum dimensionality is nmax + 1
-# get path to current directory and append file name to it
-fname = joinpath(dirname(@__FILE__), "hdindexing.jl")
-make_stencil(fname, nmax)  # generate source file
-include("hdindexing.jl")
+# get path to tempdir and append file name to it
+mktempdir() do dir
+    fname = joinpath(dir, "hdindexing.jl")
+    make_stencil(fname, nmax)  # generate source file
+    include(fname)
+end
 
 npts_dir = [10000, 80, 20, 12, 9, 6]  # number of points in each direction
 for i=1:nmax
