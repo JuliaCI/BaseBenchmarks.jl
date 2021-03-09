@@ -24,7 +24,7 @@ end
 
 g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 
-testbuf = IOBuffer(randstring(RandUtils.SEED, 10^4))
+testbuf = IOBuffer(samerandstring(10^4))
 
 g["read"]       = @benchmarkable perf_read!($testbuf)
 g["readstring"] = @benchmarkable read($testbuf, String)
@@ -41,13 +41,14 @@ function serialized_buf(x)
     return io
 end
 
-teststrings = [randstring(RandUtils.SEED, 32) for i=1:10^3]
+const STR_RNG = StableRNGs.StableRNG(1)
+teststrings = [randstring(STR_RNG, 32) for i=1:10^3]
 teststrings_buf = serialized_buf(teststrings)
 
 g["serialize", "Vector{String}"] = @benchmarkable serialize(io, $teststrings) setup=(io=IOBuffer())
 g["deserialize", "Vector{String}"] = @benchmarkable (seek($teststrings_buf, 0); deserialize($teststrings_buf))
 
-testdata = rand(RandUtils.SEED,1000,1000)
+testdata = samerand(1000,1000)
 testdata_buf = serialized_buf(testdata)
 
 g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, $testdata) setup=(io=IOBuffer())
@@ -59,7 +60,7 @@ g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek($testdata_buf, 0); de
 
 g = addgroup!(SUITE, "array_limit", ["array", "display"])
 
-test_vector = rand(10^8)
+test_vector = samerand(10^8)
 test_column_matrix = reshape(test_vector, length(test_vector), 1)
 test_square_matrix = reshape(test_vector, 10^4, 10^4)
 disp = TextDisplay(IOContext(devnull, :limit=>true))

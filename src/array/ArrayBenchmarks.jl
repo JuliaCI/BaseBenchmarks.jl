@@ -280,7 +280,7 @@ function perf_convert!(a, x)
     return a
 end
 
-x_int = rand(1:1000000,100,100)
+x_int = samerand(1:1000000,100,100)
 x_float = 1.0 * x_int
 x_complex = x_float .+ 0.0im
 

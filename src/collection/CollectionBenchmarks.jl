@@ -2,24 +2,25 @@ module CollectionBenchmarks
 
 using BenchmarkTools
 using Random
+using StableRNGs
 
 const SUITE = BenchmarkGroup()
 
-const MT = MersenneTwister(0)
+const RNG = StableRNG(1)
 
 const iterlen = 1000
-const ints = rand(MT, 1:iterlen, iterlen)
-const strings = [randstring(MT, rand(MT, 1:30)) for i in 1:iterlen]
-const anys = (shuffle!(MT, [ints; strings;])[1:iterlen])::Vector{Any}
+const ints = rand(RNG, 1:iterlen, iterlen)
+const strings = [randstring(RNG, rand(RNG, 1:30)) for i in 1:iterlen]
+const anys = (shuffle!(RNG, [ints; strings;])[1:iterlen])::Vector{Any}
 const sortedints = sort(ints)
 
 # random element, in the collections iff 2nd parameter is true
-let anyshuffled = shuffle(MT, anys),
+let anyshuffled = shuffle(RNG, anys),
     filter = Iterators.filter
     d = Dict((Int,    true ) => first(filter(i->isa(i, Int),    anyshuffled))::Int,
              (String, true ) => first(filter(i->isa(i, String), anyshuffled))::String,
-             (Int,    false) => first(filter(i->!in(i, ints), rand(MT, 1:iterlen) for _ in 1:typemax(Int)))::Int,
-             (String, false) => randstring(MT, 40)::String)
+             (Int,    false) => first(filter(i->!in(i, ints), rand(RNG, 1:iterlen) for _ in 1:typemax(Int)))::Int,
+             (String, false) => randstring(RNG, 40)::String)
     global randelt
     randelt(C, T, bool) = (T == Any && (T = Int); C === Dict || C === IdDict ? (d[T, bool] => d[T, bool]) : d[T, bool])
 end
@@ -195,7 +196,7 @@ set_tolerance!(g)
 ##################
 
 g = addgroup!(SUITE, "set operations", ["AbstractSet", "Array"])
-const newints = [rand(MT, ints, 10); rand(MT, 1:iterlen, 10); rand(MT, iterlen:2iterlen, 10);]
+const newints = [rand(RNG, ints, 10); rand(RNG, 1:iterlen, 10); rand(RNG, iterlen:2iterlen, 10);]
 
 foreach_container(C = (BitSet, Set, Vector), T = (Int,)) do C, cstr, T, tstr, c
     g[cstr, tstr, "union"]     = @benchmarkable union($c)
@@ -259,7 +260,7 @@ g = addgroup!(SUITE, "optimizations", ["Dict", "IdDict", "Set", "BitSet", "Vecto
 for T in (Nothing, Bool, Int8, UInt16)
     local v
     v::Vector{T} = T === Nothing ? Vector{Nothing}(undef, 100000) :
-                                   rand(MT, one(T):typemax(T), 100000)
+                                   rand(RNG, one(T):typemax(T), 100000)
     tstr = string(T)
     g["Dict", "abstract", tstr] = @benchmarkable Dict($(map(Pair, v, v)))
     g["Dict", "concrete", tstr] = @benchmarkable Dict{$T,$T}($(map(Pair, v, v)))
