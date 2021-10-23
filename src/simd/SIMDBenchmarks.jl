@@ -225,8 +225,8 @@ for s in (4095, 4096), T in (Int32, Int64, Float32, Float64)
         SUITE["Linear", "auto_two_reductions", tstr, s] = @benchmarkable perf_auto_two_reductions($v, $x, $y)
     end
 end
-const nbytes = 1 << 20
-_partition(iter::CartesianIndices) = @inbounds @view iter[2:length(iter)-1]
+const nbytes = 1 << 18
+_partition(iter::CartesianIndices) = @inbounds view(iter, 2:length(iter)-1)
 for ndims in (2,3,4), dim1 in (31, 32, 63, 64), T in (Int32, Int64, Float32, Float64)
     num = nbytes ÷ sizeof(T)
     sz = (dim1, ntuple(_ -> 8, ndims - 2)..., (num>>(3ndims - 6)) ÷  dim1)
