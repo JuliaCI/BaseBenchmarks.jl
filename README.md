@@ -8,7 +8,7 @@ This package is a collection of Julia benchmarks using to track the performance 
 BaseBenchmarks is written using the
 [BenchmarkTools](https://github.com/JuliaCI/BenchmarkTools.jl) package. I
 highly suggest at least skimming the [BenchmarkTools
-manual](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md)
+manual](https://juliaci.github.io/BenchmarkTools.jl/stable/)
 before using BaseBenchmarks locally.
 
 #### Loading and running benchmarks
