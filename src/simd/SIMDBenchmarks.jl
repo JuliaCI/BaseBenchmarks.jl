@@ -11,17 +11,17 @@ const SUITE = BenchmarkGroup(["array", "inbounds"])
 # Methods #
 ###########
 
-function perf_axpy!(a, X, Y, f = identity)
+function perf_axpy!(a, X, Y, iter = eachindex(X))
     # LLVM's auto-vectorizer typically vectorizes this loop even without @simd
-    @inbounds @simd for i in f(eachindex(X))
+    @inbounds @simd for i in iter
         Y[i] += a*X[i]
     end
     return Y
 end
 
-function perf_inner(X, Y, f = identity)
+function perf_inner(X, Y, iter = eachindex(X))
     s = zero(eltype(X))
-    @inbounds @simd for i in f(eachindex(X))
+    @inbounds @simd for i in iter
         s += X[i]*Y[i]
     end
     return s
@@ -37,20 +37,20 @@ function perf_sum_reduce(X)
     return s
 end
 
-function perf_manual_example!(X, Y, Z, f = identity)
+function perf_manual_example!(X, Y, Z, iter = eachindex(X, Y, Z))
     s = zero(eltype(Z))
-    @inbounds @simd for i in f(eachindex(X, Y, Z))
+    @inbounds @simd for i in iter
         Z[i] = X[i]-Y[i]
         s += Z[i]*Z[i]
     end
     return s
 end
 
-function perf_two_reductions(X, Y, Z, f = identity)
+function perf_two_reductions(X, Y, Z, iter = eachindex(X, Y, Z))
     # Use non-zero initial value to make sure reduction values include it.
     s = one(eltype(X))
     t = one(eltype(Y))
-    @inbounds @simd for i in f(eachindex(X, Y, Z))
+    @inbounds @simd for i in iter
         s += X[i]
         t += 2*Y[i]
         s += Z[i]   # Two reductions go into s
@@ -58,9 +58,9 @@ function perf_two_reductions(X, Y, Z, f = identity)
     return s*t
 end
 
-function perf_conditional_loop!(X, Y, Z, f = identity)
+function perf_conditional_loop!(X, Y, Z, iter = eachindex(X, Y, Z))
     # SIMD loop with a long conditional expression
-    @inbounds @simd for i = f(eachindex(X, Y, Z))
+    @inbounds @simd for i = iter
         X[i] = Y[i] * (Z[i] > Y[i]) * (Z[i] < Y[i]) * (Z[i] >= Y[i]) * (Z[i] <= Y[i])
     end
     return X
@@ -138,6 +138,16 @@ function perf_auto_conditional_loop!(X, Y, Z)
         end
     end
     return X
+end
+
+function perf_manual_partition!(A, n)
+    s = zero(eltype(A))
+    @inbounds for I in Iterators.partition(eachindex(A), n)
+        @simd for i in I
+            s += A[i]
+        end
+    end
+    s
 end
 
 function perf_auto_local_arrays(V)
@@ -225,11 +235,11 @@ for s in (4095, 4096), T in (Int32, Int64, Float32, Float64)
         SUITE["Linear", "auto_two_reductions", tstr, s] = @benchmarkable perf_auto_two_reductions($v, $x, $y)
     end
 end
-const nbytes = 1 << 18
-_partition(iter::CartesianIndices) = @inbounds view(iter, 2:length(iter)-1)
-for ndims in (2,3,4), dim1 in (31, 32, 63, 64), T in (Int32, Int64, Float32, Float64)
-    num = nbytes ÷ sizeof(T)
-    sz = (dim1, ntuple(_ -> 8, ndims - 2)..., (num>>(3ndims - 6)) ÷  dim1)
+const maxnbytes = 1 << 15
+for ndims in (2,3,4), dim1 in (31, 32, 63, 64), T in (Float64, Float32, Int64, Int32)
+    num = maxnbytes ÷ sizeof(T)
+    dim2 = min(128, num>>(2ndims-4) ÷ dim1)
+    sz = (dim1, dim2, ntuple(_ -> 4, ndims - 2)...)
     tstr = string(T)
     _v = samerand(T, sz); v = view(_v, axes(_v)...)
     _x = samerand(T, sz); x = view(_x, axes(_x)...)
@@ -240,13 +250,14 @@ for ndims in (2,3,4), dim1 in (31, 32, 63, 64), T in (Int32, Int64, Float32, Flo
     SUITE["Cartesian", "manual_example!", tstr, ndims, dim1] = @benchmarkable perf_manual_example!($v, $x, $y)
     SUITE["Cartesian", "two_reductions", tstr, ndims, dim1] = @benchmarkable perf_two_reductions($v, $x, $y)
     SUITE["Cartesian", "conditional_loop!", tstr, ndims, dim1] = @benchmarkable perf_conditional_loop!($v, $x, $y)
-    SUITE["CartesianPartition", "axpy!", tstr, ndims, dim1] = @benchmarkable perf_axpy!($n, $v, $x, _partition)
-    SUITE["CartesianPartition", "inner", tstr, ndims, dim1] = @benchmarkable perf_inner($v, $x, _partition)
-    SUITE["CartesianPartition", "manual_example!", tstr, ndims, dim1] = @benchmarkable perf_manual_example!($v, $x, $y, _partition)
-    SUITE["CartesianPartition", "two_reductions", tstr, ndims, dim1] = @benchmarkable perf_two_reductions($v, $x, $y, _partition)
-    SUITE["CartesianPartition", "conditional_loop!", tstr, ndims, dim1] = @benchmarkable perf_conditional_loop!($v, $x, $y, _partition)
+    subiter = view(eachindex(v), 2:length(v)-1)
+    SUITE["CartesianPartition", "axpy!", tstr, ndims, dim1] = @benchmarkable perf_axpy!($n, $v, $x, $subiter)
+    SUITE["CartesianPartition", "inner", tstr, ndims, dim1] = @benchmarkable perf_inner($v, $x, $subiter)
+    SUITE["CartesianPartition", "manual_example!", tstr, ndims, dim1] = @benchmarkable perf_manual_example!($v, $x, $y, $subiter)
+    SUITE["CartesianPartition", "two_reductions", tstr, ndims, dim1] = @benchmarkable perf_two_reductions($v, $x, $y, $subiter)
+    SUITE["CartesianPartition", "conditional_loop!", tstr, ndims, dim1] = @benchmarkable perf_conditional_loop!($v, $x, $y, $subiter)
+    SUITE["CartesianPartition", "manual_partition!", tstr, ndims, dim1] = @benchmarkable perf_manual_partition!($v, 512)
 end
-
 for b in values(SUITE)
     b.params.time_tolerance = 0.20
 end
