@@ -29,7 +29,9 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "sparse" => :SparseBenchmarks,
                      "string" => :StringBenchmarks,
                      "tuple" => :TupleBenchmarks,
-                     "frontend" => :FrontendBenchmarks)
+                     "frontend" => :FrontendBenchmarks,
+                     )
+@static VERSION ≥ v"1.8-DEV" && push!(MODULES, "inference" => :InferenceBenchmarks)
 
 load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 
