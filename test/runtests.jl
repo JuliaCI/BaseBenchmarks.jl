@@ -9,6 +9,6 @@ BaseBenchmarks.loadall!()
 
 @test begin
     run(BaseBenchmarks.SUITE, verbose = true, samples = 1,
-        evals = 2, gctrial = false, gcsample = false);
+        evals = 1, gctrial = false, gcsample = false);
     true
 end
