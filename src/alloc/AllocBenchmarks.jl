@@ -40,8 +40,19 @@ function perf_alloc_many_structs()
     end
 end
 
+function perf_grow_array()
+    x = Vector{Int}()
+    for i in 1:10000000
+        push!(x, i)
+
+        GC.safepoint()
+        Threads.atomic_fence()
+    end
+end
+
 SUITE["arrays"] = @benchmarkable perf_alloc_many_arrays()
 SUITE["strings"] = @benchmarkable perf_alloc_many_strings()
 SUITE["structs"] = @benchmarkable perf_alloc_many_structs()
+SUITE["grow_array"] = @benchmarkable perf_grow_array()
 
 end # module
