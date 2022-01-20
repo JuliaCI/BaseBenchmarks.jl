@@ -24,7 +24,24 @@ function perf_alloc_many_strings()
     end
 end
 
+# mutable to make it heap allocate
+mutable struct Foo
+    x::Int
+    y::Int
+end
+
+function perf_alloc_many_structs()
+    for i in 1:10000000
+        # global to ensure that this is heap allocated
+        global b = Foo(i, i+1)
+
+        GC.safepoint()
+        Threads.atomic_fence()
+    end
+end
+
 SUITE["arrays"] = @benchmarkable perf_alloc_many_arrays()
 SUITE["strings"] = @benchmarkable perf_alloc_many_strings()
+SUITE["structs"] = @benchmarkable perf_alloc_many_structs()
 
 end # module
