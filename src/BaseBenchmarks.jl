@@ -10,6 +10,7 @@ BenchmarkTools.DEFAULT_PARAMETERS.memory_tolerance = 0.01
 const PARAMS_PATH = joinpath(dirname(@__FILE__), "..", "etc", "params.json")
 const SUITE = BenchmarkGroup()
 const MODULES = Dict("array" => :ArrayBenchmarks,
+                     "alloc" => :AllocBenchmarks,
                      "broadcast" => :BroadcastBenchmarks,
                      "collection" => :CollectionBenchmarks,
                      "dates" => :DatesBenchmarks,
