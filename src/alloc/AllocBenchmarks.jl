@@ -5,17 +5,17 @@ using BenchmarkTools
 const SUITE = BenchmarkGroup()
 
 function perf_alloc_many_arrays()
-  a = nothing
-  for _ in 1:10000000
-      a = []
-  end
+    for _ in 1:10000000
+        # global to ensure that this is heap allocated
+        global a = []
+    end
 end
 
 function perf_alloc_many_strings()
-  a = nothing
-  for i in 1:10000000
-      a = "hello $(i)"
-  end
+    for i in 1:10000000
+        # global to ensure that this is heap allocated
+        global b = "hello $(i)"
+    end
 end
 
 SUITE["arrays"] = @benchmarkable perf_alloc_many_arrays()
