@@ -5,7 +5,7 @@ using BenchmarkTools
 const SUITE = BenchmarkGroup()
 
 function perf_alloc_many_arrays()
-    for _ in 1:10000
+    for _ in 1:100
         # global to ensure that this is heap allocated
         global a = [[] for _ in 1:1000]
 
@@ -15,7 +15,7 @@ function perf_alloc_many_arrays()
 end
 
 function perf_alloc_many_strings()
-    for i in 1:10000
+    for i in 1:100
         # global to ensure that this is heap allocated
         global b = ["hello $(j)" for j in 1:1000]
 
@@ -31,7 +31,7 @@ mutable struct Foo
 end
 
 function perf_alloc_many_structs()
-    for i in 1:10000
+    for i in 1:100
         # global to ensure that this is heap allocated
         global b = [Foo(i, j) for j in 1:1000]
 
@@ -42,7 +42,7 @@ end
 
 function perf_grow_array()
     global x = Vector{Int}()
-    for i in 1:10000
+    for i in 1:100
         for j in 1:1000
             push!(x, j)
         end
