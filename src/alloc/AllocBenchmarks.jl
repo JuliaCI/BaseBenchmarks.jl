@@ -2,7 +2,7 @@ module AllocBenchmarks
 
 using BenchmarkTools
 
-const SUITE = BenchmarkGroup()
+const SUITE = BenchmarkGroup(["alloc"])
 
 function perf_alloc_many_arrays()
     for _ in 1:100
