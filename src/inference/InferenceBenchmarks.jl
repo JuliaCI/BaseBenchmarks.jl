@@ -131,8 +131,7 @@ function opt_call(@nospecialize(f), @nospecialize(types = Tuple{});
     return function ()
         params = OptimizationParams(interp)
         opt = OptimizationState(frame, params, interp)
-        result = widenconst(frame.result.result)
-        optimize(interp, opt, params, result)
+        optimize(interp, opt, params, frame.result)
     end
 end
 
