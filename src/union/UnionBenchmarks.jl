@@ -99,6 +99,16 @@ function perf_binaryop(op::Function, X::AbstractArray, Y::AbstractArray)
     ret
 end
 
+function perf_sumskipmissing(X::AbstractArray)
+    sX = skipmissing(X)
+    T = eltype(sX)
+    s = _zero(T) + _zero(T)
+    @inbounds for i in eachindex(sX)
+        s += sX[i]
+    end
+    s
+end
+
 for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64})
     if T == BigInt
         S = Int128
@@ -161,10 +171,22 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
         g["skipmissing", collect, eltype(A), M] =
             @benchmarkable collect(skipmissing($A))
 
+        g["skipmissing", keys, eltype(A), M] =
+            @benchmarkable collect(keys(skipmissing($A)))
+
+        g["skipmissing", eachindex, eltype(A), M] =
+            @benchmarkable collect(eachindex(skipmissing($A)))
+
         g["skipmissing", sum, eltype(A), M] =
             @benchmarkable sum(skipmissing($A))
 
+        g["skipmissing", perf_sumskipmissing, eltype(A), M] =
+            @benchmarkable perf_sumskipmissing($A)
+
         if hasmethod(isless, Tuple{T, T})
+            g["skipmissing", filter, eltype(A), M] =
+                @benchmarkable filter(>(0.5), skipmissing($A))
+
             g["sort", eltype(A), M] = @benchmarkable sort($A)
         end
     end
