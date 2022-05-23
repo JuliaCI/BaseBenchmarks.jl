@@ -11,6 +11,13 @@ This benchmark group `"inference"` is composed of the following subgroups:
 """
 module InferenceBenchmarks
 
+# InferenceBenchmarker
+# ====================
+# this new `AbstractInterpreter` satisfies the minimum interface requirements and manages
+# its cache independently in a way it is totally separated from the native code cache
+# managed by the runtime system: this allows us to profile Julia-level inference reliably
+# without being influenced by previous trials or some native execution
+
 using BenchmarkTools, InteractiveUtils
 
 const CC = Core.Compiler
@@ -147,18 +154,47 @@ function tune_benchmarks!(
     end
 end
 
-const SUITE = BenchmarkGroup()
+# "inference" benchmark targets
+# =============================
 
 # TODO add TTFP?
+# XXX some targets below really depends on the compiler implementation itself
+# (e.g. `abstract_call_gf_by_type`) and thus a bit more unreliable --  ideally
+# we want to replace them with other functions that have the similar characteristics
+# but whose call graph are orthogonal to the Julia's compiler implementation
+
+using REPL
+brdcast(xs, x) = findall(>(x), abs.(xs))
+let # see https://github.com/JuliaLang/julia/pull/45276
+    n = 10000
+    ex = Expr(:block)
+    var = gensym()
+    push!(ex.args, :($var = x))
+    for _ = 1:n
+        newvar = gensym()
+        push!(ex.args, :($newvar = $var + 1))
+        var = newvar
+    end
+    @eval global function quadratic(x)
+        $ex
+    end
+end
+
+const SUITE = BenchmarkGroup()
 
 let g = addgroup!(SUITE, "abstract interpretation")
     g["sin(42)"] = @benchmarkable (@abs_call sin(42))
     g["rand(Float64)"] = @benchmarkable (@abs_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (abs_call(println, (QuoteNode,)))
+    g["broadcast"] = @benchmarkable abs_call(brdcast, (Vector{Float64},Float64))
+    g["REPL.REPLCompletions.completions"] = @benchmarkable abs_call(
+        REPL.REPLCompletions.completions, (String,Int))
+    g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable abs_call(Base.init_stdio, (Ptr{Cvoid},))
     g["abstract_call_gf_by_type"] = @benchmarkable abs_call(
         CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))
     g["construct_ssa!"] = @benchmarkable abs_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable abs_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
+    g["quadratic"] = @benchmarkable abs_call(quadratic, (Int,))
     tune_benchmarks!(g)
 end
 
@@ -166,9 +202,14 @@ let g = addgroup!(SUITE, "optimization")
     g["sin(42)"] = @benchmarkable f() (setup = (f = @opt_call sin(42)))
     g["rand(Float64)"] = @benchmarkable f() (setup = (f = @opt_call rand(Float64)))
     g["println(::QuoteNode)"] = @benchmarkable f() (setup = (f = opt_call(println, (QuoteNode,))))
+    g["broadcast"] = @benchmarkable f() (setup = (f = opt_call(brdcast, (Vector{Float64},Float64))))
+    g["REPL.REPLCompletions.completions"] = @benchmarkable f() (setup = (f = opt_call(
+        REPL.REPLCompletions.completions, (String,Int))))
+    g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable f() (setup = (f = opt_call(Base.init_stdio, (Ptr{Cvoid},))))
     g["abstract_call_gf_by_type"] = @benchmarkable f() (setup = (f = opt_call(CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))))
     g["construct_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))))
     g["domsort_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))))
+    g["quadratic"] = @benchmarkable f() (setup = (f = opt_call(quadratic, (Int,))))
     tune_benchmarks!(g)
 end
 
@@ -176,10 +217,15 @@ let g = addgroup!(SUITE, "allinference")
     g["sin(42)"] = @benchmarkable (@inf_call sin(42))
     g["rand(Float64)"] = @benchmarkable (@inf_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (inf_call(println, (QuoteNode,)))
+    g["broadcast"] = @benchmarkable inf_call(brdcast, (Vector{Float64},Float64))
+    g["REPL.REPLCompletions.completions"] = @benchmarkable inf_call(
+        REPL.REPLCompletions.completions, (String,Int))
+    g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable inf_call(Base.init_stdio, (Ptr{Cvoid},))
     g["abstract_call_gf_by_type"] = @benchmarkable inf_call(
         CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))
     g["construct_ssa!"] = @benchmarkable inf_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable inf_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
+    g["quadratic"] = @benchmarkable inf_call(quadratic, (Int,))
     tune_benchmarks!(g)
 end
 
