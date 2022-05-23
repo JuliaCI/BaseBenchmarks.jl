@@ -172,7 +172,7 @@ let g = addgroup!(SUITE, "optimization")
     tune_benchmarks!(g)
 end
 
-let g = addgroup!(SUITE, "inference")
+let g = addgroup!(SUITE, "allinference")
     g["sin(42)"] = @benchmarkable (@inf_call sin(42))
     g["rand(Float64)"] = @benchmarkable (@inf_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (inf_call(println, (QuoteNode,)))
