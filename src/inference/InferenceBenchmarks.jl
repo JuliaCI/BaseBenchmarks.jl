@@ -5,9 +5,9 @@ Defines a benchmark suite for Julia-level compilation pipeline.
 Note that this benchmark suite is only available for Julia 1.8 and higher.
 
 This benchmark group `"inference"` is composed of the following subgroups:
-- `"inference"`: benchmarks the overall Julia-level compilation pipeline per each static call
-- `"abstract interpretation"`: benchmarks abstract interpretation per each static call (without optimization)
-- `"optimization"`: benchmarks optimization passes applied per a single call frame
+- `"allinference"`: benchmarks the overall Julia-level compilation pipeline for a static call graph
+- `"abstract interpretation"`: benchmarks abstract interpretation for a static call graph (without optimization)
+- `"optimization"`: benchmarks optimization passes applied for a single call frame
 """
 module InferenceBenchmarks
 
