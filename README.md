@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/JuliaCI/BaseBenchmarks.jl/workflows/CI/badge.svg)](https://github.com/JuliaCI/BaseBenchmarks.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![codecov](https://codecov.io/gh/JuliaCI/BaseBenchmarks.jl/branch/master/graph/badge.svg?label=codecov&token=ZETWYEXlbE)](https://codecov.io/gh/JuliaCI/BaseBenchmarks.jl)
 
-This package is a collection of Julia benchmarks using to track the performance of [the Julia language](https://github.com/JuliaLang/julia).
+This package is a collection of Julia benchmarks used to track the performance of [the Julia language](https://github.com/JuliaLang/julia).
 
 BaseBenchmarks is written using the
 [BenchmarkTools](https://github.com/JuliaCI/BenchmarkTools.jl) package. I
