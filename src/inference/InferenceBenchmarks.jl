@@ -179,6 +179,20 @@ let # see https://github.com/JuliaLang/julia/pull/45276
         $ex
     end
 end
+let # see https://github.com/JuliaLang/julia/pull/46535
+    n = 100
+    ex = Expr(:block)
+    var = gensym()
+    push!(ex.args, :(y = sum(x)))
+    for i = 1:n
+        push!(ex.args, :(x .= $(Float64(i))))
+        push!(ex.args, :(y += sum(x)))
+    end
+    push!(ex.args, :(return y))
+    @eval global function method_match_cache(x)
+        $ex
+    end
+end
 
 const SUITE = BenchmarkGroup()
 
@@ -195,6 +209,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["construct_ssa!"] = @benchmarkable abs_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable abs_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["quadratic"] = @benchmarkable abs_call(quadratic, (Int,))
+    g["method_match_cache"] = @benchmarkable abs_call(method_match_cache, (Float64,))
     tune_benchmarks!(g)
 end
 
@@ -210,6 +225,7 @@ let g = addgroup!(SUITE, "optimization")
     g["construct_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))))
     g["domsort_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))))
     g["quadratic"] = @benchmarkable f() (setup = (f = opt_call(quadratic, (Int,))))
+    g["method_match_cache"] = @benchmarkable f() (setup = (f = opt_call(method_match_cache, (Float64,))))
     tune_benchmarks!(g)
 end
 
@@ -226,6 +242,7 @@ let g = addgroup!(SUITE, "allinference")
     g["construct_ssa!"] = @benchmarkable inf_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable inf_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["quadratic"] = @benchmarkable inf_call(quadratic, (Int,))
+    g["method_match_cache"] = @benchmarkable inf_call(method_match_cache, (Float64,))
     tune_benchmarks!(g)
 end
 
