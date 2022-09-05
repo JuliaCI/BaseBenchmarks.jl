@@ -108,7 +108,7 @@ end
 macro inf_call(ex0...)
     return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :inf_call, ex0)
 end
-function inf_call(@nospecialize(f), @nospecialize(types = Tuple{});
+function inf_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   interp = InferenceBenchmarker(),
                   run_optimizer = true)
     ft = Typeof(f)
@@ -124,7 +124,7 @@ end
 macro abs_call(ex0...)
     return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :abs_call, ex0)
 end
-function abs_call(@nospecialize(f), @nospecialize(types = Tuple{});
+function abs_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   interp = InferenceBenchmarker(; optimize = false))
     return inf_call(f, types; interp)
 end
@@ -132,7 +132,7 @@ end
 macro opt_call(ex0...)
     return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :opt_call, ex0)
 end
-function opt_call(@nospecialize(f), @nospecialize(types = Tuple{});
+function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   interp = InferenceBenchmarker())
     frame = inf_call(f, types; interp, run_optimizer = false)
     return function ()
@@ -165,7 +165,9 @@ end
 
 using REPL
 brdcast(xs, x) = findall(>(x), abs.(xs))
-let # see https://github.com/JuliaLang/julia/pull/45276
+let # check the compilation behavior for a function with lots of local variables
+    # (where the sparse state management is critical to get a reasonable performance)
+    # see https://github.com/JuliaLang/julia/pull/45276
     n = 10000
     ex = Expr(:block)
     var = gensym()
@@ -179,7 +181,8 @@ let # see https://github.com/JuliaLang/julia/pull/45276
         $ex
     end
 end
-let # see https://github.com/JuliaLang/julia/pull/46535
+let # benchmark the performance benefit of `CachedMethodTable`
+    # see https://github.com/JuliaLang/julia/pull/46535
     n = 100
     ex = Expr(:block)
     var = gensym()
@@ -191,6 +194,21 @@ let # see https://github.com/JuliaLang/julia/pull/46535
     push!(ex.args, :(return y))
     @eval global function method_match_cache(x)
         $ex
+    end
+end
+let # check the performance benefit of concrete evaluation
+    param = 1000
+    ex = Expr(:block)
+    var = gensym()
+    push!(ex.args, :($var = x))
+    for _ = 1:param
+        newvar = gensym()
+        push!(ex.args, :($newvar = sin($var)))
+        var = newvar
+    end
+    @eval let
+        sins(x) = $ex
+        global concrete_eval() = sins(42)
     end
 end
 
@@ -210,6 +228,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["domsort_ssa!"] = @benchmarkable abs_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["quadratic"] = @benchmarkable abs_call(quadratic, (Int,))
     g["method_match_cache"] = @benchmarkable abs_call(method_match_cache, (Float64,))
+    g["concrete_eval"] = @benchmarkable abs_call(concrete_eval)
     tune_benchmarks!(g)
 end
 
@@ -226,6 +245,7 @@ let g = addgroup!(SUITE, "optimization")
     g["domsort_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))))
     g["quadratic"] = @benchmarkable f() (setup = (f = opt_call(quadratic, (Int,))))
     g["method_match_cache"] = @benchmarkable f() (setup = (f = opt_call(method_match_cache, (Float64,))))
+    g["concrete_eval"] = @benchmarkable f() (setup = (f = opt_call(concrete_eval)))
     tune_benchmarks!(g)
 end
 
@@ -243,6 +263,7 @@ let g = addgroup!(SUITE, "allinference")
     g["domsort_ssa!"] = @benchmarkable inf_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["quadratic"] = @benchmarkable inf_call(quadratic, (Int,))
     g["method_match_cache"] = @benchmarkable inf_call(method_match_cache, (Float64,))
+    g["concrete_eval"] = @benchmarkable inf_call(concrete_eval)
     tune_benchmarks!(g)
 end
 
