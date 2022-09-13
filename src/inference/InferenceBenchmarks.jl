@@ -211,6 +211,15 @@ let # check the performance benefit of concrete evaluation
         global concrete_eval() = sins(42)
     end
 end
+# check the performance benefit of caching `GlobalRef`-lookup result
+# see https://github.com/JuliaLang/julia/pull/46729
+using Core.Intrinsics: add_int
+const ONE = 1
+@eval function many_global_refs(x)
+    z = 0
+    $([:(z = add_int(x, add_int(z, ONE))) for _ = 1:10000]...)
+    return add_int(z, ONE)
+end
 
 const SUITE = BenchmarkGroup()
 
@@ -229,6 +238,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["quadratic"] = @benchmarkable abs_call(quadratic, (Int,))
     g["method_match_cache"] = @benchmarkable abs_call(method_match_cache, (Float64,))
     g["concrete_eval"] = @benchmarkable abs_call(concrete_eval)
+    g["many_global_refs"] = @benchmarkable abs_call(many_global_refs, (Int,))
     tune_benchmarks!(g)
 end
 
@@ -246,6 +256,7 @@ let g = addgroup!(SUITE, "optimization")
     g["quadratic"] = @benchmarkable f() (setup = (f = opt_call(quadratic, (Int,))))
     g["method_match_cache"] = @benchmarkable f() (setup = (f = opt_call(method_match_cache, (Float64,))))
     g["concrete_eval"] = @benchmarkable f() (setup = (f = opt_call(concrete_eval)))
+    g["many_global_refs"] = @benchmarkable f() (setup = (f = opt_call(many_global_refs, (Int,))))
     tune_benchmarks!(g)
 end
 
@@ -264,6 +275,7 @@ let g = addgroup!(SUITE, "allinference")
     g["quadratic"] = @benchmarkable inf_call(quadratic, (Int,))
     g["method_match_cache"] = @benchmarkable inf_call(method_match_cache, (Float64,))
     g["concrete_eval"] = @benchmarkable inf_call(concrete_eval)
+    g["many_global_refs"] = @benchmarkable inf_call(many_global_refs, (Int,))
     tune_benchmarks!(g)
 end
 
