@@ -164,7 +164,7 @@ end
 # but whose call graph are orthogonal to the Julia's compiler implementation
 
 using REPL
-brdcast(xs, x) = findall(>(x), abs.(xs))
+broadcasting(xs, x) = findall(>(x), abs.(xs))
 let # check the compilation behavior for a function with lots of local variables
     # (where the sparse state management is critical to get a reasonable performance)
     # see https://github.com/JuliaLang/julia/pull/45276
@@ -177,7 +177,7 @@ let # check the compilation behavior for a function with lots of local variables
         push!(ex.args, :($newvar = $var + 1))
         var = newvar
     end
-    @eval global function quadratic(x)
+    @eval global function many_local_vars(x)
         $ex
     end
 end
@@ -192,7 +192,7 @@ let # benchmark the performance benefit of `CachedMethodTable`
         push!(ex.args, :(y += sum(x)))
     end
     push!(ex.args, :(return y))
-    @eval global function method_match_cache(x)
+    @eval global function many_method_matches(x)
         $ex
     end
 end
@@ -208,7 +208,7 @@ let # check the performance benefit of concrete evaluation
     end
     @eval let
         sins(x) = $ex
-        global concrete_eval() = sins(42)
+        global many_const_calls() = sins(42)
     end
 end
 # check the performance benefit of caching `GlobalRef`-lookup result
@@ -227,7 +227,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["sin(42)"] = @benchmarkable (@abs_call sin(42))
     g["rand(Float64)"] = @benchmarkable (@abs_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (abs_call(println, (QuoteNode,)))
-    g["broadcast"] = @benchmarkable abs_call(brdcast, (Vector{Float64},Float64))
+    g["broadcasting"] = @benchmarkable abs_call(broadcasting, (Vector{Float64},Float64))
     g["REPL.REPLCompletions.completions"] = @benchmarkable abs_call(
         REPL.REPLCompletions.completions, (String,Int))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable abs_call(Base.init_stdio, (Ptr{Cvoid},))
@@ -235,9 +235,9 @@ let g = addgroup!(SUITE, "abstract interpretation")
         CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))
     g["construct_ssa!"] = @benchmarkable abs_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable abs_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
-    g["quadratic"] = @benchmarkable abs_call(quadratic, (Int,))
-    g["method_match_cache"] = @benchmarkable abs_call(method_match_cache, (Float64,))
-    g["concrete_eval"] = @benchmarkable abs_call(concrete_eval)
+    g["many_local_vars"] = @benchmarkable abs_call(many_local_vars, (Int,))
+    g["many_method_matches"] = @benchmarkable abs_call(many_method_matches, (Float64,))
+    g["many_const_calls"] = @benchmarkable abs_call(many_const_calls)
     g["many_global_refs"] = @benchmarkable abs_call(many_global_refs, (Int,))
     tune_benchmarks!(g)
 end
@@ -246,16 +246,16 @@ let g = addgroup!(SUITE, "optimization")
     g["sin(42)"] = @benchmarkable f() (setup = (f = @opt_call sin(42)))
     g["rand(Float64)"] = @benchmarkable f() (setup = (f = @opt_call rand(Float64)))
     g["println(::QuoteNode)"] = @benchmarkable f() (setup = (f = opt_call(println, (QuoteNode,))))
-    g["broadcast"] = @benchmarkable f() (setup = (f = opt_call(brdcast, (Vector{Float64},Float64))))
+    g["broadcasting"] = @benchmarkable f() (setup = (f = opt_call(broadcasting, (Vector{Float64},Float64))))
     g["REPL.REPLCompletions.completions"] = @benchmarkable f() (setup = (f = opt_call(
         REPL.REPLCompletions.completions, (String,Int))))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable f() (setup = (f = opt_call(Base.init_stdio, (Ptr{Cvoid},))))
     g["abstract_call_gf_by_type"] = @benchmarkable f() (setup = (f = opt_call(CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))))
     g["construct_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))))
     g["domsort_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))))
-    g["quadratic"] = @benchmarkable f() (setup = (f = opt_call(quadratic, (Int,))))
-    g["method_match_cache"] = @benchmarkable f() (setup = (f = opt_call(method_match_cache, (Float64,))))
-    g["concrete_eval"] = @benchmarkable f() (setup = (f = opt_call(concrete_eval)))
+    g["many_local_vars"] = @benchmarkable f() (setup = (f = opt_call(many_local_vars, (Int,))))
+    g["many_method_matches"] = @benchmarkable f() (setup = (f = opt_call(many_method_matches, (Float64,))))
+    g["many_const_calls"] = @benchmarkable f() (setup = (f = opt_call(many_const_calls)))
     g["many_global_refs"] = @benchmarkable f() (setup = (f = opt_call(many_global_refs, (Int,))))
     tune_benchmarks!(g)
 end
@@ -264,7 +264,7 @@ let g = addgroup!(SUITE, "allinference")
     g["sin(42)"] = @benchmarkable (@inf_call sin(42))
     g["rand(Float64)"] = @benchmarkable (@inf_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (inf_call(println, (QuoteNode,)))
-    g["broadcast"] = @benchmarkable inf_call(brdcast, (Vector{Float64},Float64))
+    g["broadcasting"] = @benchmarkable inf_call(broadcasting, (Vector{Float64},Float64))
     g["REPL.REPLCompletions.completions"] = @benchmarkable inf_call(
         REPL.REPLCompletions.completions, (String,Int))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable inf_call(Base.init_stdio, (Ptr{Cvoid},))
@@ -272,9 +272,9 @@ let g = addgroup!(SUITE, "allinference")
         CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))
     g["construct_ssa!"] = @benchmarkable inf_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable inf_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
-    g["quadratic"] = @benchmarkable inf_call(quadratic, (Int,))
-    g["method_match_cache"] = @benchmarkable inf_call(method_match_cache, (Float64,))
-    g["concrete_eval"] = @benchmarkable inf_call(concrete_eval)
+    g["many_local_vars"] = @benchmarkable inf_call(many_local_vars, (Int,))
+    g["many_method_matches"] = @benchmarkable inf_call(many_method_matches, (Float64,))
+    g["many_const_calls"] = @benchmarkable inf_call(many_const_calls)
     g["many_global_refs"] = @benchmarkable inf_call(many_global_refs, (Int,))
     tune_benchmarks!(g)
 end
