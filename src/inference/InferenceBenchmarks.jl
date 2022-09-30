@@ -231,8 +231,13 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["REPL.REPLCompletions.completions"] = @benchmarkable abs_call(
         REPL.REPLCompletions.completions, (String,Int))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable abs_call(Base.init_stdio, (Ptr{Cvoid},))
-    g["abstract_call_gf_by_type"] = @benchmarkable abs_call(
-        CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))
+    g["abstract_call_gf_by_type"] = @benchmarkable abs_call(CC.abstract_call_gf_by_type,
+        # https://github.com/JuliaLang/julia/pull/46966
+        @static if isdefined(CC, :StmtInfo)
+            (NativeInterpreter,Any,CC.ArgInfo,CC.StmtInfo,Any,InferenceState,Int)
+        else
+            (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int)
+        end)
     g["construct_ssa!"] = @benchmarkable abs_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable abs_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["many_local_vars"] = @benchmarkable abs_call(many_local_vars, (Int,))
@@ -250,7 +255,13 @@ let g = addgroup!(SUITE, "optimization")
     g["REPL.REPLCompletions.completions"] = @benchmarkable f() (setup = (f = opt_call(
         REPL.REPLCompletions.completions, (String,Int))))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable f() (setup = (f = opt_call(Base.init_stdio, (Ptr{Cvoid},))))
-    g["abstract_call_gf_by_type"] = @benchmarkable f() (setup = (f = opt_call(CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))))
+    g["abstract_call_gf_by_type"] = @benchmarkable f() (setup = (f = opt_call(CC.abstract_call_gf_by_type,
+        # https://github.com/JuliaLang/julia/pull/46966
+        @static if isdefined(CC, :StmtInfo)
+            (NativeInterpreter,Any,CC.ArgInfo,CC.StmtInfo,Any,InferenceState,Int)
+        else
+            (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int)
+        end)))
     g["construct_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))))
     g["domsort_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))))
     g["many_local_vars"] = @benchmarkable f() (setup = (f = opt_call(many_local_vars, (Int,))))
@@ -268,8 +279,13 @@ let g = addgroup!(SUITE, "allinference")
     g["REPL.REPLCompletions.completions"] = @benchmarkable inf_call(
         REPL.REPLCompletions.completions, (String,Int))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable inf_call(Base.init_stdio, (Ptr{Cvoid},))
-    g["abstract_call_gf_by_type"] = @benchmarkable inf_call(
-        CC.abstract_call_gf_by_type, (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int))
+    g["abstract_call_gf_by_type"] = @benchmarkable inf_call(CC.abstract_call_gf_by_type,
+        # https://github.com/JuliaLang/julia/pull/46966
+        @static if isdefined(CC, :StmtInfo)
+            (NativeInterpreter,Any,CC.ArgInfo,CC.StmtInfo,Any,InferenceState,Int)
+        else
+            (NativeInterpreter,Any,CC.ArgInfo,Any,InferenceState,Int)
+        end)
     g["construct_ssa!"] = @benchmarkable inf_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable inf_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["many_local_vars"] = @benchmarkable inf_call(many_local_vars, (Int,))
