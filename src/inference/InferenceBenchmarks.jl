@@ -226,6 +226,39 @@ const ONE = 1
     $([:(z = add_int(x, add_int(z, ONE))) for _ = 1:10000]...)
     return add_int(z, ONE)
 end
+strangesum(::Vector{Float64}) = error("this should not be called")
+strangesum(x::AbstractArray) = sum(x)
+let # check performance of invoke call handling
+    n = 100
+    ex = Expr(:block)
+    var = gensym()
+    push!(ex.args, :(y = sum(x)))
+    for i = 1:n
+        push!(ex.args, :(y += Base.@invoke strangesum(x::AbstractArray)))
+    end
+    push!(ex.args, :(return y))
+    @eval global function many_invoke_calls(x)
+        $ex
+    end
+end
+import Base.Experimental: @opaque
+let # check performance of opaque closure handling
+    n = 100
+    ex = Expr(:block)
+    var = gensym()
+    push!(ex.args, :(y = sum(x)))
+    for i = 1:n
+        push!(ex.args, :(oc = @inline @opaque (i, x, y) -> begin
+            x .= Float64(i)
+            y += sum(x)
+        end))
+        push!(ex.args, :(oc($i, x, y)))
+    end
+    push!(ex.args, :(return y))
+    @eval global function many_opaque_closures(x)
+        $ex
+    end
+end
 
 const SUITE = BenchmarkGroup()
 
@@ -250,6 +283,8 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["many_method_matches"] = @benchmarkable abs_call(many_method_matches, (Vector{Float64},))
     g["many_const_calls"] = @benchmarkable abs_call(many_const_calls)
     g["many_global_refs"] = @benchmarkable abs_call(many_global_refs, (Int,))
+    g["many_invoke_calls"] = @benchmarkable abs_call(many_invoke_calls, (Vector{Float64},))
+    g["many_opaque_closures"] = @benchmarkable abs_call(many_opaque_closures, (Vector{Float64},))
     tune_benchmarks!(g)
 end
 
@@ -274,6 +309,8 @@ let g = addgroup!(SUITE, "optimization")
     g["many_method_matches"] = @benchmarkable f() (setup = (f = opt_call(many_method_matches, (Vector{Float64},))))
     g["many_const_calls"] = @benchmarkable f() (setup = (f = opt_call(many_const_calls)))
     g["many_global_refs"] = @benchmarkable f() (setup = (f = opt_call(many_global_refs, (Int,))))
+    g["many_invoke_calls"] = @benchmarkable f() (setup = (f = opt_call(many_invoke_calls, (Vector{Float64},))))
+    g["many_opaque_closures"] = @benchmarkable f() (setup = (f = opt_call(many_opaque_closures, (Vector{Float64},))))
     tune_benchmarks!(g)
 end
 
@@ -298,6 +335,8 @@ let g = addgroup!(SUITE, "allinference")
     g["many_method_matches"] = @benchmarkable inf_call(many_method_matches, (Vector{Float64},))
     g["many_const_calls"] = @benchmarkable inf_call(many_const_calls)
     g["many_global_refs"] = @benchmarkable inf_call(many_global_refs, (Int,))
+    g["many_invoke_calls"] = @benchmarkable inf_call(many_invoke_calls, (Vector{Float64},))
+    g["many_opaque_closures"] = @benchmarkable inf_call(many_opaque_closures, (Vector{Float64},))
     tune_benchmarks!(g)
 end
 
