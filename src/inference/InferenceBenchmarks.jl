@@ -110,7 +110,8 @@ macro inf_call(ex0...)
 end
 function inf_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   interp = InferenceBenchmarker(),
-                  run_optimizer = true)
+                  run_optimizer = true,
+                  is_errorneous = false)
     ft = Typeof(f)
     if isa(types, Type)
         u = unwrap_unionall(types)
@@ -118,23 +119,28 @@ function inf_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
     else
         tt = Tuple{ft, types...}
     end
-    return inf_gf_by_type!(interp, tt; run_optimizer)
+    frame = inf_gf_by_type!(interp, tt; run_optimizer)
+    checkop = is_errorneous ? (===) : (!==)
+    @assert checkop(frame.bestguess, Union{}) "invalid inference benchmark found"
+    return frame
 end
 
 macro abs_call(ex0...)
     return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :abs_call, ex0)
 end
 function abs_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
-                  interp = InferenceBenchmarker(; optimize = false))
-    return inf_call(f, types; interp)
+                  interp = InferenceBenchmarker(; optimize = false),
+                  is_errorneous = false)
+    return inf_call(f, types; interp, is_errorneous)
 end
 
 macro opt_call(ex0...)
     return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :opt_call, ex0)
 end
 function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
-                  interp = InferenceBenchmarker())
-    frame = inf_call(f, types; interp, run_optimizer = false)
+                  interp = InferenceBenchmarker(),
+                  is_errorneous = false)
+    frame = inf_call(f, types; interp, run_optimizer = false, is_errorneous)
     return function ()
         params = OptimizationParams(interp)
         opt = OptimizationState(frame, params, interp)
@@ -241,7 +247,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["construct_ssa!"] = @benchmarkable abs_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable abs_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["many_local_vars"] = @benchmarkable abs_call(many_local_vars, (Int,))
-    g["many_method_matches"] = @benchmarkable abs_call(many_method_matches, (Float64,))
+    g["many_method_matches"] = @benchmarkable abs_call(many_method_matches, (Vector{Float64},))
     g["many_const_calls"] = @benchmarkable abs_call(many_const_calls)
     g["many_global_refs"] = @benchmarkable abs_call(many_global_refs, (Int,))
     tune_benchmarks!(g)
@@ -265,7 +271,7 @@ let g = addgroup!(SUITE, "optimization")
     g["construct_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))))
     g["domsort_ssa!"] = @benchmarkable f() (setup = (f = opt_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))))
     g["many_local_vars"] = @benchmarkable f() (setup = (f = opt_call(many_local_vars, (Int,))))
-    g["many_method_matches"] = @benchmarkable f() (setup = (f = opt_call(many_method_matches, (Float64,))))
+    g["many_method_matches"] = @benchmarkable f() (setup = (f = opt_call(many_method_matches, (Vector{Float64},))))
     g["many_const_calls"] = @benchmarkable f() (setup = (f = opt_call(many_const_calls)))
     g["many_global_refs"] = @benchmarkable f() (setup = (f = opt_call(many_global_refs, (Int,))))
     tune_benchmarks!(g)
@@ -289,7 +295,7 @@ let g = addgroup!(SUITE, "allinference")
     g["construct_ssa!"] = @benchmarkable inf_call(CC.construct_ssa!, (Core.CodeInfo,CC.IRCode,CC.DomTree,Vector{CC.SlotInfo},Vector{Any}))
     g["domsort_ssa!"] = @benchmarkable inf_call(CC.domsort_ssa!, (CC.IRCode,CC.DomTree))
     g["many_local_vars"] = @benchmarkable inf_call(many_local_vars, (Int,))
-    g["many_method_matches"] = @benchmarkable inf_call(many_method_matches, (Float64,))
+    g["many_method_matches"] = @benchmarkable inf_call(many_method_matches, (Vector{Float64},))
     g["many_const_calls"] = @benchmarkable inf_call(many_const_calls)
     g["many_global_refs"] = @benchmarkable inf_call(many_global_refs, (Int,))
     tune_benchmarks!(g)
