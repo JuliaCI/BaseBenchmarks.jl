@@ -12,7 +12,7 @@ const SUITE = BenchmarkGroup()
 # Default algorithms at various sizes  (≈162s) #
 ################################################
 
-for LENGTH in [3, 10, 100, 1000, 10000]
+for LENGTH in [3, 10, 30, 100, 1000, 10000]
     g = addgroup!(SUITE, "length = $LENGTH")
 
     g["sort!(fill(missing, length), rev=true)"] = @benchmarkable sort!(x, rev=true) setup=(x=fill(missing, $LENGTH))
