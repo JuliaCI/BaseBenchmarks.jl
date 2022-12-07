@@ -26,9 +26,9 @@ import .CC:
     may_optimize, may_compress, may_discard_trees, InferenceParams,  OptimizationParams,
     get_world_counter, get_inference_cache, code_cache, # get, getindex, haskey, setindex!
     nothing
-import Core:
-    MethodInstance, CodeInstance, MethodMatch, SimpleVector, Typeof
-import .CC:
+using Core:
+    MethodInstance, CodeInstance, MethodTable, MethodMatch, SimpleVector, Typeof
+using .CC:
     AbstractInterpreter, NativeInterpreter, WorldRange, WorldView, InferenceResult,
     InferenceState, OptimizationState,
     _methods_by_ftype, specialize_method, unwrap_unionall, rewrap_unionall, widenconst,
@@ -71,16 +71,31 @@ CC.haskey(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = has
 CC.setindex!(wvc::WorldView{<:InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
 
 function inf_gf_by_type!(interp::InferenceBenchmarker, @nospecialize(tt::Type{<:Tuple}); kwargs...)
-    mm = get_single_method_match(tt, InferenceParams(interp).MAX_METHODS, get_world_counter(interp))
-    return inf_method_signature!(interp, mm.method, mm.spec_types, mm.sparams; kwargs...)
+    match = _which(tt; world=get_world_counter(interp))
+    return inf_method_signature!(interp, match.method, match.spec_types, match.sparams; kwargs...)
 end
 
-function get_single_method_match(@nospecialize(tt), lim, world)
-    mms = _methods_by_ftype(tt, lim, world)
-    isa(mms, Bool) && error("unable to find matching method for $(tt)")
-    filter!(mm::MethodMatch->mm.spec_types===tt, mms)
-    length(mms) == 1 || error("unable to find single target method for $(tt)")
-    return first(mms)::MethodMatch
+@static if VERSION ≥ v"1.10.0-DEV.96"
+    using Base: _which
+else
+    function _which(@nospecialize(tt::Type);
+        method_table::Union{Nothing,MethodTable,Core.Compiler.MethodTableView}=nothing,
+        world::UInt=get_world_counter(),
+        raise::Bool=false)
+        if method_table === nothing
+            table = Core.Compiler.InternalMethodTable(world)
+        elseif isa(method_table, MethodTable)
+            table = Core.Compiler.OverlayMethodTable(world, method_table)
+        else
+            table = method_table
+        end
+        match, = Core.Compiler.findsup(tt, table)
+        if match === nothing
+            raise && error("no unique matching method found for the specified argument types")
+            return nothing
+        end
+        return match
+    end
 end
 
 inf_method!(interp::InferenceBenchmarker, m::Method; kwargs...) =
