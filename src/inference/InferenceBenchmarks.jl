@@ -168,9 +168,12 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   is_errorneous = false)
     frame = inf_call(f, types; interp, run_optimizer = false, is_errorneous)
     return function ()
+        # `optimize` may modify these objects, so stash the pre-optimization states
+        src, stmt_info = copy(frame.src), copy(frame.stmt_info)
         params = OptimizationParams(interp)
         opt = OptimizationState(frame, params, interp)
         optimize(interp, opt, params, frame.result)
+        frame.src, frame.stmt_info = src, stmt_info
     end
 end
 
