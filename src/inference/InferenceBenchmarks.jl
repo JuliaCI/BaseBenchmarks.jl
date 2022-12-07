@@ -38,11 +38,14 @@ struct InferenceBenchmarkerCache
     dict::IdDict{MethodInstance,CodeInstance}
 end
 struct InferenceBenchmarker <: AbstractInterpreter
-    native::NativeInterpreter
+    world::UInt
+    inf_params::InferenceParams
+    opt_params::OptimizationParams
     optimize::Bool
     compress::Bool
     discard_trees::Bool
-    cache::InferenceBenchmarkerCache
+    inf_cache::Vector{InferenceResult}
+    code_cache::InferenceBenchmarkerCache
     function InferenceBenchmarker(
         world::UInt = get_world_counter();
         inf_params::InferenceParams = InferenceParams(),
@@ -50,21 +53,29 @@ struct InferenceBenchmarker <: AbstractInterpreter
         optimize::Bool = true,
         compress::Bool = true,
         discard_trees::Bool = true,
-        cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()),
+        inf_cache::Vector{InferenceResult} = InferenceResult[],
+        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()),
         )
-        native = NativeInterpreter(world; inf_params, opt_params)
-        new(native, optimize, compress, discard_trees, cache)
+        return new(
+            world,
+            inf_params,
+            opt_params,
+            optimize,
+            compress,
+            discard_trees,
+            inf_cache,
+            code_cache)
     end
 end
 
 CC.may_optimize(interp::InferenceBenchmarker) = interp.optimize
 CC.may_compress(interp::InferenceBenchmarker) = interp.compress
 CC.may_discard_trees(interp::InferenceBenchmarker) = interp.discard_trees
-CC.InferenceParams(interp::InferenceBenchmarker) = InferenceParams(interp.native)
-CC.OptimizationParams(interp::InferenceBenchmarker) = OptimizationParams(interp.native)
-CC.get_world_counter(interp::InferenceBenchmarker) = get_world_counter(interp.native)
-CC.get_inference_cache(interp::InferenceBenchmarker) = get_inference_cache(interp.native)
-CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.cache, WorldRange(get_world_counter(interp)))
+CC.InferenceParams(interp::InferenceBenchmarker) = interp.inf_params
+CC.OptimizationParams(interp::InferenceBenchmarker) = interp.opt_params
+CC.get_world_counter(interp::InferenceBenchmarker) = interp.world
+CC.get_inference_cache(interp::InferenceBenchmarker) = interp.inf_cache
+CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_world_counter(interp)))
 CC.get(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
 CC.getindex(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
 CC.haskey(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
