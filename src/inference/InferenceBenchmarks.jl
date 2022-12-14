@@ -26,9 +26,9 @@ import .CC:
     may_optimize, may_compress, may_discard_trees, InferenceParams,  OptimizationParams,
     get_world_counter, get_inference_cache, code_cache, # get, getindex, haskey, setindex!
     nothing
-import Core:
-    MethodInstance, CodeInstance, MethodMatch, SimpleVector, Typeof
-import .CC:
+using Core:
+    MethodInstance, CodeInstance, MethodTable, MethodMatch, SimpleVector, Typeof
+using .CC:
     AbstractInterpreter, NativeInterpreter, WorldRange, WorldView, InferenceResult,
     InferenceState, OptimizationState,
     _methods_by_ftype, specialize_method, unwrap_unionall, rewrap_unionall, widenconst,
@@ -38,11 +38,14 @@ struct InferenceBenchmarkerCache
     dict::IdDict{MethodInstance,CodeInstance}
 end
 struct InferenceBenchmarker <: AbstractInterpreter
-    native::NativeInterpreter
+    world::UInt
+    inf_params::InferenceParams
+    opt_params::OptimizationParams
     optimize::Bool
     compress::Bool
     discard_trees::Bool
-    cache::InferenceBenchmarkerCache
+    inf_cache::Vector{InferenceResult}
+    code_cache::InferenceBenchmarkerCache
     function InferenceBenchmarker(
         world::UInt = get_world_counter();
         inf_params::InferenceParams = InferenceParams(),
@@ -50,37 +53,60 @@ struct InferenceBenchmarker <: AbstractInterpreter
         optimize::Bool = true,
         compress::Bool = true,
         discard_trees::Bool = true,
-        cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()),
+        inf_cache::Vector{InferenceResult} = InferenceResult[],
+        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()),
         )
-        native = NativeInterpreter(world; inf_params, opt_params)
-        new(native, optimize, compress, discard_trees, cache)
+        return new(
+            world,
+            inf_params,
+            opt_params,
+            optimize,
+            compress,
+            discard_trees,
+            inf_cache,
+            code_cache)
     end
 end
 
 CC.may_optimize(interp::InferenceBenchmarker) = interp.optimize
 CC.may_compress(interp::InferenceBenchmarker) = interp.compress
 CC.may_discard_trees(interp::InferenceBenchmarker) = interp.discard_trees
-CC.InferenceParams(interp::InferenceBenchmarker) = InferenceParams(interp.native)
-CC.OptimizationParams(interp::InferenceBenchmarker) = OptimizationParams(interp.native)
-CC.get_world_counter(interp::InferenceBenchmarker) = get_world_counter(interp.native)
-CC.get_inference_cache(interp::InferenceBenchmarker) = get_inference_cache(interp.native)
-CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.cache, WorldRange(get_world_counter(interp)))
+CC.InferenceParams(interp::InferenceBenchmarker) = interp.inf_params
+CC.OptimizationParams(interp::InferenceBenchmarker) = interp.opt_params
+CC.get_world_counter(interp::InferenceBenchmarker) = interp.world
+CC.get_inference_cache(interp::InferenceBenchmarker) = interp.inf_cache
+CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_world_counter(interp)))
 CC.get(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
 CC.getindex(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
 CC.haskey(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
 CC.setindex!(wvc::WorldView{<:InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
 
 function inf_gf_by_type!(interp::InferenceBenchmarker, @nospecialize(tt::Type{<:Tuple}); kwargs...)
-    mm = get_single_method_match(tt, InferenceParams(interp).MAX_METHODS, get_world_counter(interp))
-    return inf_method_signature!(interp, mm.method, mm.spec_types, mm.sparams; kwargs...)
+    match = _which(tt; world=get_world_counter(interp))
+    return inf_method_signature!(interp, match.method, match.spec_types, match.sparams; kwargs...)
 end
 
-function get_single_method_match(@nospecialize(tt), lim, world)
-    mms = _methods_by_ftype(tt, lim, world)
-    isa(mms, Bool) && error("unable to find matching method for $(tt)")
-    filter!(mm::MethodMatch->mm.spec_types===tt, mms)
-    length(mms) == 1 || error("unable to find single target method for $(tt)")
-    return first(mms)::MethodMatch
+@static if VERSION ≥ v"1.10.0-DEV.96"
+    using Base: _which
+else
+    function _which(@nospecialize(tt::Type);
+        method_table::Union{Nothing,MethodTable,Core.Compiler.MethodTableView}=nothing,
+        world::UInt=get_world_counter(),
+        raise::Bool=false)
+        if method_table === nothing
+            table = Core.Compiler.InternalMethodTable(world)
+        elseif isa(method_table, MethodTable)
+            table = Core.Compiler.OverlayMethodTable(world, method_table)
+        else
+            table = method_table
+        end
+        match, = Core.Compiler.findsup(tt, table)
+        if match === nothing
+            raise && error("no unique matching method found for the specified argument types")
+            return nothing
+        end
+        return match
+    end
 end
 
 inf_method!(interp::InferenceBenchmarker, m::Method; kwargs...) =
@@ -142,9 +168,12 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   is_errorneous = false)
     frame = inf_call(f, types; interp, run_optimizer = false, is_errorneous)
     return function ()
+        # `optimize` may modify these objects, so stash the pre-optimization states
+        src, stmt_info = copy(frame.src), copy(frame.stmt_info)
         params = OptimizationParams(interp)
         opt = OptimizationState(frame, params, interp)
         optimize(interp, opt, params, frame.result)
+        frame.src, frame.stmt_info = src, stmt_info
     end
 end
 
