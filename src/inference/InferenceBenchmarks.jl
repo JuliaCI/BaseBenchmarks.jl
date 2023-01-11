@@ -170,9 +170,14 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
     return function ()
         # `optimize` may modify these objects, so stash the pre-optimization states
         src, stmt_info = copy(frame.src), copy(frame.stmt_info)
-        params = OptimizationParams(interp)
-        opt = OptimizationState(frame, params, interp)
-        optimize(interp, opt, params, frame.result)
+        @static if !hasfield(Core.Compiler.InliningState, :params)
+            opt = OptimizationState(frame, interp)
+            optimize(interp, opt, frame.result)
+        else
+            params = OptimizationParams(interp)
+            opt = OptimizationState(frame, params, interp)
+            optimize(interp, opt, params, frame.result)
+        end
         frame.src, frame.stmt_info = src, stmt_info
     end
 end
