@@ -173,7 +173,7 @@ Here are some contribution tips and guidelines:
 
 New benchmarks added to BaseBenchmarks won't be present via CI right away, as
 their execution parameters must be [tuned and
-cached](https://github.com/JuliaCI/BenchmarkTools.jl/blob/master/doc/manual.md#caching-parameters)
+cached](https://juliaci.github.io/BenchmarkTools.jl/stable/manual/#Caching-Parameters)
 on [Nanosoldier](https://github.com/JuliaCI/Nanosoldier.jl) (our benchmark
 cluster) before they are suitable for running. This process is performed
 periodically and upon request, after which the `master` branch is merged into
