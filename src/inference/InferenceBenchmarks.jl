@@ -275,19 +275,7 @@ let # check performance of opaque closure handling
     end
 end
 
-using Pkg
-let old = Pkg.project().path
-    infbenchmarkenv = @__DIR__
-    try
-        Pkg.activate(infbenchmarkenv)
-        Pkg.instantiate()
-        Pkg.precompile()
-
-        using DataFrames, CSV, Plots, OrdinaryDiffEq
-    finally
-        Pkg.activate(old)
-    end
-end
+using DataFrames, CSV, Plots, OrdinaryDiffEq
 
 function lorenz(du, u, p, t)
     du[1] = 10.0(u[2] - u[1])
