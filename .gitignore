@@ -1,4 +1,7 @@
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+!src/inference/LocalPreferences.toml
+!src/inference/Manifest.toml
+!Manifest.toml
 !LocalPreferences.toml

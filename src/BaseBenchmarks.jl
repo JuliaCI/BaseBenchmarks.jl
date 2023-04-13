@@ -1,6 +1,7 @@
 module BaseBenchmarks
 
 using BenchmarkTools
+using Pkg
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 1.0
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 10000
@@ -38,13 +39,37 @@ load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 
 function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     modsym = MODULES[id]
-    modpath = joinpath(dirname(@__FILE__), id, "$(modsym).jl")
-    Core.eval(BaseBenchmarks, :(include($modpath)))
-    modsuite = Core.eval(BaseBenchmarks, modsym).SUITE
-    group[id] = modsuite
-    if tune
-        results = BenchmarkTools.load(PARAMS_PATH)[1]
-        haskey(results, id) && loadparams!(modsuite, results[id], :evals)
+    modpath = joinpath(@__DIR__, id, "$(modsym).jl")
+
+    # We allow our individual benchmark groups to have their own Project.toml file
+    # but each of those should have the top-level `BaseBenchmarks` project dev'ed
+    # out to a relative path of `../..`.
+    version_specific_path = joinpath(@__DIR__, id, "$(VERSION.major).$(VERSION.minor)", "Project.toml")
+    general_path = joinpath(@__DIR__, id, "Project.toml")
+    if isfile(version_specific_path)
+        needs_instantiate = true
+        project_path = version_specific_path
+    elseif isfile(general_path)
+        needs_instantiate = true
+        project_path = general_path
+    else
+        project_path = Base.active_project()
+        needs_instantiate = false
+    end
+
+    Pkg.activate(project_path) do
+        # If you're running into dependency problems when loading a benchmark,
+        # try uncommenting this, it can help you to understand what's going on.
+        # Pkg.status()
+        needs_instantiate && Pkg.instantiate()
+
+        Core.eval(Main, :(include($modpath)))
+        modsuite = Core.eval(Main, modsym).SUITE
+        group[id] = modsuite
+        if tune
+            results = BenchmarkTools.load(PARAMS_PATH)[1]
+            haskey(results, id) && loadparams!(modsuite, results[id], :evals)
+        end
     end
     return group
 end
