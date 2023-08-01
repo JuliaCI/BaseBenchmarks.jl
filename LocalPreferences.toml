@@ -1,4 +1,23 @@
 # NOTE These packages are only used for the inference benchmark,
 #      thus they really don't need to be precompiled.
-[SnoopPrecompile]
-skip_precompile = ["CSV", "DataFrames", "OrdinaryDiffEq", "Plots"]
+
+[CSV]
+precompile_workload = false
+
+[DataFrames]
+precompile_workload = false
+
+[LoopVectorization]
+precompile_workload = false
+
+[LinearSolve]
+precompile_workload = false
+
+[NonlinearSolve]
+precompile_workload = false
+
+[OrdinaryDiffEq]
+precompile_workload = false
+
+[Plots]
+precompile_workload = false

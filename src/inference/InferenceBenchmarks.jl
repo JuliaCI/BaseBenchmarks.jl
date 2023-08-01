@@ -277,6 +277,8 @@ end
 
 using DataFrames, CSV, Plots, OrdinaryDiffEq
 
+global df::DataFrame = DataFrame(a = [1,2,3], b = [4,5,6])
+
 function lorenz(du, u, p, t)
     du[1] = 10.0(u[2] - u[1])
     du[2] = u[1] * (28.0 - u[3]) - u[2]
@@ -319,6 +321,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["many_invoke_calls"] = @benchmarkable abs_call(many_invoke_calls, (Vector{Float64},))
     g["many_opaque_closures"] = @benchmarkable abs_call(many_opaque_closures, (Vector{Float64},))
     g["DataFrames.DataFrame(::Dict{Symbol,Any})"] = @benchmarkable abs_call(DataFrame, (Dict{Symbol,Any},))
+    g["DataFrames.transform(df, ...)"] = @benchmarkable (@abs_call transform(df, [:a, :b] => ((a, b) -> @. a + b * a * b) => :c))
     g["CSV.read(::String, DataFrame)"] = @benchmarkable (@abs_call CSV.read("some.csv", DataFrame)) seconds=70
     g["Plots.plot(::Matrix{Float64})"] = @benchmarkable (@abs_call plot(rand(10,3))) seconds=100
     g["OrdinaryDiffEq.solve(prob::ODEProblem, QNDF())"] = @benchmarkable @abs_call solve(prob, QNDF())
@@ -340,6 +343,7 @@ let g = addgroup!(SUITE, "optimization")
     g["many_invoke_calls"] = @benchmarkable f() (setup = (f = opt_call(many_invoke_calls, (Vector{Float64},))))
     g["many_opaque_closures"] = @benchmarkable f() (setup = (f = opt_call(many_opaque_closures, (Vector{Float64},))))
     g["DataFrames.DataFrame(::Dict{Symbol,Any})"] = @benchmarkable f() = (setup = (f = opt_call(DataFrame, (Dict{Symbol,Any},))))
+    g["DataFrames.transform(df, ...)"] = @benchmarkable f() = (setup = (f = @opt_call transform(df, [:a, :b] => ((a, b) -> @. a + b * a * b) => :c)))
     g["CSV.read(::String, DataFrame)"] = @benchmarkable f() = (setup = (f = @opt_call CSV.read("some.csv", DataFarme)))
     g["Plots.plot(::Matrix{Float64})"] = @benchmarkable f() = (setup = (f = @opt_call plot(rand(10,3))))
     g["OrdinaryDiffEq.solve(prob::ODEProblem, QNDF())"] = @benchmarkable f() = (setup = (f = @opt_call solve(prob, QNDF())))
@@ -361,6 +365,7 @@ let g = addgroup!(SUITE, "allinference")
     g["many_invoke_calls"] = @benchmarkable inf_call(many_invoke_calls, (Vector{Float64},))
     g["many_opaque_closures"] = @benchmarkable inf_call(many_opaque_closures, (Vector{Float64},))
     g["DataFrames.DataFrame(::Dict{Symbol,Any})"] = @benchmarkable inf_call(DataFrame, (Dict{Symbol,Any},))
+    g["DataFrames.transform(df, ...)"] = @benchmarkable (@inf_call transform(df, [:a, :b] => ((a, b) -> @. a + b * a * b) => :c))
     g["CSV.read(::String, DataFrame)"] = @benchmarkable (@inf_call CSV.read("some.csv", DataFrame))
     g["Plots.plot(::Matrix{Float64})"] = @benchmarkable (@inf_call plot(rand(10,3))) seconds=60
     g["OrdinaryDiffEq.solve(prob::ODEProblem, QNDF())"] = @benchmarkable (@inf_call solve(prob, QNDF())) seconds=40
