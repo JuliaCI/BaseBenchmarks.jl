@@ -54,8 +54,7 @@ struct InferenceBenchmarker <: AbstractInterpreter
         compress::Bool = true,
         discard_trees::Bool = true,
         inf_cache::Vector{InferenceResult} = InferenceResult[],
-        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()),
-        )
+        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()))
         return new(
             world,
             inf_params,
@@ -182,26 +181,8 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
     end
 end
 
-function tune_benchmarks!(
-    g::BenchmarkGroup;
-    seconds=30,
-    gcsample=true,
-    )
-    for v in values(g)
-        v.params.seconds = seconds
-        v.params.gcsample = gcsample
-        v.params.evals = 1 # `setup` must be functional
-    end
-end
-
 # "inference" benchmark targets
 # =============================
-
-# TODO add TTFP?
-# XXX some targets below really depends on the compiler implementation itself
-# (e.g. `abstract_call_gf_by_type`) and thus a bit more unreliable --  ideally
-# we want to replace them with other functions that have the similar characteristics
-# but whose call graph are orthogonal to the Julia's compiler implementation
 
 using REPL
 broadcasting(xs, x) = findall(>(x), abs.(xs))
@@ -294,11 +275,40 @@ let # check performance of opaque closure handling
     end
 end
 
+using DataFrames, CSV, Plots, OrdinaryDiffEq
+
+global df::DataFrame = DataFrame(a = [1,2,3], b = [4,5,6])
+
+function lorenz(du, u, p, t)
+    du[1] = 10.0(u[2] - u[1])
+    du[2] = u[1] * (28.0 - u[3]) - u[2]
+    du[3] = u[1] * u[2] - (8 / 3) * u[3]
+end
+let p = ODEProblem(lorenz, [1.0; 0.0; 0.0], (0.0, 1.0))
+    global prob::typeof(p) = p
+end
+
+function tune_benchmarks!(
+    g::BenchmarkGroup;
+    seconds=30,
+    gcsample=true)
+    default = BenchmarkTools.DEFAULT_PARAMETERS
+    for v in values(g)
+        if v.params.seconds == default.seconds
+            v.params.seconds = seconds
+        end
+        if v.params.gcsample == default.gcsample
+            v.params.gcsample = gcsample
+        end
+        v.params.evals = 1 # `setup` must be functional
+    end
+end
+
 const SUITE = BenchmarkGroup()
 
 let g = addgroup!(SUITE, "abstract interpretation")
-    g["sin(42)"] = @benchmarkable (@abs_call sin(42))
-    g["rand(Float64)"] = @benchmarkable (@abs_call rand(Float64))
+    g["sin(42)"] = @benchmarkable @abs_call sin(42)
+    g["rand(Float64)"] = @benchmarkable @abs_call rand(Float64)
     g["println(::QuoteNode)"] = @benchmarkable (abs_call(println, (QuoteNode,)))
     g["broadcasting"] = @benchmarkable abs_call(broadcasting, (Vector{Float64},Float64))
     g["REPL.REPLCompletions.completions"] = @benchmarkable abs_call(
@@ -310,6 +320,11 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["many_global_refs"] = @benchmarkable abs_call(many_global_refs, (Int,))
     g["many_invoke_calls"] = @benchmarkable abs_call(many_invoke_calls, (Vector{Float64},))
     g["many_opaque_closures"] = @benchmarkable abs_call(many_opaque_closures, (Vector{Float64},))
+    g["DataFrames.DataFrame(::Dict{Symbol,Any})"] = @benchmarkable abs_call(DataFrame, (Dict{Symbol,Any},))
+    g["DataFrames.transform(df, ...)"] = @benchmarkable (@abs_call transform(df, [:a, :b] => ((a, b) -> @. a + b * a * b) => :c))
+    g["CSV.read(::String, DataFrame)"] = @benchmarkable (@abs_call CSV.read("some.csv", DataFrame)) seconds=70
+    g["Plots.plot(::Matrix{Float64})"] = @benchmarkable (@abs_call plot(rand(10,3))) seconds=100
+    g["OrdinaryDiffEq.solve(prob::ODEProblem, QNDF())"] = @benchmarkable @abs_call solve(prob, QNDF())
     tune_benchmarks!(g)
 end
 
@@ -327,12 +342,17 @@ let g = addgroup!(SUITE, "optimization")
     g["many_global_refs"] = @benchmarkable f() (setup = (f = opt_call(many_global_refs, (Int,))))
     g["many_invoke_calls"] = @benchmarkable f() (setup = (f = opt_call(many_invoke_calls, (Vector{Float64},))))
     g["many_opaque_closures"] = @benchmarkable f() (setup = (f = opt_call(many_opaque_closures, (Vector{Float64},))))
+    g["DataFrames.DataFrame(::Dict{Symbol,Any})"] = @benchmarkable f() = (setup = (f = opt_call(DataFrame, (Dict{Symbol,Any},))))
+    g["DataFrames.transform(df, ...)"] = @benchmarkable f() = (setup = (f = @opt_call transform(df, [:a, :b] => ((a, b) -> @. a + b * a * b) => :c)))
+    g["CSV.read(::String, DataFrame)"] = @benchmarkable f() = (setup = (f = @opt_call CSV.read("some.csv", DataFarme)))
+    g["Plots.plot(::Matrix{Float64})"] = @benchmarkable f() = (setup = (f = @opt_call plot(rand(10,3))))
+    g["OrdinaryDiffEq.solve(prob::ODEProblem, QNDF())"] = @benchmarkable f() = (setup = (f = @opt_call solve(prob, QNDF())))
     tune_benchmarks!(g)
 end
 
 let g = addgroup!(SUITE, "allinference")
-    g["sin(42)"] = @benchmarkable (@inf_call sin(42))
-    g["rand(Float64)"] = @benchmarkable (@inf_call rand(Float64))
+    g["sin(42)"] = @benchmarkable @inf_call sin(42)
+    g["rand(Float64)"] = @benchmarkable @inf_call rand(Float64)
     g["println(::QuoteNode)"] = @benchmarkable (inf_call(println, (QuoteNode,)))
     g["broadcasting"] = @benchmarkable inf_call(broadcasting, (Vector{Float64},Float64))
     g["REPL.REPLCompletions.completions"] = @benchmarkable inf_call(
@@ -344,6 +364,11 @@ let g = addgroup!(SUITE, "allinference")
     g["many_global_refs"] = @benchmarkable inf_call(many_global_refs, (Int,))
     g["many_invoke_calls"] = @benchmarkable inf_call(many_invoke_calls, (Vector{Float64},))
     g["many_opaque_closures"] = @benchmarkable inf_call(many_opaque_closures, (Vector{Float64},))
+    g["DataFrames.DataFrame(::Dict{Symbol,Any})"] = @benchmarkable inf_call(DataFrame, (Dict{Symbol,Any},))
+    g["DataFrames.transform(df, ...)"] = @benchmarkable (@inf_call transform(df, [:a, :b] => ((a, b) -> @. a + b * a * b) => :c))
+    g["CSV.read(::String, DataFrame)"] = @benchmarkable (@inf_call CSV.read("some.csv", DataFrame))
+    g["Plots.plot(::Matrix{Float64})"] = @benchmarkable (@inf_call plot(rand(10,3))) seconds=60
+    g["OrdinaryDiffEq.solve(prob::ODEProblem, QNDF())"] = @benchmarkable (@inf_call solve(prob, QNDF())) seconds=40
     tune_benchmarks!(g)
 end
 
