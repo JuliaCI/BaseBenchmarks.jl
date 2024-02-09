@@ -24,7 +24,7 @@ const CC = Core.Compiler
 
 import .CC:
     may_optimize, may_compress, may_discard_trees, InferenceParams,  OptimizationParams,
-    get_world_counter, get_inference_cache, code_cache, # get, getindex, haskey, setindex!
+    #=get_inference_world,=# get_inference_cache, code_cache, # get, getindex, haskey, setindex!
     nothing
 using Core:
     MethodInstance, CodeInstance, MethodTable, MethodMatch, SimpleVector, Typeof
@@ -33,6 +33,13 @@ using .CC:
     InferenceState, OptimizationState,
     _methods_by_ftype, specialize_method, unwrap_unionall, rewrap_unionall, widenconst,
     typeinf, optimize
+
+@static if VERSION ≥ v"1.11.0-DEV.1498"
+    import .CC: get_inference_world
+    using Base: get_world_counter
+else
+    import .CC: get_world_counter, get_world_counter as get_inference_world
+end
 
 struct InferenceBenchmarkerCache
     dict::IdDict{MethodInstance,CodeInstance}
@@ -73,16 +80,16 @@ CC.may_compress(interp::InferenceBenchmarker) = interp.compress
 CC.may_discard_trees(interp::InferenceBenchmarker) = interp.discard_trees
 CC.InferenceParams(interp::InferenceBenchmarker) = interp.inf_params
 CC.OptimizationParams(interp::InferenceBenchmarker) = interp.opt_params
-CC.get_world_counter(interp::InferenceBenchmarker) = interp.world
+#=CC.=#get_inference_world(interp::InferenceBenchmarker) = interp.world
 CC.get_inference_cache(interp::InferenceBenchmarker) = interp.inf_cache
-CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_world_counter(interp)))
+CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_inference_world(interp)))
 CC.get(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
 CC.getindex(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
 CC.haskey(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
 CC.setindex!(wvc::WorldView{<:InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
 
 function inf_gf_by_type!(interp::InferenceBenchmarker, @nospecialize(tt::Type{<:Tuple}); kwargs...)
-    match = _which(tt; world=get_world_counter(interp))
+    match = _which(tt; world=get_inference_world(interp))
     return inf_method_signature!(interp, match.method, match.spec_types, match.sparams; kwargs...)
 end
 
