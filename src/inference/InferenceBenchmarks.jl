@@ -23,9 +23,7 @@ using BenchmarkTools, InteractiveUtils
 const CC = Core.Compiler
 
 import .CC:
-    may_optimize, may_compress, may_discard_trees, InferenceParams,  OptimizationParams,
-    #=get_inference_world,=# get_inference_cache, code_cache, # get, getindex, haskey, setindex!
-    nothing
+    may_optimize, may_compress, may_discard_trees, InferenceParams,  OptimizationParams
 using Core:
     MethodInstance, CodeInstance, MethodTable, MethodMatch, SimpleVector, Typeof
 using .CC:
@@ -43,6 +41,7 @@ end
 
 struct InferenceBenchmarkerCache
     dict::IdDict{MethodInstance,CodeInstance}
+    InferenceBenchmarkerCache() = new(IdDict{MethodInstance,CodeInstance}())
 end
 struct InferenceBenchmarker <: AbstractInterpreter
     world::UInt
@@ -61,7 +60,7 @@ struct InferenceBenchmarker <: AbstractInterpreter
         compress::Bool = true,
         discard_trees::Bool = true,
         inf_cache::Vector{InferenceResult} = InferenceResult[],
-        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(IdDict{MethodInstance,CodeInstance}()),
+        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(),
         )
         return new(
             world,
@@ -87,6 +86,9 @@ CC.get(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance, default)
 CC.getindex(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
 CC.haskey(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
 CC.setindex!(wvc::WorldView{<:InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
+if isdefined(CC, :cache_owner)
+CC.cache_owner(wvc::InferenceBenchmarker) = wvc.code_cache
+end
 
 function inf_gf_by_type!(interp::InferenceBenchmarker, @nospecialize(tt::Type{<:Tuple}); kwargs...)
     match = _which(tt; world=get_inference_world(interp))
