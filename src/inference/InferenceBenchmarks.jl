@@ -18,26 +18,22 @@ module InferenceBenchmarks
 # managed by the runtime system: this allows us to profile Julia-level inference reliably
 # without being influenced by previous trials or some native execution
 
-using BenchmarkTools, InteractiveUtils
-
 const CC = Core.Compiler
 
-import .CC:
-    may_optimize, may_compress, may_discard_trees, InferenceParams,  OptimizationParams
 using Core:
-    MethodInstance, CodeInstance, MethodTable, MethodMatch, SimpleVector, Typeof
+    MethodInstance, CodeInstance, MethodTable, SimpleVector
 using .CC:
-    AbstractInterpreter, NativeInterpreter, WorldRange, WorldView, InferenceResult,
-    InferenceState, OptimizationState,
-    _methods_by_ftype, specialize_method, unwrap_unionall, rewrap_unionall, widenconst,
-    typeinf, optimize
-
+    AbstractInterpreter, InferenceParams, InferenceResult, InferenceState,
+    OptimizationParams, OptimizationState, WorldRange, WorldView,
+    specialize_method, unwrap_unionall, rewrap_unionall
 @static if VERSION ≥ v"1.11.0-DEV.1498"
     import .CC: get_inference_world
-    using Base: get_world_counter
 else
-    import .CC: get_world_counter, get_world_counter as get_inference_world
+    import .CC: get_world_counter as get_inference_world
 end
+using Base: get_world_counter
+using InteractiveUtils: gen_call_with_extracted_types_and_kwargs
+using BenchmarkTools: @benchmarkable, BenchmarkGroup, addgroup!
 
 struct InferenceBenchmarkerCache
     dict::IdDict{MethodInstance,CodeInstance}
@@ -60,8 +56,7 @@ struct InferenceBenchmarker <: AbstractInterpreter
         compress::Bool = true,
         discard_trees::Bool = true,
         inf_cache::Vector{InferenceResult} = InferenceResult[],
-        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache(),
-        )
+        code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache())
         return new(
             world,
             inf_params,
@@ -82,11 +77,11 @@ CC.OptimizationParams(interp::InferenceBenchmarker) = interp.opt_params
 #=CC.=#get_inference_world(interp::InferenceBenchmarker) = interp.world
 CC.get_inference_cache(interp::InferenceBenchmarker) = interp.inf_cache
 CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_inference_world(interp)))
-CC.get(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
-CC.getindex(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
-CC.haskey(wvc::WorldView{<:InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
-CC.setindex!(wvc::WorldView{<:InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
-if isdefined(CC, :cache_owner)
+CC.get(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
+CC.getindex(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
+CC.haskey(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
+CC.setindex!(wvc::WorldView{InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
+@static if isdefined(CC, :cache_owner)
 CC.cache_owner(wvc::InferenceBenchmarker) = wvc.code_cache
 end
 
@@ -135,19 +130,18 @@ inf_method_signature!(interp::InferenceBenchmarker, m::Method, @nospecialize(aty
 function inf_method_instance!(interp::InferenceBenchmarker, mi::MethodInstance;
                               run_optimizer::Bool = true)
     result = InferenceResult(mi)
-    frame = InferenceState(result, #=cache=# run_optimizer ? :global : :no, interp)::InferenceState
-    typeinf(interp, frame)
+    frame = InferenceState(result, #=cache_mode=#run_optimizer ? :global : :no, interp)::InferenceState
+    CC.typeinf(interp, frame)
     return frame
 end
 
 macro inf_call(ex0...)
-    return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :inf_call, ex0)
+    return gen_call_with_extracted_types_and_kwargs(__module__, :inf_call, ex0)
 end
 function inf_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
-                  interp = InferenceBenchmarker(),
-                  run_optimizer = true,
-                  is_errorneous = false)
-    ft = Typeof(f)
+                  interp::InferenceBenchmarker = InferenceBenchmarker(),
+                  run_optimizer::Bool = true)
+    ft = Core.Typeof(f)
     if isa(types, Type)
         u = unwrap_unionall(types)
         tt = rewrap_unionall(Tuple{ft, u.parameters...}, types)
@@ -155,37 +149,34 @@ function inf_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
         tt = Tuple{ft, types...}
     end
     frame = inf_gf_by_type!(interp, tt; run_optimizer)
-    checkop = is_errorneous ? (===) : (!==)
-    @assert checkop(frame.bestguess, Union{}) "invalid inference benchmark found"
+    frame.bestguess !== Union{} || error("invalid inference benchmark found")
     return frame
 end
 
 macro abs_call(ex0...)
-    return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :abs_call, ex0)
+    return gen_call_with_extracted_types_and_kwargs(__module__, :abs_call, ex0)
 end
 function abs_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
-                  interp = InferenceBenchmarker(; optimize = false),
-                  is_errorneous = false)
-    return inf_call(f, types; interp, is_errorneous)
+                  interp::InferenceBenchmarker = InferenceBenchmarker(; optimize = false))
+    return inf_call(f, types; interp)
 end
 
 macro opt_call(ex0...)
-    return InteractiveUtils.gen_call_with_extracted_types_and_kwargs(__module__, :opt_call, ex0)
+    return gen_call_with_extracted_types_and_kwargs(__module__, :opt_call, ex0)
 end
 function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
-                  interp = InferenceBenchmarker(),
-                  is_errorneous = false)
-    frame = inf_call(f, types; interp, run_optimizer = false, is_errorneous)
+                  interp::InferenceBenchmarker = InferenceBenchmarker())
+    frame = inf_call(f, types; interp, run_optimizer = false)
     return function ()
         # `optimize` may modify these objects, so stash the pre-optimization states
         src, stmt_info = copy(frame.src), copy(frame.stmt_info)
         @static if !hasfield(Core.Compiler.InliningState, :params)
             opt = OptimizationState(frame, interp)
-            optimize(interp, opt, frame.result)
+            CC.optimize(interp, opt, frame.result)
         else
             params = OptimizationParams(interp)
             opt = OptimizationState(frame, params, interp)
-            optimize(interp, opt, params, frame.result)
+            CC.optimize(interp, opt, params, frame.result)
         end
         frame.src, frame.stmt_info = src, stmt_info
     end
@@ -212,7 +203,7 @@ end
 # we want to replace them with other functions that have the similar characteristics
 # but whose call graph are orthogonal to the Julia's compiler implementation
 
-using REPL
+using REPL.REPLCompletions: completions
 broadcasting(xs, x) = findall(>(x), abs.(xs))
 let # check the compilation behavior for a function with lots of local variables
     # (where the sparse state management is critical to get a reasonable performance)
@@ -310,8 +301,7 @@ let g = addgroup!(SUITE, "abstract interpretation")
     g["rand(Float64)"] = @benchmarkable (@abs_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (abs_call(println, (QuoteNode,)))
     g["broadcasting"] = @benchmarkable abs_call(broadcasting, (Vector{Float64},Float64))
-    g["REPL.REPLCompletions.completions"] = @benchmarkable abs_call(
-        REPL.REPLCompletions.completions, (String,Int))
+    g["REPL.REPLCompletions.completions"] = @benchmarkable abs_call(completions, (String,Int))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable abs_call(Base.init_stdio, (Ptr{Cvoid},))
     g["many_local_vars"] = @benchmarkable abs_call(many_local_vars, (Int,))
     g["many_method_matches"] = @benchmarkable abs_call(many_method_matches, (Vector{Float64},))
@@ -327,8 +317,7 @@ let g = addgroup!(SUITE, "optimization")
     g["rand(Float64)"] = @benchmarkable f() (setup = (f = @opt_call rand(Float64)))
     g["println(::QuoteNode)"] = @benchmarkable f() (setup = (f = opt_call(println, (QuoteNode,))))
     g["broadcasting"] = @benchmarkable f() (setup = (f = opt_call(broadcasting, (Vector{Float64},Float64))))
-    g["REPL.REPLCompletions.completions"] = @benchmarkable f() (setup = (f = opt_call(
-        REPL.REPLCompletions.completions, (String,Int))))
+    g["REPL.REPLCompletions.completions"] = @benchmarkable f() (setup = (f = opt_call(completions, (String,Int))))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable f() (setup = (f = opt_call(Base.init_stdio, (Ptr{Cvoid},))))
     g["many_local_vars"] = @benchmarkable f() (setup = (f = opt_call(many_local_vars, (Int,))))
     g["many_method_matches"] = @benchmarkable f() (setup = (f = opt_call(many_method_matches, (Vector{Float64},))))
@@ -344,8 +333,7 @@ let g = addgroup!(SUITE, "allinference")
     g["rand(Float64)"] = @benchmarkable (@inf_call rand(Float64))
     g["println(::QuoteNode)"] = @benchmarkable (inf_call(println, (QuoteNode,)))
     g["broadcasting"] = @benchmarkable inf_call(broadcasting, (Vector{Float64},Float64))
-    g["REPL.REPLCompletions.completions"] = @benchmarkable inf_call(
-        REPL.REPLCompletions.completions, (String,Int))
+    g["REPL.REPLCompletions.completions"] = @benchmarkable inf_call(completions, (String,Int))
     g["Base.init_stdio(::Ptr{Cvoid})"] = @benchmarkable inf_call(Base.init_stdio, (Ptr{Cvoid},))
     g["many_local_vars"] = @benchmarkable inf_call(many_local_vars, (Int,))
     g["many_method_matches"] = @benchmarkable inf_call(many_method_matches, (Vector{Float64},))
