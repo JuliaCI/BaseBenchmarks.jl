@@ -25,7 +25,7 @@ using Core:
 using .CC:
     AbstractInterpreter, InferenceParams, InferenceResult, InferenceState,
     OptimizationParams, OptimizationState, WorldRange, WorldView,
-    specialize_method, unwrap_unionall, rewrap_unionall
+    specialize_method, unwrap_unionall, rewrap_unionall, copy
 @static if VERSION ≥ v"1.11.0-DEV.1498"
     import .CC: get_inference_world
 else
@@ -167,9 +167,14 @@ end
 function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
                   interp::InferenceBenchmarker = InferenceBenchmarker())
     frame = inf_call(f, types; interp, run_optimizer = false)
+    evals = 0
     return function ()
-        # `optimize` may modify these objects, so stash the pre-optimization states
-        src, stmt_info = copy(frame.src), copy(frame.stmt_info)
+        @assert (evals += 1) <= 1
+        ## `optimize` may modify these objects, so need to stash the pre-optimization states, if we want to allow multiple evals
+        #src, stmt_info, slottypes, ssavalue_uses = copy(frame.src), copy(frame.stmt_info), copy(frame.slottypes), copy(frame.ssavalue_uses)
+        #cfg = @static hasfield(InferenceState, :cfg) ? copy(frame.cfg) : nothing
+        #unreachable = @static hasfield(InferenceState, :unreachable) ? copy(frame.unreachable) : nothing
+        #bb_vartables = @static hasfield(InferenceState, :bb_vartables) ? copy(frame.bb_vartables) : nothing
         @static if !hasfield(Core.Compiler.InliningState, :params)
             opt = OptimizationState(frame, interp)
             CC.optimize(interp, opt, frame.result)
@@ -178,7 +183,10 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
             opt = OptimizationState(frame, params, interp)
             CC.optimize(interp, opt, params, frame.result)
         end
-        frame.src, frame.stmt_info = src, stmt_info
+        #frame.src, frame.stmt_info, frame.slottypes, frame.ssavalue_uses = src, stmt_info, slottypes, ssavalue_uses
+        #cfg === nothing || (frame.cfg = cfg)
+        #unreachable === nothing || (frame.unreachable = unreachable)
+        #bb_vartables === nothing || (frame.bb_vartables = bb_vartables)
     end
 end
 
