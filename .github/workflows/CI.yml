@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'     # LTS
           - '1'       # current stable
           - 'nightly'
         os:
@@ -23,10 +22,9 @@ jobs:
         arch:
           - x64
         include:
-          ## This platform is currently broken
-          #- version: '1'
-          #  os: ubuntu-latest
-          #  arch: x86
+          - version: '1'
+            os: ubuntu-latest
+            arch: x86
           - version: '1'
             os: windows-latest
             arch: x64
