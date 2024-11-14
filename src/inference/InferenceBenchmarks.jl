@@ -18,7 +18,15 @@ module InferenceBenchmarks
 # managed by the runtime system: this allows us to profile Julia-level inference reliably
 # without being influenced by previous trials or some native execution
 
+@static if VERSION ≥ v"1.12.0-DEV.1581"
+if Base.REFLECTION_COMPILER[] === nothing
+const CC = Base.Compiler
+else
+const CC = Base.REFLECTION_COMPILER[]
+end
+else
 const CC = Core.Compiler
+end
 
 using Core:
     MethodInstance, CodeInstance, MethodTable, SimpleVector
@@ -94,17 +102,17 @@ end
     using Base: _which
 else
     function _which(@nospecialize(tt::Type);
-        method_table::Union{Nothing,MethodTable,Core.Compiler.MethodTableView}=nothing,
+        method_table::Union{Nothing,MethodTable,CC.MethodTableView}=nothing,
         world::UInt=get_world_counter(),
         raise::Bool=false)
         if method_table === nothing
-            table = Core.Compiler.InternalMethodTable(world)
+            table = CC.InternalMethodTable(world)
         elseif isa(method_table, MethodTable)
-            table = Core.Compiler.OverlayMethodTable(world, method_table)
+            table = CC.OverlayMethodTable(world, method_table)
         else
             table = method_table
         end
-        match, = Core.Compiler.findsup(tt, table)
+        match, = CC.findsup(tt, table)
         if match === nothing
             raise && error("no unique matching method found for the specified argument types")
             return nothing
@@ -175,7 +183,7 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
         #cfg = @static hasfield(InferenceState, :cfg) ? copy(frame.cfg) : nothing
         #unreachable = @static hasfield(InferenceState, :unreachable) ? copy(frame.unreachable) : nothing
         #bb_vartables = @static hasfield(InferenceState, :bb_vartables) ? copy(frame.bb_vartables) : nothing
-        @static if !hasfield(Core.Compiler.InliningState, :params)
+        @static if !hasfield(CC.InliningState, :params)
             opt = OptimizationState(frame, interp)
             CC.optimize(interp, opt, frame.result)
         else
