@@ -40,7 +40,8 @@ function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     modsym = MODULES[id]
     modpath = joinpath(dirname(@__FILE__), id, "$(modsym).jl")
     Core.eval(BaseBenchmarks, :(include($modpath)))
-    modsuite = Core.eval(BaseBenchmarks, modsym).SUITE
+    mod = Core.eval(BaseBenchmarks, modsym)
+    modsuite = invokelatest(getfield, mod, :SUITE)
     group[id] = modsuite
     if tune
         results = BenchmarkTools.load(PARAMS_PATH)[1]
