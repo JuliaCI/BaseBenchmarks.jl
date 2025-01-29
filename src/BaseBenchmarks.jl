@@ -31,8 +31,8 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "string" => :StringBenchmarks,
                      "tuple" => :TupleBenchmarks,
                      "frontend" => :FrontendBenchmarks,
+                     "inference" => :InferenceBenchmarks,
                      )
-@static VERSION ≥ v"1.8-DEV" && push!(MODULES, "inference" => :InferenceBenchmarks)
 
 load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 

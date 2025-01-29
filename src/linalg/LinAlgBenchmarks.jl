@@ -121,11 +121,9 @@ for s in (2, 3)
     B = randmat(s)
     C = randmat(s)
     g["3-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B)
-    
-    if VERSION >= v"1.3"
-        (α, β) = rand(2)
-        g["5-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B, $α, $β)
-    end
+
+    (α, β) = rand(2)
+    g["5-arg mul!", s] = @benchmarkable LinearAlgebra.mul!($C, $A, $B, $α, $β)
 end
 
 

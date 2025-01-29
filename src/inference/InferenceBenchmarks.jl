@@ -94,31 +94,8 @@ CC.cache_owner(wvc::InferenceBenchmarker) = wvc.code_cache
 end
 
 function inf_gf_by_type!(interp::InferenceBenchmarker, @nospecialize(tt::Type{<:Tuple}); kwargs...)
-    match = _which(tt; world=get_inference_world(interp))
+    match = Base._which(tt; world=get_inference_world(interp))
     return inf_method_signature!(interp, match.method, match.spec_types, match.sparams; kwargs...)
-end
-
-@static if VERSION ≥ v"1.10.0-DEV.96"
-    using Base: _which
-else
-    function _which(@nospecialize(tt::Type);
-        method_table::Union{Nothing,MethodTable,CC.MethodTableView}=nothing,
-        world::UInt=get_world_counter(),
-        raise::Bool=false)
-        if method_table === nothing
-            table = CC.InternalMethodTable(world)
-        elseif isa(method_table, MethodTable)
-            table = CC.OverlayMethodTable(world, method_table)
-        else
-            table = method_table
-        end
-        match, = CC.findsup(tt, table)
-        if match === nothing
-            raise && error("no unique matching method found for the specified argument types")
-            return nothing
-        end
-        return match
-    end
 end
 
 inf_method!(interp::InferenceBenchmarker, m::Method; kwargs...) =
@@ -178,23 +155,17 @@ function opt_call(@nospecialize(f), @nospecialize(types = Base.default_tt(f));
     evals = 0
     return function ()
         @assert (evals += 1) <= 1
-        ## `optimize` may modify these objects, so need to stash the pre-optimization states, if we want to allow multiple evals
-        #src, stmt_info, slottypes, ssavalue_uses = copy(frame.src), copy(frame.stmt_info), copy(frame.slottypes), copy(frame.ssavalue_uses)
-        #cfg = @static hasfield(InferenceState, :cfg) ? copy(frame.cfg) : nothing
-        #unreachable = @static hasfield(InferenceState, :unreachable) ? copy(frame.unreachable) : nothing
-        #bb_vartables = @static hasfield(InferenceState, :bb_vartables) ? copy(frame.bb_vartables) : nothing
-        @static if !hasfield(CC.InliningState, :params)
-            opt = OptimizationState(frame, interp)
-            CC.optimize(interp, opt, frame.result)
-        else
-            params = OptimizationParams(interp)
-            opt = OptimizationState(frame, params, interp)
-            CC.optimize(interp, opt, params, frame.result)
-        end
-        #frame.src, frame.stmt_info, frame.slottypes, frame.ssavalue_uses = src, stmt_info, slottypes, ssavalue_uses
-        #cfg === nothing || (frame.cfg = cfg)
-        #unreachable === nothing || (frame.unreachable = unreachable)
-        #bb_vartables === nothing || (frame.bb_vartables = bb_vartables)
+        # # `optimize` may modify these objects, so need to stash the pre-optimization states, if we want to allow multiple evals
+        # src, stmt_info, slottypes, ssavalue_uses = copy(frame.src), copy(frame.stmt_info), copy(frame.slottypes), copy(frame.ssavalue_uses)
+        # cfg = copy(frame.cfg)
+        # unreachable = @static hasfield(InferenceState, :unreachable) ? copy(frame.unreachable) : nothing
+        # bb_vartables = @static hasfield(InferenceState, :bb_vartables) ? copy(frame.bb_vartables) : nothing
+        opt = OptimizationState(frame, interp)
+        CC.optimize(interp, opt, frame.result)
+        # frame.src, frame.stmt_info, frame.slottypes, frame.ssavalue_uses = src, stmt_info, slottypes, ssavalue_uses
+        # cfg === nothing || (frame.cfg = cfg)
+        # unreachable === nothing || (frame.unreachable = unreachable)
+        # bb_vartables === nothing || (frame.bb_vartables = bb_vartables)
     end
 end
 

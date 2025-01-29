@@ -271,7 +271,7 @@ for T in (Nothing, Bool, Int8, UInt16)
     if T === Nothing
         g["Vector", "abstract", tstr] = @benchmarkable Vector($v)
         g["Vector", "concrete", tstr] = @benchmarkable Vector{$T}($v)
-    elseif T !== Bool && (!(T <: Unsigned) || VERSION >= v"0.7.0-")
+    elseif T !== Bool && !(T <: Unsigned)
         # there is a bug on 0.6, will probably get fixed on v6.2, cf. #24365
         g["BitSet", tstr] = @benchmarkable BitSet($v)
     end
