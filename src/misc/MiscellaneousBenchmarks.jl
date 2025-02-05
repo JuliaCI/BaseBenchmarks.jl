@@ -24,7 +24,7 @@ function perf_splatting(A, n, xs...)
     return s
 end
 
-g[(3,3,3)] = @benchmarkable perf_splatting($(samerand(3,3,3)), 100, 1, 2, 3)
+g[(3,3,3)] = @benchmarkable perf_splatting(x, 100, 1, 2, 3) setup=(x=samerand(3,3,3))
 
 ###########################################################################
 # crossover from x + y + ... to afoldl (issue #13724)
@@ -39,16 +39,16 @@ function perf_afoldl(n, k)
 end
 
 g = addgroup!(SUITE, "afoldl", ["+", "getindex"])
-g["Int"] = @benchmarkable perf_afoldl(100, $(zeros(Int, 20)))
-g["Float64"] = @benchmarkable perf_afoldl(100, $(zeros(Float64, 20)))
-g["Complex{Float64}"] = @benchmarkable perf_afoldl(100, $(zeros(Complex{Float64}, 20)))
+g["Int"] = @benchmarkable perf_afoldl(100, x) setup=(x=zeros(Int, 20))
+g["Float64"] = @benchmarkable perf_afoldl(100, x) setup=(x=zeros(Float64, 20))
+g["Complex{Float64}"] = @benchmarkable perf_afoldl(100, x) setup=(x=zeros(Complex{Float64}, 20))
 
 ###########################################################################
 # repeat function (issue #15553)
 
 g = addgroup!(SUITE, "repeat", ["array"])
-g[200, 24, 1] = @benchmarkable repeat($(collect(1:200)), inner=$[24], outer=$[1])
-g[200, 1, 24] = @benchmarkable repeat($(collect(1:200)), inner=$[1], outer=$[24])
+g[200, 24, 1] = @benchmarkable repeat(x, inner=$[24], outer=$[1]) setup=(x=collect(1:200))
+g[200, 1, 24] = @benchmarkable repeat(x, inner=$[1], outer=$[24]) setup=(x=collect(1:200))
 
 ###########################################################################
 # bitshift operators (from #18135)
@@ -84,15 +84,15 @@ end
 
 g = addgroup!(SUITE, "parse", ["DateTime"])
 datestr = map(string, range(DateTime("2016-02-19T12:34:56"), step = Dates.Millisecond(123), length = 200))
-g["Int"] = @benchmarkable perf_parse($(Vector{Int}(undef, 1000)), $(map(string, 1:1000)))
-g["Float64"] = @benchmarkable perf_parse($(Vector{Float64}(undef, 1000)), $(map(string, 1:1000)))
+g["Int"] = @benchmarkable perf_parse(x, s) setup=(x=Vector{Int}(undef, 1000); s=map(string, 1:1000))
+g["Float64"] = @benchmarkable perf_parse(x, s) setup=(x=Vector{Float64}(undef, 1000); s=map(string, 1:1000))
 
 ###########################################################################
 # Julia language components (parser, etc.)
 
 # horner-like nested expression with n levels: 1*(x + 2*(x + 2*(x + 3* ...
 # ... written as a string so that we can also benchmark parsing of this function.
-nestedexpr_str = """
+const nestedexpr_str = """
 function nestedexpr(n)
     ex = :x
     for i = n:-1:1
@@ -104,8 +104,8 @@ include_string(@__MODULE__, nestedexpr_str)
 
 g = addgroup!(SUITE, "julia")
 g["parse", "array"] = @benchmarkable Meta.parse($("[" * "a + b, "^100 * "]"))
-g["parse", "nested"] = @benchmarkable Meta.parse($(string(nestedexpr(100))))
-g["parse", "function"] = @benchmarkable Meta.parse($nestedexpr_str)
+g["parse", "nested"] = @benchmarkable Meta.parse(s) setup=(s=string(nestedexpr(100)))
+g["parse", "function"] = @benchmarkable Meta.parse(nestedexpr_str)
 g["macroexpand", "evalpoly"] = @benchmarkable macroexpand(@__MODULE__, $(Expr(:macrocall, Symbol("@evalpoly"), 1:10...)))
 
 ###########################################################################
@@ -148,10 +148,6 @@ function jltype(dt::FloatingPointDatatype)
     end
 end
 
-x_16 = fill(h5type(Float16), 1000000)
-x_32 = fill(h5type(Float32), 1000000)
-x_64 = fill(h5type(Float64), 1000000)
-
 function perf_jltype(x)
     y = 0
     for i = 1:length(x)
@@ -161,9 +157,9 @@ function perf_jltype(x)
 end
 
 g = addgroup!(SUITE, "issue 12165")
-g["Float16"] = @benchmarkable perf_jltype($x_16)
-g["Float32"] = @benchmarkable perf_jltype($x_32)
-g["Float64"] = @benchmarkable perf_jltype($x_64)
+g["Float16"] = @benchmarkable perf_jltype(x_16) setup=(x_16 = fill(h5type(Float16), 1000000))
+g["Float32"] = @benchmarkable perf_jltype(x_32) setup=(x_32 = fill(h5type(Float32), 1000000))
+g["Float64"] = @benchmarkable perf_jltype(x_64) setup=(x_64 = fill(h5type(Float64), 1000000))
 
 
 #########################################################################
@@ -233,8 +229,7 @@ function pathcost(distmat::Matrix{T}, path::Vector{Int}, lb::Int = 1, ub::Int = 
     return cost
 end
 
-dm = samerand(Float64, 300, 300)
-SUITE["18129"] = @benchmarkable perf_cheapest_insertion_18129($dm, $([1, 1]))
+SUITE["18129"] = @benchmarkable perf_cheapest_insertion_18129(dm, ip) setup=(dm=samerand(Float64, 300, 300); ip=[1, 1])
 
 
 ###############################################################################
@@ -251,8 +246,7 @@ function perf_dsum_20517(A::Matrix)
     B
 end
 
-A = samerand(127,127)
-SUITE["20517"] = @benchmarkable perf_dsum_20517($A)
+SUITE["20517"] = @benchmarkable perf_dsum_20517(A) setup=(A = samerand(127,127))
 
 
 ###############################################
@@ -275,9 +269,12 @@ end
 g = addgroup!(SUITE, "23042")
 
 for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
-    b = samerand(T, 128, 128)
-    a = similar(b)
-    g[string(T)] = @benchmarkable perf_copy_23042($(Foo_23042(a)), $(Foo_23042(b)))
+    g[string(T)] = @benchmarkable perf_copy_23042(Fa, Fb) setup=begin
+        b = samerand($T, 128, 128)
+        a = similar(b)
+        Fa = Foo_23042(a)
+        Fb = Foo_23042(b)
+    end
 end
 
 ###############################################
@@ -285,10 +282,11 @@ end
 
 g = addgroup!(SUITE, "foldl", ["filter", "flatten"])
 
-let xs = [abs(x) < 1 ? x : missing for x in randn(1000)]
-    g["foldl(+, filter(...))"] = @benchmarkable foldl(+, (x for x in $xs if x !== missing))
+let xs() = [abs(x) < 1 ? x : missing for x in randn(1000)]
+    g["foldl(+, filter(...))"] =
+        @benchmarkable foldl(+, (x for x in xs if x !== missing)) setup=(xs=$xs())
     g["foldl(+, filter(...); init = 0.0)"] =
-        @benchmarkable foldl(+, (x for x in $xs if x !== missing); init = 0.0)
+        @benchmarkable foldl(+, (x for x in xs if x !== missing); init = 0.0) setup=(xs=$xs())
 end
 
 g["foldl(+, flatten(filter(...)))"] =
@@ -301,17 +299,12 @@ g = addgroup!(SUITE, "iterators", ["zip", "flatten"])
 
 # zip
 for N in (1,1000), M in 1:4
-    X = zip(Iterators.repeated(1:N, M)...)
-    g["zip($(join(fill("1:$N", M), ", ")))"] = @benchmarkable collect($X)
+    g["zip($(join(fill("1:$N", M), ", ")))"] = @benchmarkable collect(X) setup=(X=zip(Iterators.repeated(1:$N, $M)...))
 end
 
 # flatten
-let X = Base.Iterators.flatten(fill(rand(50), 100))
-    g["sum(flatten(fill(rand(50), 100))))"] = @benchmarkable sum($X)
-end
-let X = Base.Iterators.flatten(collect((i,i+1) for i in 1:1000))
-    g["sum(flatten(collect((i,i+1) for i in 1:1000))"] = @benchmarkable sum($X)
-end
+g["sum(flatten(fill(rand(50), 100))))"] = @benchmarkable sum(X) setup=(X=Base.Iterators.flatten(fill(samerand(50), 100)))
+g["sum(flatten(collect((i,i+1) for i in 1:1000))"] = @benchmarkable sum(X) setup=(X=Base.Iterators.flatten(collect((i,i+1) for i in 1:1000)))
 
 ####################################################
 # Allocation elision stumped by conditional #28226 #
@@ -357,10 +350,13 @@ end
     end
 end
 
-z = zeros(41); A = rand(2, 41); B = rand(2, 41);
 g = addgroup!(SUITE, "allocation elision view")
-g["conditional"] = @benchmarkable perf_colwise_alloc!($z, $A, $B)
-g["no conditional"] = @benchmarkable perf_colwise_noalloc!($z, $A, $B)
+g["conditional"] = @benchmarkable perf_colwise_alloc!(z, A, B) setup=begin
+    z = zeros(41); A = samerand(2, 41); B = samerand(2, 41)
+end
+g["no conditional"] = @benchmarkable perf_colwise_noalloc!(z, A, B) setup=begin
+    z = zeros(41); A = samerand(2, 41); B = samerand(2, 41)
+end
 
 
 ####################################################
@@ -373,29 +369,29 @@ function f2(a,b,c,d,e,f,g,h,j,k,l,m,n,o,p)
         @inbounds a[i] = b[i]+c*(d*e[i]+f*g[i]+h*j[i]+k*l[i]+m*n[i]+o*p[i])
     end
 end
-a = rand(10)
-b = rand(10)
-c = 0.1
-d = 0.1
-e = rand(10)
-f = 0.1
-g = rand(10)
-h = 0.1
-j = rand(10)
-k = 0.1
-l = rand(10)
-m = 0.1
-n = rand(10)
-o = 0.1
-p = rand(10)
+SUITE["fastmath many args"] = @benchmarkable f2(a,b,c,d,e,f,g,h,j,k,l,m,n,o,p) setup=begin
+    a = samerand(10)
+    b = samerand(10)
+    c = $0.1
+    d = $0.1
+    e = samerand(10)
+    f = $0.1
+    g = samerand(10)
+    h = $0.1
+    j = samerand(10)
+    k = $0.1
+    l = samerand(10)
+    m = $0.1
+    n = samerand(10)
+    o = $0.1
+    p = samerand(10)
+end
 
-SUITE["fastmath many args"] = @benchmarkable f2($a,$b,$c,$d,$e,$f,$g,$h,$j,$k,$l,$m,$n,$o,$p)
 
 ##############################################################
 # Performance and typing of 6+ dimensional generators #21058 #
 ##############################################################
-perf_g6() = sum([+(a,b,c,d,e,f) for a in 1:4, b in 1:4, c in 1:4, d in 1:4, e in 1:4, f in 1:4])
 
-SUITE["perf highdim generator"] = @benchmarkable perf_g6()
+SUITE["perf highdim generator"] = @benchmarkable sum([+(a,b,c,d,e,f) for a in 1:4, b in 1:4, c in 1:4, d in 1:4, e in 1:4, f in 1:4])
 
 end

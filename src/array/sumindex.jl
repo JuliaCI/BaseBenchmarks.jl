@@ -292,39 +292,38 @@ Base.zero(::Type{PairVals{T}}) where T = PairVals(zero(T), zero(T))
 Base.:(+)(p1::PairVals, p2::PairVals) = PairVals(p1.a + p2.a, p1.b + p2.b)
 Base.:(*)(p1::PairVals, p2::PairVals) = PairVals(p1.a * p2.a, p1.b * p2.b)
 
-function makearrays(::Type{T}, r::Integer, c::Integer) where T
+# return the ith array in our set of definition
+function makearrays(::Type{T}, r::Integer, c::Integer, i::Int) where T
     A = samerand(T, r, c)
+    ((i -= 1) == 0) && return A
     B = similar(A, r+1, c+1)
     B[1:r, 1:c] = A
     AS = ArrayLS(B)
-    ASS = ArrayLSLS(B)
-    AF = ArrayLF(A)
-    Astrd = ArrayStrides(A)
-    Astrd1 = ArrayStrides1(A)
+    ((i -= 1) == 0) && return AS
+    ((i -= 1) == 0) && return ArrayLSLS(B)
+    ((i -= 1) == 0) && return ArrayLF(A)
+    #Astrd = ArrayStrides(A)
+    #Astrd1 = ArrayStrides1(A)
     B = samerand(T, r+1, c+2)
     # And views thereof
-    Asub = view(B, 1:r, 2:c+1)
-    Asub2 = view(A, :, :)
-    Asub3 = view(AS, :, :)
+    ((i -= 1) == 0) && return view(B, 1:r, 2:c+1)
+    ((i -= 1) == 0) && return view(A, :, :)
+    ((i -= 1) == 0) && return view(AS, :, :)
     C = samerand(T, 4, r, c)
-    Asub4 = view(C, 1, :, :)
-    Asub5 = view(ArrayLS(C), 1, :, :)
-    Asub6 = view(reshape(view(C, :, :, :), Val(2)), :, 2:c+1)
-    Asub7 = view(reshape(view(ArrayLS(C), :, :, :), Val(2)), :, 2:c+1)
-    arrays = (A, AF, AS, ASS, Asub, Asub2, Asub3, Asub4, Asub5, Asub6, Asub7)
+    ((i -= 1) == 0) && return view(C, 1, :, :)
+    ((i -= 1) == 0) && return view(ArrayLS(C), 1, :, :)
+    ((i -= 1) == 0) && return view(reshape(view(C, :, :, :), Val(2)), :, 2:c+1)
+    ((i -= 1) == 0) && return view(reshape(view(ArrayLS(C), :, :, :), Val(2)), :, 2:c+1)
     # ReinterpretArrays
-    if sizeof(T) < 8
-        Tw = widen(T)
-        Aw = samerand(Tw, r, c)
-        Awr = reinterpret(PairVals{T}, Aw)  # same size, with fields
-        arrays = (arrays..., Aw, Awr)
-    end
-    if iseven(r)
-        arrays = (arrays..., reinterpret(PairVals{T}, A))  # twice the size, with fields
-    end
+    @assert sizeof(T) < 8
+    Tw = widen(T)
+    Aw = samerand(Tw, r, c)
+    ((i -= 1) == 0) && return Aw
+    ((i -= 1) == 0) && return reinterpret(PairVals{T}, Aw)  # same size, with fields
+    @assert iseven(r)
+    ((i -= 1) == 0) && return reinterpret(PairVals{T}, A)  # twice the size, with fields
     if T === Int32
-        arrays = (arrays..., reinterpret(Float32, A))  # same size, no fields
+        ((i -= 1) == 0) && return reinterpret(Float32, A)
     end
-
-    return arrays
+    return -i
 end

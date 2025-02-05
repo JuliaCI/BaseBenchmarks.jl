@@ -55,18 +55,15 @@ let g = addgroup!(SUITE, "issues")
     g["sortperm(rand(10^7))"] = @benchmarkable sortperm(x) setup=(x=rand(10^7))
 
     # 9832
-    a_9832 = rand(Int, 30_000_000, 2)
-    g["sortslices sorting very short slices"] = @benchmarkable sortslices($a_9832, dims=2)
+    g["sortslices sorting very short slices"] = @benchmarkable sortslices(a_9832, dims=2) setup=(a_9832=rand(Int, 30_000_000, 2))
 
     # 36546
-    xv_36546 = view(rand(1000), 1:1000)
-    g["sortperm on a view (Float64)"] = @benchmarkable sortperm($xv_36546)
-    xs_36546 = rand(1:10^3, 10^4, 2)
-    g["sortperm on a view (Int)"] = @benchmarkable sortperm(view($xs_36546,:,1))
+    g["sortperm on a view (Float64)"] = @benchmarkable sortperm(xv_36546) setup=(xv_36546=view(rand(1000), 1:1000))
+    g["sortperm on a view (Int)"] = @benchmarkable sortperm(view(xs_36546,:,1)) setup=(xs_36546=rand(1:10^3, 10^4, 2))
 
     # 39864
-    v2_39864 = samerand(2000)
-    g["inplace sorting of a view"] = @benchmarkable sort!(vv) setup = (vv1 = deepcopy($v2_39864); vv = @view vv1[500:1499]) evals = 1
+    g["inplace sorting of a view"] = @benchmarkable sort!(vv) setup=(vv1 = samerand(2000); vv = @view vv1[500:1499]) evals = 1
+
 
     # 46149
     g["Float16"] = @benchmarkable sort!(x) setup=(x=rand(Float16, 10^6)) evals=1
@@ -93,14 +90,12 @@ end
 #############################################
 
 for (group, Alg, len) in (("quicksort", QuickSort, 50_000), ("mergesort", MergeSort, 50_000), ("insertionsort", InsertionSort, 100))
-    list = samerand(len)
     g = addgroup!(SUITE, group)
 
-    ix = collect(1:length(list))
-    g["sort forwards"] = @benchmarkable sort($list; alg = $Alg)
-    g["sortperm forwards"] = @benchmarkable sortperm($list; alg = $Alg)
-    g["sort! reverse"] = @benchmarkable sort!(x; alg = $Alg, rev = true) setup=(x = copy($list)) evals=1
-    g["sortperm! reverse"] = @benchmarkable sortperm!(x, $list; alg = $Alg, rev = true) setup=(x = copy($ix))
+    g["sort forwards"] = @benchmarkable sort(list; alg = $Alg) setup=(list=samerand($len))
+    g["sortperm forwards"] = @benchmarkable sortperm(list; alg = $Alg) setup=(list=samerand($len))
+    g["sort! reverse"] = @benchmarkable sort!(x; alg = $Alg, rev = true) setup=(x=samerand($len)) evals=1
+    g["sortperm! reverse"] = @benchmarkable sortperm!(x, list; alg = $Alg, rev = true) setup=(list=samerand($len); x=collect(1:length(list)))
 
     for b in values(g)
         b.params.time_tolerance = 0.20
@@ -115,15 +110,15 @@ g = addgroup!(SUITE, "issorted")
 
 const LIST_SIZE = 50_000
 const LISTS = (
-    ("ascending", collect(1:LIST_SIZE)),
-    ("descending", collect(LIST_SIZE:-1:1)),
-    ("ones", ones(LIST_SIZE)),
-    ("random", samerand(LIST_SIZE))
+    ("ascending", () -> collect(1:LIST_SIZE)),
+    ("descending", () -> collect(LIST_SIZE:-1:1)),
+    ("ones", () -> ones(LIST_SIZE)),
+    ("random", () -> samerand(LIST_SIZE))
 )
 
-for (kind, list) in LISTS
-    g["forwards", kind] = @benchmarkable issorted($list)
-    g["reverse", kind] = @benchmarkable issorted($list; rev = true)
+for (kind, getlist) in LISTS
+    g["forwards", kind] = @benchmarkable issorted(list) setup=(list=$getlist())
+    g["reverse", kind] = @benchmarkable issorted(list; rev = true) setup=(list=$getlist())
 end
 
 for b in values(g)

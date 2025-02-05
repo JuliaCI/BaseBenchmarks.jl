@@ -24,10 +24,10 @@ end
 
 g = addgroup!(SUITE, "read", ["buffer", "stream", "string"])
 
-testbuf = IOBuffer(samerandstring(10^4))
+gettestbuf() = IOBuffer(samerandstring(10^4))
 
-g["read"]       = @benchmarkable perf_read!($testbuf)
-g["readstring"] = @benchmarkable read($testbuf, String)
+g["read"]       = @benchmarkable perf_read!(testbuf) setup=(testbuf=gettestbuf())
+g["readstring"] = @benchmarkable read(testbuf, String) setup=(testbuf=gettestbuf())
 
 #################################
 # serialization (#18633, #7893) #
@@ -42,17 +42,17 @@ function serialized_buf(x)
 end
 
 const STR_RNG = StableRNGs.StableRNG(1)
-teststrings = [randstring(STR_RNG, 32) for i=1:10^3]
-teststrings_buf = serialized_buf(teststrings)
+getteststrings() = [randstring(STR_RNG, 32) for i=1:10^3]
+getteststrings_buf() = serialized_buf(getteststrings())
 
-g["serialize", "Vector{String}"] = @benchmarkable serialize(io, $teststrings) setup=(io=IOBuffer())
-g["deserialize", "Vector{String}"] = @benchmarkable (seek($teststrings_buf, 0); deserialize($teststrings_buf))
+g["serialize", "Vector{String}"] = @benchmarkable serialize(io, teststrings) setup=(io=IOBuffer(); teststrings=getteststrings())
+g["deserialize", "Vector{String}"] = @benchmarkable (seek(teststrings_buf, 0); deserialize(teststrings_buf)) setup=(teststrings_buf=getteststrings_buf())
 
-testdata = samerand(1000,1000)
-testdata_buf = serialized_buf(testdata)
+gettestdata() = samerand(1000,1000)
+gettestdata_buf() = serialized_buf(gettestdata())
 
-g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, $testdata) setup=(io=IOBuffer())
-g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek($testdata_buf, 0); deserialize($testdata_buf))
+g["serialize", "Matrix{Float64}"] = @benchmarkable serialize(io, testdata) setup=(io=IOBuffer(); testdata=gettestdata())
+g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek(testdata_buf, 0); deserialize(testdata_buf)) setup=(testdata_buf=gettestdata_buf())
 
 ###################################
 # limited array printing (#23681) #
@@ -60,13 +60,14 @@ g["deserialize", "Matrix{Float64}"] = @benchmarkable (seek($testdata_buf, 0); de
 
 g = addgroup!(SUITE, "array_limit", ["array", "display"])
 
-test_vector = samerand(10^8)
-test_column_matrix = reshape(test_vector, length(test_vector), 1)
-test_square_matrix = reshape(test_vector, 10^4, 10^4)
-disp = TextDisplay(IOContext(devnull, :limit=>true))
+gettest_vector() = samerand(10^8)
+gettest_column_matrix(test_vector) = reshape(test_vector, length(test_vector), 1)
+gettest_square_matrix(test_vector) = reshape(test_vector, 10^4, 10^4)
+getdisp() = TextDisplay(IOContext(devnull, :limit=>true))
 
-for A in (test_vector, test_column_matrix, test_square_matrix)
-    g["display", "$(typeof(A))$(size(A))"] = @benchmarkable display($disp, $A)
+for getA in (identity, gettest_column_matrix, gettest_square_matrix)
+    A = getA(gettest_vector())
+    g["display", "$(typeof(A))$(size(A))"] = @benchmarkable display(disp, A) setup=(disp=getdisp(); A=$getA(gettest_vector()))
 end
 
 ###################################
