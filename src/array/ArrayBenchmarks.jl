@@ -388,4 +388,12 @@ g["cumsum", "Float64", "dim2"] = @benchmarkable cumsum(mfloat, dims=2) setup=(mf
 g["cumsum!", "Float64", "dim1"] = @benchmarkable cumsum!(res, mfloat, dims=1) setup=(mfloat=getmfloat(); res=similar(mfloat))
 g["cumsum!", "Float64", "dim2"] = @benchmarkable cumsum!(res, mfloat, dims=2) setup=(mfloat=getmfloat(); res=similar(mfloat))
 
+#############################################
+# Performance of heterogenous tuples #39035 #
+#############################################
+
+perf_het_tuple() = b = [1, 2.0]
+
+SUITE["perf heterogenous tuple"] = @benchmarkable perf_het_tuple()
+
 end # module
