@@ -2,7 +2,7 @@
     "inference" => InferenceBenchmarks
 
 Defines a benchmark suite for Julia-level compilation pipeline.
-Note that this benchmark suite is only available for Julia 1.8 and higher.
+Note that this benchmark suite is only available for Julia 1.10 and higher.
 
 This benchmark group `"inference"` is composed of the following subgroups:
 - `"allinference"`: benchmarks the overall Julia-level compilation pipeline for a static call graph
