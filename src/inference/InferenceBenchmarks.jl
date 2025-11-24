@@ -32,8 +32,11 @@ using Core:
     MethodInstance, CodeInstance, MethodTable, SimpleVector
 using .CC:
     AbstractInterpreter, InferenceParams, InferenceResult, InferenceState,
-    OptimizationParams, OptimizationState, WorldRange, WorldView,
+    OptimizationParams, OptimizationState, WorldRange,
     specialize_method, unwrap_unionall, rewrap_unionall, copy
+@static if isdefined(CC, :WorldView)
+    import .CC: WorldView
+end
 @static if VERSION ≥ v"1.11.0-DEV.1498"
     import .CC: get_inference_world
 else
@@ -84,11 +87,19 @@ CC.InferenceParams(interp::InferenceBenchmarker) = interp.inf_params
 CC.OptimizationParams(interp::InferenceBenchmarker) = interp.opt_params
 #=CC.=#get_inference_world(interp::InferenceBenchmarker) = interp.world
 CC.get_inference_cache(interp::InferenceBenchmarker) = interp.inf_cache
-CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_inference_world(interp)))
-CC.get(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
-CC.getindex(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
-CC.haskey(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
-CC.setindex!(wvc::WorldView{InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
+@static if isdefined(CC, :WorldView)
+    CC.code_cache(interp::InferenceBenchmarker) = WorldView(interp.code_cache, WorldRange(get_inference_world(interp)))
+    CC.get(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance, default) = get(wvc.cache.dict, mi, default)
+    CC.getindex(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance) = getindex(wvc.cache.dict, mi)
+    CC.haskey(wvc::WorldView{InferenceBenchmarkerCache}, mi::MethodInstance) = haskey(wvc.cache.dict, mi)
+    CC.setindex!(wvc::WorldView{InferenceBenchmarkerCache}, ci::CodeInstance, mi::MethodInstance) = setindex!(wvc.cache.dict, ci, mi)
+else
+    CC.code_cache(interp::InferenceBenchmarker) = CC.OverlayCodeCache(interp.code_cache, interp.inf_cache)
+    CC.get(cache::InferenceBenchmarkerCache, mi::MethodInstance, default) = get(cache.dict, mi, default)
+    CC.getindex(cache::InferenceBenchmarkerCache, mi::MethodInstance) = getindex(cache.dict, mi)
+    CC.haskey(cache::InferenceBenchmarkerCache, mi::MethodInstance) = haskey(cache.dict, mi)
+    CC.setindex!(cache::InferenceBenchmarkerCache, ci::CodeInstance, mi::MethodInstance) = setindex!(cache.dict, ci, mi)
+end
 @static if isdefined(CC, :cache_owner)
 CC.cache_owner(wvc::InferenceBenchmarker) = wvc.code_cache
 end
