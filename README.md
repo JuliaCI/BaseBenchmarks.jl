@@ -108,7 +108,7 @@ using BenchmarkTools, BaseBenchmarks
 master = BenchmarkTools.load("master.json")[1]
 pr = BenchmarkTools.load("pr.json")[1]
 regs = regressions(judge(minimum(pr), minimum(master))) # a BenchmarkGroup containing the regressions
-pairs = leaves(regs) # an array of (ID, `TrialJudgement`) pairs
+pairs = BenchmarkTools.leaves(regs) # an array of (ID, `TrialJudgement`) pairs
 ```
 
 This will show which tests resulted in regressions and to what magnitude. Here's an
