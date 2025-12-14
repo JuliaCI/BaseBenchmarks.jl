@@ -22,6 +22,7 @@ end
 g = addgroup!(SUITE, "packed_types")
 
 # Define extra primitive types for benchmarking
+struct Int0 end
 primitive type Int24 3 * 8 end
 
 primitive type Int136 17 * 8 end
@@ -31,7 +32,7 @@ primitive type Int392 49 * 8 end
 
 primitive type Int1024 128 * 8 end
 
-for B in (1, 2, 3, 8, 16, 17, 48, 49, 128)
+for B in (0, 1, 2, 3, 8, 16, 17, 48, 49, 128)
     let T = eval(Symbol("Int$(B*8)"))
         g[B] = @benchmarkable bench_reinterpret($T, $(ntuple(i->UInt8(i), B)))
     end
@@ -60,6 +61,7 @@ end
 g = addgroup!(SUITE, "mixed_tuples")
 
 for tup in [
+        ((), (((), ())), ()),
         (1.0, 2, 3.0, 4, 5.0, 6, 7.0, 8, 9.0, 10, 11.10, 12, 13.0),
         ntuple(i->(isodd(i) ? Int32(i) : Float32(i)), 25),
         ntuple(i->(isodd(i) ? true : i % UInt8), 228),
@@ -73,6 +75,8 @@ end
 g = addgroup!(SUITE, "padded_to_padded")
 
 for (tup, T2) in [
+        # Empty tuples:
+        ((), (((), ())), ()) => Tuple{Tuple{Tuple{}, Tuple{}}, Tuple{}, Tuple{Tuple{}}},
         # Same padding, different positions:
         (0x01, 1, 0x02) => Tuple{Int32, Int16, Int32},
         (0x01, 1, 2, ntuple(i->0x01, 100),) => Tuple{UInt64, UInt8, Int64, NTuple{100,Int8}},
