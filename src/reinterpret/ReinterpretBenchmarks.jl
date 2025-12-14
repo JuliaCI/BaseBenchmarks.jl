@@ -23,16 +23,11 @@ g = addgroup!(SUITE, "packed_types")
 
 # Define extra primitive types for benchmarking
 struct Int0 end
-primitive type Int24 3 * 8 end
-
 primitive type Int136 17 * 8 end
-
-primitive type Int384 48 * 8 end
 primitive type Int392 49 * 8 end
-
 primitive type Int1024 128 * 8 end
 
-for B in (0, 1, 2, 3, 8, 16, 17, 48, 49, 128)
+for B in (0, 8, 17, 49, 128)
     let T = eval(Symbol("Int$(B*8)"))
         g[B] = @benchmarkable bench_reinterpret($T, $(ntuple(i->UInt8(i), B)))
     end
