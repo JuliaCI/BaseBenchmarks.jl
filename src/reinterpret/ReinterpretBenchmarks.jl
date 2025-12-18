@@ -43,9 +43,9 @@ primitive type Int936 117 * 8 end
 primitive type Int1824 228 * 8 end
 
 for tup in [
-        (0x01, 1, 0x02),
-        (1, 0x0001, (0x01, 2, 0x01), 0x01, 1.0),
-        (0x01, 1, 2, ntuple(i->0x01, 100),),
+        (0x01, Int64(1), 0x02),
+        (Int64(1), 0x0001, (0x01, Int64(2), 0x01), 0x01, 1.0),
+        (0x01, Int64(1), Int64(2), ntuple(i->0x01, 100),),
     ]
     B1 = sizeof(tup)
     B2 = Base.packedsize(typeof(tup))
@@ -55,6 +55,7 @@ end
 
 g = addgroup!(SUITE, "mixed_tuples")
 
+primitive type Int416 52 * 8 end
 for tup in [
         ((), (((), ())), ()),
         (1.0, 2, 3.0, 4, 5.0, 6, 7.0, 8, 9.0, 10, 11.10, 12, 13.0),
@@ -73,10 +74,10 @@ for (tup, T2) in [
         # Empty tuples:
         ((), (((), ())), ()) => Tuple{Tuple{Tuple{}, Tuple{}}, Tuple{}, Tuple{Tuple{}}},
         # Same padding, different positions:
-        (0x01, 1, 0x02) => Tuple{Int32, Int16, Int32},
-        (0x01, 1, 2, ntuple(i->0x01, 100),) => Tuple{UInt64, UInt8, Int64, NTuple{100,Int8}},
+        (0x01, Int64(1), 0x02) => Tuple{Int32, Int16, Int32},
+        (0x01, Int64(1), Int64(2), ntuple(i->0x01, 100),) => Tuple{UInt64, UInt8, Int64, NTuple{100,Int8}},
         # small padding to big
-        (1, 0x0001, (0x01, 2, 0x01), 0x01, 1.0) =>
+        (Int64(1), 0x0001, (0x01, Int64(2), 0x01), 0x01, 1.0) =>
             Tuple{Int16, Int8, Int64, Int8, Int64, Int64, Int8},
         # inverse: big padding to small
         (0x0000, 0x01, 0x0000000000000002, 0x03, 0x0000000000000004, 0x0000000000000005, 0x06) =>
