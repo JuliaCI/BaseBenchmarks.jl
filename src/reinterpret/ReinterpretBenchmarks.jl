@@ -55,7 +55,8 @@ end
 
 g = addgroup!(SUITE, "mixed_tuples")
 
-primitive type Int416 52 * 8 end
+primitive type Int416 52 * 8 end  # For 32-bit
+primitive type Int640 80 * 8 end  # For 32-bit
 for tup in [
         ((), (((), ())), ()),
         (1.0, 2, 3.0, 4, 5.0, 6, 7.0, 8, 9.0, 10, 11.10, 12, 13.0),
