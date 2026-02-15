@@ -46,6 +46,14 @@ using Base: get_world_counter
 using InteractiveUtils: gen_call_with_extracted_types_and_kwargs
 using BenchmarkTools: @benchmarkable, BenchmarkGroup, addgroup!
 
+@static if VERSION ≥ v"1.14.0-DEV.1691"
+    const InfCacheType = CC.InferenceCache
+    _empty_inf_cache() = CC.InferenceCache()
+else
+    const InfCacheType = Vector{InferenceResult}
+    _empty_inf_cache() = InferenceResult[]
+end
+
 struct InferenceBenchmarkerCache
     dict::IdDict{MethodInstance,CodeInstance}
     InferenceBenchmarkerCache() = new(IdDict{MethodInstance,CodeInstance}())
@@ -57,7 +65,7 @@ struct InferenceBenchmarker <: AbstractInterpreter
     optimize::Bool
     compress::Bool
     discard_trees::Bool
-    inf_cache::Vector{InferenceResult}
+    inf_cache::InfCacheType
     code_cache::InferenceBenchmarkerCache
     function InferenceBenchmarker(
         world::UInt = get_world_counter();
@@ -66,7 +74,7 @@ struct InferenceBenchmarker <: AbstractInterpreter
         optimize::Bool = true,
         compress::Bool = true,
         discard_trees::Bool = true,
-        inf_cache::Vector{InferenceResult} = InferenceResult[],
+        inf_cache::InfCacheType = _empty_inf_cache(),
         code_cache::InferenceBenchmarkerCache = InferenceBenchmarkerCache())
         return new(
             world,
