@@ -85,9 +85,13 @@ for s in ((600, 600),
           (600, 400),
           (20000, 20000),
           (20000, 10000))
-    g["transpose", s] = @benchmarkable transpose(m) setup=(m=samesprand($s[1], $s[2], 0.01))
+    # Note: bare `transpose(m)`/`adjoint(cm)` only construct a lazy
+    # `Transpose`/`Adjoint` wrapper (struct allocation, sub-microsecond)
+    # and don't measure any real work. Wrap in `copy(...)` to actually
+    # materialize the transposed matrix.
+    g["transpose", s] = @benchmarkable copy(transpose(m)) setup=(m=samesprand($s[1], $s[2], 0.01))
     g["transpose!", s] = @benchmarkable transpose!(mt, m) setup=(m=samesprand($s[1], $s[2], 0.01); mt=copy(transpose(m)))
-    g["adjoint", s] = @benchmarkable adjoint(cm) setup=(m=samesprand($s[1], $s[2], 0.01); cm=m + m*im)
+    g["adjoint", s] = @benchmarkable copy(adjoint(cm)) setup=(m=samesprand($s[1], $s[2], 0.01); cm=m + m*im)
     g["adjoint!", s] = @benchmarkable adjoint!(cmt, cm) setup=(m=samesprand($s[1], $s[2], 0.01); cm=m + m*im; cmt=copy(transpose(cm)))
 end
 
