@@ -75,36 +75,53 @@ function perf_parse_json(strng::AbstractString)
         if strng[pos] != '"'
             error("AbstractString starting with quotation expected at position $pos")
         else
-            pos = pos + 1
+            pos += 1
         end
-        str = ""
+        str = IOBuffer()
         while pos <= len
             nc = strng[pos]
             if nc == '"'
+                pos += 1
+                return String(take!(str))
+            elseif nc == '\\'
                 pos = pos + 1
-                return string(str)
-            elseif nc ==  '\\'
-                if pos+1 > len
-                    error_pos("End of file reached right after escape character")
-                end
-                pos = pos + 1
+                pos > len && break # goto error handling
                 anc = strng[pos]
-                if anc == '"' || anc == '\\' || anc == '/'
-                    str = string(str, strng[pos])
-                    pos = pos + 1
-                elseif anc ==  'b' || anc == 'f'|| anc == 'n' || anc == 'r' || anc == 't'
-                    str = string(str, '\\', string[pos])
-                    pos = pos + 1
+                if anc ==  '"'
+                    write(str, "\"")
+                    pos += 1
+                elseif anc ==  '\\'
+                    write(str, "\\")
+                    pos += 1
+                elseif anc ==  '/'
+                    write(str, "/")
+                    pos += 1
+                elseif anc ==  'b'
+                    write(str, "\b")
+                    pos += 1
+                elseif anc ==  'f'
+                    write(str, "\f")
+                    pos += 1
+                elseif anc ==  'n'
+                    write(str, "\n")
+                    pos += 1
+                elseif anc ==  'r'
+                    write(str, "\r")
+                    pos += 1
+                elseif anc ==  't'
+                    write(str, "\t")
+                    pos += 1
                 elseif anc == 'u'
-                    if pos+4 > len
-                        error_pos("End of file reached in escaped unicode character")
-                    end
-                    str = string(str, strng[pos-1:pos+4])
+                    pos + 4 > len && break # goto error handling
+                    write(str, Char(parse(Int, strng[pos:pos+4], base=16)))
                     pos = pos + 5
+                else # should rarely happen
+                    write(str, anc)
+                    pos = pos + 1
                 end
-            else # should never happen
-                str = string(str,strng[pos])
-                pos = pos + 1
+            else # common case
+                write(str, nc)
+                pos = nextind(strng, pos)
             end
         end
         error("End of file while expecting end of string")
