@@ -31,6 +31,7 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "string" => :StringBenchmarks,
                      "tuple" => :TupleBenchmarks,
                      "frontend" => :FrontendBenchmarks,
+                     "globals" => :GlobalsBenchmarks,
                      "inference" => :InferenceBenchmarks,
                      )
 
