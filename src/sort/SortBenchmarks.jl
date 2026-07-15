@@ -76,7 +76,11 @@ let g = addgroup!(SUITE, "issues")
     g["partialsort(rand(10_000), 10_000)"] = @benchmarkable partialsort(x, 10_000) setup=(x=rand(10_000))
 
     # 47715
-    g["sort(rand(10^8))"] = @benchmarkable sort(x) setup=(x=rand(10^8))
+    # 10^8 Float64 (~0.8 GB) plus the sort's working buffer exhausts a 32-bit
+    # address space, so restrict this case to 64-bit.
+    if Sys.WORD_SIZE == 64
+        g["sort(rand(10^8))"] = @benchmarkable sort(x) setup=(x=rand(10^8))
+    end
 
     # 47766
     g["partialsort!(rand(10_000), 1:3, rev=true)"] = @benchmarkable partialsort!(x, 1:3; rev=true) setup=(x=rand(10_000)) evals=1
