@@ -170,6 +170,9 @@ include("subarray.jl")
 g = addgroup!(SUITE, "subarray", ["lucompletepiv", "gramschmidt"])
 
 for s in (100, 250, 500, 1000)
+    # The 1000×1000 case allocates >2 GB per evaluation, which overflows
+    # BenchmarkTools' 32-bit (Int32) memory counter, so restrict it to 64-bit.
+    s == 1000 && Sys.WORD_SIZE != 64 && continue
     g["lucompletepivCopy!", s] = @benchmarkable perf_lucompletepivCopy!(fill!(m, n)) setup=begin
         n = samerand()
         m = samerand($s, $s)
