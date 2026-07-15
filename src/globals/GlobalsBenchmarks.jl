@@ -82,6 +82,40 @@ function perf_read_const(n)
     return s
 end
 
+# fully dynamic getglobal: the symbol is hidden behind a `compilerbarrier` so the
+# binding cannot be resolved at compile time, forcing the runtime lookup path
+function perf_getglobal_dynamic(n)
+    s = 0.0
+    m = @__MODULE__
+    for i in 1:n
+        s += getglobal(m, Base.compilerbarrier(:const, :typed_f64))::Float64
+        global typed_int = 1
+    end
+    return s
+end
+
+# `isdefined` on a non-const global binding with a compile-time-known symbol
+# (codegen emits a runtime binding check rather than folding to `true`)
+function perf_isdefined(n)
+    c = 0
+    for i in 1:n
+        c += isdefined(@__MODULE__, :typed_f64)
+        global typed_int = 1
+    end
+    return c
+end
+
+# `isdefined` on a global binding, symbol likewise hidden behind a `compilerbarrier`
+function perf_isdefined_dynamic(n)
+    c = 0
+    m = @__MODULE__
+    for i in 1:n
+        c += isdefined(m, Base.compilerbarrier(:const, :typed_f64))
+        global typed_int = 1
+    end
+    return c
+end
+
 SUITE["read_typed"]    = @benchmarkable perf_read_typed(10_000)
 SUITE["rmw_typed"]     = @benchmarkable perf_rmw_typed(10_000)
 SUITE["write_const"]   = @benchmarkable perf_write_const(10_000)
@@ -89,6 +123,9 @@ SUITE["write_varying"] = @benchmarkable perf_write_varying(10_000)
 SUITE["many_globals"]  = @benchmarkable perf_many_globals(2_000)
 SUITE["read_untyped"]  = @benchmarkable perf_read_untyped(10_000)
 SUITE["read_const"]    = @benchmarkable perf_read_const(10_000)
+SUITE["getglobal_dynamic"] = @benchmarkable perf_getglobal_dynamic(10_000)
+SUITE["isdefined"]         = @benchmarkable perf_isdefined(10_000)
+SUITE["isdefined_dynamic"] = @benchmarkable perf_isdefined_dynamic(10_000)
 
 @static if isdefined(Base, :swapglobal!)
     # swapglobal! on a typed global
