@@ -41,7 +41,7 @@ for T in INTS
     tstr = string(T)
     onestr = string(one(T))
     for n in T[filter(x -> T === BigInt || x <= typemax(T),
-                      [1, 2^32-1, b2^32+1, b2^64-1, b2^64, b2^127, b2^10000]);]
+                      [1, b2^32-1, b2^32+1, b2^64-1, b2^64, b2^127, b2^10000]);]
         nstr = n == b2^10000 ? "2^10000" : string(n)
         g["RangeGenerator", tstr, "$onestr:$nstr"] = @benchmarkable RangeGenerator($(T(1):n))
         g["rand", "MersenneTwister", tstr, "RangeGenerator($onestr:$nstr)"] =
