@@ -177,14 +177,12 @@ foreach_container() do C, cstr, T, tstr, c
     else
         g[cstr, tstr, "push!", "overwrite"] = @benchmarkable push!(d, $eltin)             setup=(d=copy($c))
         g[cstr, tstr, "push!", "new"]       = @benchmarkable push!(d, $eltout)            setup=(d=copy($c)) evals=1
-        # despite the `evals=1` parameter, this gets evaluated more than once, leading to a KeyError
-        # g[cstr, tstr, "pop!",  "specified"] = @benchmarkable  pop!(d, $(askey(C, eltin))) setup=(d=copy($c)) evals=1
-        # so we add a push!
+        # push! first, so that every evaluation in a sample finds the key
         g[cstr, tstr, "pop!",  "specified"] = @benchmarkable  pop!(push!(d, $eltin), $(askey(C, eltin))) setup=(d=copy($c))
 
     end
     if C !== IdDict
-        # same remark as above, we need to push! a value to avoid ending up with an empty container
+        # push! the value back, so that the container doesn't run empty over the evaluations
         g[cstr, tstr, "pop!", "unspecified"] = @benchmarkable push!(d, pop!(d)) setup=(d=copy($c))
     end
 end
