@@ -1,5 +1,8 @@
 module CollectionBenchmarks
 
+include(joinpath(dirname(@__FILE__), "..", "utils", "RandUtils.jl"))
+
+using .RandUtils
 using BenchmarkTools
 using Random
 using StableRNGs
@@ -86,11 +89,15 @@ function perf_push!(c, elts)
     end
 end
 
+# Hashing the random elements branches on collisions and duplicates, which follow the insertion
+# order, so reshuffle the elements; see `@benchmarkable_reshuffled`.
 foreach_container(C = (Vector, Dict, IdDict, Set)) do C, cstr, T, tstr, c
-    g[cstr, tstr, "iterator"] = @benchmarkable $C($(initcoll(C, T)))
-    g[cstr, tstr, "loop"]     = @benchmarkable perf_push!(newcoll($C, $T), $(initcoll(C, T)))
+    elts = initcoll(C, T)
+    hashed = C !== Vector
+    g[cstr, tstr, "iterator"] = @benchmarkable_reshuffled_if hashed elts $C($elts)
+    g[cstr, tstr, "loop"]     = @benchmarkable_reshuffled_if hashed elts perf_push!(newcoll($C, $T), $elts)
     g[cstr, tstr, "loop", "sizehint!"] =
-        @benchmarkable perf_push!(sizehint!(newcoll($C, $T), iterlen), $(initcoll(C, T)))
+        @benchmarkable_reshuffled_if hashed elts perf_push!(sizehint!(newcoll($C, $T), iterlen), $elts)
 end
 
 g["BitSet", "Int", "unsorted", "iterator"]          = @benchmarkable BitSet($ints)
@@ -197,20 +204,23 @@ g = addgroup!(SUITE, "set operations", ["AbstractSet", "Array"])
 const newints = [rand(RNG, ints, 10); rand(RNG, 1:iterlen, 10); rand(RNG, iterlen:2iterlen, 10);]
 
 foreach_container(C = (BitSet, Set, Vector), T = (Int,)) do C, cstr, T, tstr, c
-    g[cstr, tstr, "union"]     = @benchmarkable union($c)
-    g[cstr, tstr, "intersect"] = @benchmarkable intersect($c)
-    g[cstr, tstr, "symdiff"]   = @benchmarkable symdiff($c)
+    # Operations on a Vector hash its random elements in order, so reshuffle it (as for
+    # initialization above).
+    vec = C === Vector
+    g[cstr, tstr, "union"]     = @benchmarkable_reshuffled_if vec c union($c)
+    g[cstr, tstr, "intersect"] = @benchmarkable_reshuffled_if vec c intersect($c)
+    g[cstr, tstr, "symdiff"]   = @benchmarkable_reshuffled_if vec c symdiff($c)
     for C2 in (BitSet, Set, Vector)
         c2 = C2(newints)
         c2str = objstr(C2)
-        g[cstr, tstr, "union",     c2str] = @benchmarkable union($c, $c2)
-        g[cstr, tstr, "intersect", c2str] = @benchmarkable intersect($c, $c2)
-        g[cstr, tstr, "symdiff",   c2str] = @benchmarkable symdiff($c, $c2)
-        g[cstr, tstr, "setdiff",   c2str] = @benchmarkable setdiff($c, $c2)
+        g[cstr, tstr, "union",     c2str] = @benchmarkable_reshuffled_if vec c union($c, $c2)
+        g[cstr, tstr, "intersect", c2str] = @benchmarkable_reshuffled_if vec c intersect($c, $c2)
+        g[cstr, tstr, "symdiff",   c2str] = @benchmarkable_reshuffled_if vec c symdiff($c, $c2)
+        g[cstr, tstr, "setdiff",   c2str] = @benchmarkable_reshuffled_if vec c setdiff($c, $c2)
 
-        g[cstr, tstr, "union", c2str, c2str]     = @benchmarkable union($c, $c2, $c2)
-        g[cstr, tstr, "intersect", c2str, c2str] = @benchmarkable intersect($c, $c2, $c2)
-        g[cstr, tstr, "symdiff", c2str, c2str]   = @benchmarkable symdiff($c, $c2, $c2)
+        g[cstr, tstr, "union", c2str, c2str]     = @benchmarkable_reshuffled_if vec c union($c, $c2, $c2)
+        g[cstr, tstr, "intersect", c2str, c2str] = @benchmarkable_reshuffled_if vec c intersect($c, $c2, $c2)
+        g[cstr, tstr, "symdiff", c2str, c2str]   = @benchmarkable_reshuffled_if vec c symdiff($c, $c2, $c2)
 
         if C === BitSet && C2 === BitSet
             g[cstr, tstr, "intersect!", c2str] = @benchmarkable intersect!(d, $c2) setup=(d=copy($c)) evals=1

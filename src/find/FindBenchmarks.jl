@@ -18,10 +18,11 @@ const VEC_LENGTH = 1000
 for (name, x) in (("50-50", Vector{Bool}(samerand(Bool, VEC_LENGTH))),
                   ("10-90", Vector{Bool}(samerand(VEC_LENGTH) .> .9)),
                   ("90-10", Vector{Bool}(samerand(VEC_LENGTH) .> .1)))
-    g[string(typeof(x)), name] = @benchmarkable findall($x)
+    # the inputs are random bit patterns; see `@benchmarkable_reshuffled`
+    g[string(typeof(x)), name] = @benchmarkable_reshuffled x findall($x)
 
     bx = BitArray(x)
-    g[string(typeof(bx)), name] = @benchmarkable findall($bx)
+    g[string(typeof(bx)), name] = @benchmarkable_reshuffled bx findall($bx)
 end
 
 
@@ -86,17 +87,19 @@ for (name, x) in (("50-50", samerand(Bool, VEC_LENGTH)),
                   ("90-10", samerand(VEC_LENGTH) .> .1))
     bx = BitArray(x)
 
-    gn[string(typeof(x)), name] = @benchmarkable perf_findnext($x)
-    gn[string(typeof(bx)), name] = @benchmarkable perf_findnext($bx)
+    gn[string(typeof(x)), name] = @benchmarkable_reshuffled x perf_findnext($x)
+    gn[string(typeof(bx)), name] = @benchmarkable_reshuffled bx perf_findnext($bx)
 
-    gp[string(typeof(x)), name] = @benchmarkable perf_findprev($x)
-    gp[string(typeof(bx)), name] = @benchmarkable perf_findprev($bx)
+    gp[string(typeof(x)), name] = @benchmarkable_reshuffled x perf_findprev($x)
+    gp[string(typeof(bx)), name] = @benchmarkable_reshuffled bx perf_findprev($bx)
 end
 
 for T in (Bool, Int8, Int, UInt8, UInt, Float32, Float64)
     y = samerand(T, VEC_LENGTH)
-    gn["ispos", string(typeof(y))] = @benchmarkable perf_findnext($ispos, $y)
-    gp["ispos", string(typeof(y))] = @benchmarkable perf_findprev($ispos, $y)
+    # `ispos` is a coin flip for the signed types and Bool, and (nearly) always true otherwise
+    coinflip = T in (Bool, Int8, Int)
+    gn["ispos", string(typeof(y))] = @benchmarkable_reshuffled_if coinflip y perf_findnext($ispos, $y)
+    gp["ispos", string(typeof(y))] = @benchmarkable_reshuffled_if coinflip y perf_findprev($ispos, $y)
 end
 
 end

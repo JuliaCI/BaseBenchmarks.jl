@@ -126,68 +126,71 @@ for T in (Bool, Int8, Int64, Float32, Float64, BigInt, BigFloat, Complex{Float64
     X2[samerand(VEC_LENGTH) .> .9] .= nothing
     Y2[samerand(VEC_LENGTH) .> .9] .= nothing
 
+    # The arrays with missing values (M = true) are reshuffled before every evaluation: branches
+    # on `nothing`/`missing` follow their random positions. See `@benchmarkable_reshuffled`.
     for (M, A) in ((false, X), (true, X2))
-        g["perf_sum", T, M] = @benchmarkable perf_sum($A)
-        g["perf_sum2", T, M] = @benchmarkable perf_sum2($A)
-        g["perf_sum3", T, M] = @benchmarkable perf_sum3($A)
-        g["perf_sum4", T, M] = @benchmarkable perf_sum4($A)
+        g["perf_sum", T, M] = @benchmarkable_reshuffled_if M A perf_sum($A)
+        g["perf_sum2", T, M] = @benchmarkable_reshuffled_if M A perf_sum2($A)
+        g["perf_sum3", T, M] = @benchmarkable_reshuffled_if M A perf_sum3($A)
+        g["perf_sum4", T, M] = @benchmarkable_reshuffled_if M A perf_sum4($A)
 
-        g["perf_countnothing", T, M] = @benchmarkable perf_countnothing($A)
+        g["perf_countnothing", T, M] = @benchmarkable_reshuffled_if M A perf_countnothing($A)
 
         g["perf_simplecopy", T, M] =
-            @benchmarkable perf_simplecopy($A)
+            @benchmarkable_reshuffled_if M A perf_simplecopy($A)
         g["map", identity, T, M] =
-            @benchmarkable map(identity, $A)
+            @benchmarkable_reshuffled_if M A map(identity, $A)
         g["broadcast", identity, T, M] =
-            @benchmarkable broadcast(identity, $A)
+            @benchmarkable_reshuffled_if M A broadcast(identity, $A)
         g["collect", "all", T, M] =
-            @benchmarkable collect($(x for x in A))
+            @benchmarkable_reshuffled_if M A collect($(x for x in A))
         g["collect", "filter", T, M] =
-            @benchmarkable collect($(x for x in A if x !== 1.0))
+            @benchmarkable_reshuffled_if M A collect($(x for x in A if x !== 1.0))
 
         g["map", abs, T, M] =
-            @benchmarkable map(_abs, $A)
+            @benchmarkable_reshuffled_if M A map(_abs, $A)
         g["broadcast", abs, T, M] =
-            @benchmarkable broadcast(_abs, $A)
+            @benchmarkable_reshuffled_if M A broadcast(_abs, $A)
     end
 
     for (M, A, B) in (((false, false), X, Y),
                       ((true, true), X2, Y2),
                       ((false, true), X, Y2))
         g["perf_countequals", string(T)] =
-            @benchmarkable perf_countequals($A, $B)
+            @benchmarkable_reshuffled_if any(M) (A, B) perf_countequals($A, $B)
 
         g["perf_binaryop", *, T, M] =
-            @benchmarkable perf_binaryop(_mul, $A, $B)
+            @benchmarkable_reshuffled_if any(M) (A, B) perf_binaryop(_mul, $A, $B)
         g["map", *, T, M] =
-            @benchmarkable map(_mul, $A, $B)
+            @benchmarkable_reshuffled_if any(M) (A, B) map(_mul, $A, $B)
         g["broadcast", *, T, M] =
-            @benchmarkable broadcast(_mul, $A, $B)
+            @benchmarkable_reshuffled_if any(M) (A, B) broadcast(_mul, $A, $B)
     end
 
     for (M, A) in ((false, Vector{T}(X)),
                    (false, X),
                    (true, replace(X2, nothing=>missing)))
         g["skipmissing", collect, eltype(A), M] =
-            @benchmarkable collect(skipmissing($A))
+            @benchmarkable_reshuffled_if M A collect(skipmissing($A))
 
         g["skipmissing", keys, eltype(A), M] =
-            @benchmarkable collect(keys(skipmissing($A)))
+            @benchmarkable_reshuffled_if M A collect(keys(skipmissing($A)))
 
         g["skipmissing", eachindex, eltype(A), M] =
-            @benchmarkable collect(eachindex(skipmissing($A)))
+            @benchmarkable_reshuffled_if M A collect(eachindex(skipmissing($A)))
 
         g["skipmissing", sum, eltype(A), M] =
-            @benchmarkable sum(skipmissing($A))
+            @benchmarkable_reshuffled_if M A sum(skipmissing($A))
 
         g["skipmissing", perf_sumskipmissing, eltype(A), M] =
-            @benchmarkable perf_sumskipmissing($A)
+            @benchmarkable_reshuffled_if M A perf_sumskipmissing($A)
 
         if hasmethod(isless, Tuple{T, T})
+            # these branch on the values, so reshuffle all inputs
             g["skipmissing", filter, eltype(A), M] =
-                @benchmarkable filter(>(0.5), skipmissing($A))
+                @benchmarkable_reshuffled A filter(>(0.5), skipmissing($A))
 
-            g["sort", eltype(A), M] = @benchmarkable sort($A)
+            g["sort", eltype(A), M] = @benchmarkable_reshuffled A sort($A)
         end
     end
 end
