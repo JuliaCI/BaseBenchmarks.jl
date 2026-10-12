@@ -35,6 +35,20 @@ const MODULES = Dict("array" => :ArrayBenchmarks,
                      "inference" => :InferenceBenchmarks,
                      )
 
+# Take `evals` from the tuned parameters, except for benchmarks that fix `evals` themselves:
+# those typically set `evals=1` because they mutate or reshuffle their setup data.
+function loadevals!(group::BenchmarkGroup, tuned::BenchmarkGroup)
+    for (k, v) in group
+        haskey(tuned, k) || continue
+        if v isa BenchmarkGroup
+            loadevals!(v, tuned[k])
+        elseif !params(v).evals_set
+            loadparams!(v, tuned[k], :evals)
+        end
+    end
+    return group
+end
+
 load!(id::AbstractString; kwargs...) = load!(SUITE, id; kwargs...)
 
 function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
@@ -46,7 +60,7 @@ function load!(group::BenchmarkGroup, id::AbstractString; tune::Bool = true)
     group[id] = modsuite
     if tune
         results = BenchmarkTools.load(PARAMS_PATH)[1]
-        haskey(results, id) && loadparams!(modsuite, results[id], :evals)
+        haskey(results, id) && loadevals!(modsuite, results[id])
     end
     return group
 end
@@ -66,7 +80,7 @@ function loadall!(group::BenchmarkGroup; verbose::Bool = true, tune::Bool = true
     if tune
         results = BenchmarkTools.load(PARAMS_PATH)[1]
         for (id, suite) in group
-            haskey(results, id) && loadparams!(suite, results[id], :evals)
+            haskey(results, id) && loadevals!(suite, results[id])
         end
     end
     return group

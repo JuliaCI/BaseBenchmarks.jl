@@ -282,11 +282,13 @@ end
 
 g = addgroup!(SUITE, "foldl", ["filter", "flatten"])
 
+# `evals=1`: the branch predictor would learn the random positions of `missing` in `xs` over
+# repeated evaluations on the same setup data.
 let xs() = [abs(x) < 1 ? x : missing for x in randn(1000)]
     g["foldl(+, filter(...))"] =
-        @benchmarkable foldl(+, (x for x in xs if x !== missing)) setup=(xs=$xs())
+        @benchmarkable foldl(+, (x for x in xs if x !== missing)) setup=(xs=$xs()) evals=1
     g["foldl(+, filter(...); init = 0.0)"] =
-        @benchmarkable foldl(+, (x for x in xs if x !== missing); init = 0.0) setup=(xs=$xs())
+        @benchmarkable foldl(+, (x for x in xs if x !== missing); init = 0.0) setup=(xs=$xs()) evals=1
 end
 
 g["foldl(+, flatten(filter(...)))"] =
