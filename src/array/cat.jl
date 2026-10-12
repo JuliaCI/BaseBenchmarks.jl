@@ -48,10 +48,10 @@ function perf_catnd_setind(n)
     A = samerand(1, n, n, 1)
     B = samerand(1, n, n)
     C = Array{Float64}(undef, 1, n, 4n, 1)
-    C[1, :, 1:n, 1] = A
-    C[1, :, (n+1):2n, 1] = B
-    C[1, :, (2n+1):3n, 1] = B
-    C[1, :, (3n+1):4n, 1] = A
+    C[:, :, 1:n, :] = A
+    C[:, :, (n+1):2n, :] = B
+    C[:, :, (2n+1):3n, :] = B
+    C[:, :, (3n+1):4n, :] = A
     return C
 end
 
