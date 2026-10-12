@@ -4,16 +4,16 @@
 #
 # Ported from an OCaml version
 
-abstract type BTree end
 
-mutable struct Empty <: BTree
+struct Empty end
+
+struct Node{T}
+    info::T
+    left::Union{Node{T}, Empty}
+    right::Union{Node{T}, Empty}
 end
 
-mutable struct Node <: BTree
-    info
-    left::BTree
-    right::BTree
-end
+const BTree{T} = Union{Node{T}, Empty}
 
 function make(val, d)
     if d == 0
