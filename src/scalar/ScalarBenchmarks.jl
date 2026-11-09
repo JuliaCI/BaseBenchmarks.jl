@@ -544,29 +544,18 @@ end
 # rem_pio2 #
 ############
 
+# Benchmark argument reduction through the public `rem2pi` rather than Base's internal
+# reduction kernel, whose name changes between Julia versions. `rem2pi` returns abs(x) < π
+# unchanged, so only larger arguments are benchmarked. The "hard" cases are the floats
+# nearest a multiple of π/2 with abs(x) > π, where the reduction cancels the most.
 g = addgroup!(SUITE, "rem_pio2")
-const _rem = try
-    hasmethod(Base.Math.ieee754_rem_pio2, Tuple{Float64})
-    Base.Math.ieee754_rem_pio2
-catch
-    Base.Math.rem_pio2_kernel
-end
+_rem(x) = rem2pi(x, RoundNearest)
 
 for T in (Float64, )# (Float32, Float64) add Float32 later
     _arg_string = arg_string(T)
-    # -2π/4 <= x <= 2π/4
-    g["argument reduction (easy) abs(x) < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4-T(0.1)))
-    g["argument reduction (easy) abs(x) < 2π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi/4+T(0.1)))
-    g["argument reduction (hard) abs(x) < 2π/4", "positive argument", _arg_string] = @benchmarkable _rem($(2*pi/4))
-    g["argument reduction (hard) abs(x) < 2π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-2*pi/4))
-    # -3π/4 <= x <= 3π/4
-    g["argument reduction (easy) abs(x) < 3π/4", "positive argument", _arg_string] = @benchmarkable _rem($(3*pi/4-T(0.1)))
-    g["argument reduction (easy) abs(x) < 3π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-3*pi/4+T(0.1)))
-    # -4π/4 <= x <= 4π/4
-    g["argument reduction (easy) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(pi-T(0.1)))
-    g["argument reduction (easy) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-pi+T(0.1)))
-    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(Float64(pi)))
-    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(Float64(-pi)))
+    # -4π/4 <= x <= 4π/4 (Float64(pi) < π, so use the nearest float above π)
+    g["argument reduction (hard) abs(x) < 4π/4", "positive argument", _arg_string] = @benchmarkable _rem($(nextfloat(T(pi))))
+    g["argument reduction (hard) abs(x) < 4π/4", "negative argument", _arg_string] = @benchmarkable _rem($(prevfloat(T(-pi))))
     # -5π/4 <= x <= 5π/4
     g["argument reduction (easy) abs(x) < 5π/4", "positive argument", _arg_string] = @benchmarkable _rem($(5*pi/4-T(0.1)))
     g["argument reduction (easy) abs(x) < 5π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-5*pi/4+T(0.1)))
@@ -589,10 +578,10 @@ for T in (Float64, )# (Float32, Float64) add Float32 later
     # -2.0^20π/2 <= x <= 2.0^20π/2
     g["argument reduction (easy) abs(x) < 2.0^20π/4", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^10*pi/4-T(0.1)))
     g["argument reduction (easy) abs(x) < 2.0^20π/4", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^10*pi/4+T(0.1)))
-    # abs(x) >= 2.0^20π/2
-    # idx < 0
-    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^30*pi/4-T(0.1)))
-    g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^30*pi/4+T(0.1)))
+    # abs(x) >= 2.0^20π/2 (Payne-Hanek starts at 2.0^30 since Julia 1.15)
+    # idx < 0 (abs(x) < 2.0^52)
+    g["argument reduction (paynehanek) abs(x) < 2.0^52", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^40*pi/4-T(0.1)))
+    g["argument reduction (paynehanek) abs(x) < 2.0^52", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^40*pi/4+T(0.1)))
     # idx > 0
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "positive argument", _arg_string] = @benchmarkable _rem($(T(2.0)^80*pi/4-1.2))
     g["argument reduction (paynehanek) abs(x) > 2.0^20*π/2", "negative argument", _arg_string] = @benchmarkable _rem($(-T(2.0)^80*pi/4+1.2))
